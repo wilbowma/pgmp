@@ -1,0 +1,38 @@
+* abstract
+* intro: 
+  Traditional block-level profiling: 
+    some papers
+  What we do:
+    Source-level
+    Macro-expansion time
+    Loops
+    + block level: block ordering, register allocation
+  Paper as follows:
+*    Interface to (source) profiling:
+      (compile-profile )
+      (profile-dump-data )
+      (profile-load-data )
+      (profile-query-* )
+*   Macro-expansion time optimizations
+      case
+      exclusive-cond
+    Compile-time optimizations
+      loops (different than inlining)
+      consider recursive function (didn't because our implementation is limited, i.e. destroys loop detection)
+    Low-level:
+      If source info preserved until basic blocks, can use as heuristic for block order/register allocation
+        Down side: not all blocks have profile info
+                   source info <-> blocks not one-to-one
+                   not very accurate heuristic (but seems better than loop-depth)
+*    Using Block-level + Source level
+      Interface to block profiling
+        (compile-block-profile )
+      How we do blocks (rely on ordering)
+      Work flow:
+        compile w/ source profile -> profile -> compile w/ block profile using source level -> profile compile w/ both
+
+*  Related work:
+    Can't find any using source-level profiling
+    Block level: LLVM, .NET
+   
+
