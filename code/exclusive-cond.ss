@@ -2,11 +2,38 @@
   (lambda (x)
     (define-record-type clause
       (nongenerative)
+      (fields (immutable clause) (immutable count))
+      (protocol
+        (lambda (new)
+          (lambda (e1 e2)
+            (new e1 (or (profile-query-weight e2) 0))))))
+    (define parse-clause
+      (lambda (clause)
+        (syntax-case clause (=>)
+          #;[(e0) (make-clause clause ???)]
+          [(e0 => e1) (make-clause clause #'e1)]
+          [(e0 e1 e2 ...) (make-clause clause #'e1)]
+          [_ (syntax-error clause "invalid exclusive-cond clause")])))
+    (define (helper clause* els) 
+      (define (sort-em clause*)
+        (sort (lambda (cl1 cl2) (> (clause-count cl1) (clause-count cl2))) 
+          (map parse-clause clause*)))
+      #`(cond
+          #,@(map clause-clause (sort-em clause*))
+          #,@(if els #`(,els) #'())))
+    (syntax-case x (else)
+      [(_ m1 ... (else e1 e2 ...)) (helper #'(m1 ...) #'(else e1 e2 ...))]
+      [(_ m1 ...) (helper #'(m1 ...) #f)])))
+
+#;(define-syntax exclusive-cond
+  (lambda (x)
+    (define-record-type clause
+      (nongenerative)
       (fields (immutable body) (immutable count))
       (protocol
         (lambda (new)
           (lambda (e1 e2)
-            (new e1 (or (profile-query-count-syntax e2) 0))))))
+            (new e1 (or (profile-query-weight e2) 0))))))
     (define parse-clause
       (lambda (clause)
         (syntax-case clause (=>)
@@ -20,7 +47,7 @@
            (make-clause (lambda (next) #`(if e0 (begin e1 e2 ...) #,next))
              #'e1)]
           [_ (syntax-error clause "invalid exclusive-cond clause")])))
-    (define (helper clause* els) 
+    (define (helper clause* els)
       (define (sort-em clause*)
         (sort (lambda (cl1 cl2) (> (clause-count cl1) (clause-count cl2))) 
           (map parse-clause clause*)))
