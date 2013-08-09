@@ -13,9 +13,9 @@ specific knowledge of the problem domain, program, and the high-level
 code to optimize programs in ways a compiler can not. 
 
 A simple example is a conditional branching construct like Scheme's
-@racket{cond}. @racket{cond} takes an arbitrary number of clauses of
-the form @racket{(lhs rhs)}, executing the first right-hand side whose
-left-hand side is true, or executing a final @racket{else} clause if no
+@racket[cond]. @racket[cond] takes an arbitrary number of clauses of
+the form @racket[(lhs rhs)], executing the first right-hand side whose
+left-hand side is true, or executing a final @racket[else] clause if no
 left-hand side is true.  This construct essentially expands into a
 sequence of if/else expressions. However, if the programming knows that
 each clause is mutually exclusive, it is beneficial to sort the clauses
