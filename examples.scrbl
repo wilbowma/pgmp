@@ -1,7 +1,11 @@
+#lang scribble/base
+@(require "defs.rkt")
+@(require scribble/manual)
+@(require scriblib/footnote)
 @section[#:tag "examples" "Examples"]
 This section presents several macros that use profiling information to
 eptimize the expanded code. The first example is @racket{exclusive-cond},
-which was mentioned in section~@secref{intro}. The second is a profile
+which was mentioned in @secref{intro}. The second is a profile
 directed loop unrolling example. While loop unrolling can be done with
 block-level profiling, it is simple to do as a macro, and avoids the problem of
 reconstructing loops from basic-blocks. The final example is a sequence library
@@ -10,7 +14,7 @@ profile information.
 
 @subsection{exclusive-cond}
 @racket{cond} is a Scheme branching construct, described briefly in in
-section~@secref{intro}. The following example of @racket{cond} shows the
+@secref{intro}. The following example of @racket{cond} shows the
 forms it can take.
 
 @todo{insert example cond using all forms}
@@ -33,13 +37,13 @@ evaluates to a true value. The last clause is equivalent to the clause
 @todo{insert exclusive cond}
 
 @; How does exclusive-cond use profile information to implement cond
-The @racket{exclusive-cond} macro, figure~@todo{figure ref}, shows an
+The @racket{exclusive-cond} macro, figure@~ @todo{figure ref}, shows an
 implementation of @racket{cond} that will rearrange clauses based on
 the profiling information of the right-hand sides. Since the left-hand
 sides will be executed depending on the order of the clauses, profiling
 information from the left-hand side is not enough to determine which
 clause is true most often. Unfortunately, this means we
-cannot~@footnote{By manually hacking source objects, it may be possible
+cannot @note{By manually hacking source objects, it may be possible
 but would not be pretty.} implement the last syntax for @racket{cond}
 clauses which has only a left-hand side.
 

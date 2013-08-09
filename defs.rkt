@@ -1,3 +1,4 @@
 #lang racket/base
-(require scriblib/base)
-(define todo margin-comment)
+(require scribble/base)
+(provide todo)
+(define todo margin-note)

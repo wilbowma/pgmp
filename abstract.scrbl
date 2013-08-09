@@ -1,3 +1,4 @@
+#lang scribble/sigplan
 @abstract{Profile guided optimization is a compiler technique that uses sample data
 gathered at run-time to recompile and further optimize a program. The profile
 data can be more accurate than heuristics normally used in a compiler and thus

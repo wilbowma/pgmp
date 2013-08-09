@@ -1,9 +1,11 @@
+#lang scribble/base
 @section[#:tag "api" "API"]
+@(require scribble/manual)
 This section presents the API for the profile system used in later examples.
 
 The system requires the following four primitives. We present the
 primitives here so the reader can understand the examples in the next
-section, but delay discussion of the implementation until~@secref{implementation}.
+section, but delay discussion of the implementation until @secref{implementation}.
 @itemlist[
   @item[@racket{profile-query-weight}]
   @item[@racket{profile-load-data}]

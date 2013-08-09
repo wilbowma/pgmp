@@ -1,3 +1,6 @@
+#lang scribble/base
+@(require scribble/manual)
+@(require "defs.rkt")
 @section[#:tag "intro" "Introduction"]
 Profile directed optimizations can enable better optimization by using
 potentially more accurate run-time data than traditional heuristics.
@@ -23,11 +26,11 @@ cannot help.
 
 This paper presents a system for doing profile directed meta-programming
 that can work with block-level profile direct optimizations.
-Section~@secref{api} presents the API, section~@secref{examples}
-presents several examples of Scheme macros that use this system and how
-they work with block-level profiling, section~@secref{implementation}
-discuses how this profiling system is implemented, and
-section~@secref{results} presents some benchmark results @todo{maybe}.
+@Secref{api} presents the API, @secref{examples} presents
+several examples of Scheme macros that use this system and how they work
+with block-level profiling, @secref{implementation} discuses
+how this profiling system is implemented, and @secref{results}
+presents some benchmark results @todo{maybe}.
 
 While Scheme is used in this paper, the technique should work in any
 language with sufficient meta-programming capabilities, such as Template
