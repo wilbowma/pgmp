@@ -104,15 +104,15 @@ demonstrate loop unrolling using macros. Profile directed loop unrolling
 could be done using block-level profile information, but this would
 require associating loops with basic blocks, and cannot easily handle
 arbitrary recursive functions. As this example shows, doing this as a
-macro is much simpler, and can handle recursive functions, not
-just tail recursive loops.
-@todo{Make those last two sentances shorter}
-@todo{Say somethign about named lets with non-tail call sites. (other than what you've already said. or maybe not)}
+macro is simple and can handle recursive functions, not just tail
+recursive loops.
+@todo{Make those last two sentences shorter}
+@todo{Say something about named lets with non-tail call sites. (other than what you've already said. or maybe not)}
 
 Still, even in our implementation, we wait until after macro expansion
 to do loop unrolling. We still use the source-level profile information,
-which is passed through the compiler after macro expansion, but wait
-until many more loops can be exposed than only those made by a single macro.
+which is passed through the compiler, but wait until many more loops can
+be exposed than only those made by a single macro.
 @todo{That paragraph sucks, and is out of place.}
 
 @; Explain a basic let-loop
@@ -131,7 +131,8 @@ information. The macro uses profile information associated with the body
 of the loop to determine how frequently the loop is executed. Loops
 that take up less than 10% of the max execution count are not unrolled
 at all. If a loop is executed 100% of the max execution count, then it
-may be unrolled 3 times. 
+may be unrolled 3 times. Note that in @racket[named-let] the name of the
+loop is not assignable, as it is in the standard Scheme named let.
 
 @; Explain multiple call sites
 Note that in this macro, @emph{each} call site is unrolled the same
