@@ -1,5 +1,10 @@
+#lang scribble/base
+@(require "defs.rkt")
+@(require scribble/manual)
+@(require scriblib/footnote)
+@(require scriblib/figure)
 @section[#:tag "implementation" "Implementation"]
-This section discuses our implementation of the profiling system, and
+This section describes our implementation of the profiling system, and
 how source-level and block-level profile directed optimizations can work
 together in our system. First we present how code is instrumented to
 collect profile information. Next we present how we handle loading data

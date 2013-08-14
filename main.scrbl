@@ -6,3 +6,4 @@
 @include-section["intro.scrbl"]
 @include-section["api.scrbl"]
 @include-section["examples.scrbl"]
+@include-section["implementation.scrbl"]

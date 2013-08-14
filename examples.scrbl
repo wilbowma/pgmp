@@ -155,7 +155,7 @@ meta-programming enables more of such low level optimizations, it
 also enables higher level decisions normally done by the programmer
 
 @; Introduce example
-@todo[Add sequence-datatype figure]
+@todo{Add sequence-datatype figure}
 Consider a program in which a sequence is obviously required, but which
 data structure is best used to implement the sequence is not obvious.
 This example shows how to choose the implementation based on profile
@@ -165,7 +165,7 @@ operations are used more often than @racket[seq-map] and
 @racket[seq-first] then a @racket[vector] is used, otherwise a
 @racket[list] is used.
 
-@todo[Add example use of sequence-datatype macro figure]
+@todo{Add example use of sequence-datatype macro figure}
 @; Discuss quirks in example implementation
 The example requires the names of the sequence functions to be given.  
 The unique source information attached to each name is used to profile
@@ -175,31 +175,3 @@ distort profile counts. A clever compiler might try to throw out the
 effect-free reference to @racket[name] in the body of each operation, so
 this implementation is fragile.
 
-@subsection{Working with block-level profiling}
-@todo{Not sure where this subsection belongs}
-Optimizations based on source-level profile information may result in a
-different set of blocks than the blocks generated on a previous run of a
-program. If blocks are profiled naively, for instance, by assigning each
-block a number in the order in which the blocks are generated, then the
-block numbers will not be consistent after optimizing with source
-information. Therefore optimization using source profile information and
-those using block profile information cannot be done after a single
-profiled run of a program.
-
-To take advantage of both kinds of optimizations, we use the following
-workflow. First a program is compiled and instrumented to collect
-source-level information. A profiled run collects only the source-level
-information. The program is recompiled and optimized using that
-source-level information, and instrumented to collect block-level
-information. A profiled run collects only the block-level information.
-The program is finally recompiled and optimized using both the
-source-level information and the block-level information.
-
-While the workflow seems to significantly complicate the compilation
-process, the different between using only block-level profiling
-and using both source-level and block-level profiling is small. To use
-any kind of profile directed optimizations requires a 300% increase in
-the number of steps (from compile to compile-profile-compile). To use
-both source-level and block-level profile directed optimizations
-requires only an additional 66% increase in number of steps
-(compile-profile-compile to compile-profile-compile-profile-compile).
