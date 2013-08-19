@@ -28,10 +28,10 @@ This paper presents a system for doing profile directed meta-programming
 that can work with block-level profile direct optimizations.
 @Secref{api} presents the API, @secref{examples} presents
 several examples of Scheme macros that use this system and how they work
-with block-level profiling, @secref{implementation} discuses
-how this profiling system is implemented, and @secref{results}
-presents some benchmark results @todo{maybe}.
+with block-level profiling, and @secref{implementation} discuses
+how this profiling system is implemented. 
+@;and @secref{results} presents some benchmark results @todo{maybe}.
 
 While Scheme is used in this paper, the technique should work in any
 language with sufficient meta-programming capabilities, such as Template
-Haskell, C++ Templates, and MacroML. 
+Haskell, C++ Templates, or MacroML. 

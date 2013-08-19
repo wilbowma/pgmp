@@ -27,39 +27,38 @@ expansion. Each expression @racket[e] that has source information
 attached is expanded internally to @racket[(begin (profile src) e)],
 where @racket[src] is the source object attached to @racket[e]. The
 profile form is consider an effectful expression internally and should
-never be thrown out or duplicated, even if @racket[e] is. This has the
-side-effect of allows profile information to be used to check for code
-coverage in a profiled run. 
+never be thrown out or duplicated, even if @racket[e] is. 
 @todo{Make mention of how this affects pattern-matching optimizations,
 i.e. a compiler that uses nanopass.}
-@todo{That last sentence is awful. and a little out of place}
+@todo{Mention how profile info can be used for coverage checking?}
 
 These profile forms are retained until basic blocks are generated. While
-generating basic blocks the source objects from the profile forms are
-gathered up and attached to the basic block in which they appear. Since
-each of these profile forms will be `executed' if the basic block is
-executed, it is safe to `execute' them all at the top of the block. More
-interestingly, we can use this knowledge to reduce how many counters
-must be incremented.
-@todo{`executed'}
+generating basic blocks, the source objects from the profile forms are
+gathered up and attached to the basic block in which they appear. When a
+basic-block is entered, every instruction in that block will be
+executed, so any profile counters in the block must be incremented.
+Since all the profile counters must be incremented, it is safe to
+increment them all at the top of the block. 
 
-In our implementation we attempt to minimize the number of counters
+In our implementation, we attempt to minimize the number of counters
 executed at runtime. After generating basic blocks and attaching the
 source objects to their blocks, we analyze the blocks to determine which
 counters can be calculated in terms of other counters. If possible, a
 counter is computed as the sum of a list of counters (+counters)
 minus the sum of a list of counters (-counters). This complicated the
-internal representation of counters and generating of counters, but
-decreasing the overhead of profiling.
+internal representation of counters and the generation of counters, but
+decreases the overhead of profiling.
 @todo{This explanation is probably wrong}
 
-To add instrument block-level profiling, we reuse the above
-infrastructure by creating fake source objects. When a file is compiled,
-we reset global initial block number to 0, and create a fake source file
+To instrument block-level profiling, we reuse the above infrastructure
+by creating fake source objects. When a file is compiled, we reset
+global initial block number to 0, and create a fake source file
 descriptor based on the file name. When creating blocks, each block is
 given a source object using the fake file descriptor, and using the
 blocks number as the starting and ending file position. This fake source
-object is used when block-level profiling is enable.
+object is used when block-level profiling is enable. This fake source is
+ignored and the list of sources from the source code is used when
+source-level profiling is enable.
 @todo{Maybe an example of creating fake sources}
 
 @subsection{Storing and Loading profile data}
@@ -79,7 +78,8 @@ To dump profile data, the run time gathers up all profile counters.
 Recall that some counters are computed indirectly in terms of other
 counters. The values for these indirect counters are computed. These
 values with their associated source objects are then written to a file.
-@todo{I'm not 100% sure about how this works; might need Kent to explain}
+@todo{I'm not 100% sure about how this works and I need to be. Some of
+the racket peoples were asking.}
 
 To support loading multiple data sets, we do not load execution counts
 directly into the lookup table. Instead we compute the percent of max
