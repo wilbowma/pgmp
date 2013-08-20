@@ -186,19 +186,17 @@ a balance between code growth and speed when unrolling loops is tricky.
 Profile information can help the compiler focus on the most executed
 loops.
 
-Some of Scheme's basic loop constructs are simple macros, so we
-demonstrate loop unrolling using macros. Profile directed loop unrolling
-could be done using block-level profile information. However, loop
-unrolling at the block-level requires associating loops with basic
-blocks and cannot easily handle arbitrary recursive functions. As this
-example shows, doing loop unrolling as a macro is simple and can easily
-handle recursive functions. 
+Profile directed loop unrolling could be done using block-level profile
+information. However, loop unrolling at the block-level requires
+associating loops with basic blocks and cannot easily handle arbitrary
+recursive functions. As this example shows, doing loop unrolling as a
+macro is simple and can easily handle recursive functions. 
 
 Note that in our implementation we wait until after macro expansion
-to do profile directed loop unrolling. We pass the source-level profile
-information associated with function calls through the compiler, but wait
-until more loops can be exposed than only those created by a single
-macro. @todo{This paragraph seems out of place.}
+to unroll loops. We pass the source-level profile information
+associated with function calls through the compiler until more
+loops can be exposed than only those created by a single macro.
+@todo{This paragraph seems out of place.}
 
 @; Explain a basic let-loop
 A loop can be written using a named let in Scheme, as shown in
@@ -260,27 +258,25 @@ implemented using @racket[letrec] as seen in @figure-ref{named-let-simple}.
 the body of the loop between 1 and 3 times, depending on profile
 information. The macro uses profile information associated with the body
 of the loop to determine how frequently the loop is executed. Loops
-that take up less than 10% of the max execution count are not unrolled
-at all. If a loop is executed 100% of the max execution count, then it
+that are executed less than a certain threshold are not unrolled
+at all. If a loop is executed more often than any other expression, then it
 may be unrolled 3 times. Note that in @racket[named-let] the name of the
 loop is not assignable, as it is in the standard Scheme named let.
 @todo{Reword that last sentence}
-@todo{Here we refer to max execution count, before we explain it.
-Perhaps "above or below a certain threshold"}
 
 @; Explain multiple call sites
-Note that in this macro, @emph{each} call site is unrolled the same
-number of times. A named let may have multiple recursive calls, some of
-which may be more frequently used than others. A more clever macro could
-unroll each call site a different number of times, depending on how many
-times that particular call is executed. This would allow more fine grain
-control over code growth.
+A named let may have multiple recursive calls, some of which may be more
+frequently used than others. A more clever macro could unroll each call
+site a different number of times, depending on how many times that
+particular call is executed. This would allow more fine grain control
+over code growth. This example unrolls all call sites the same number of
+times.
 
 Similar macros are easy to write for @racket[do] loops, and even
-@racket[letrec] to unroll general recursive functions. Note that even in
-the @racket[named-let] example calls to the loop do not need to be tail
-calls. This simple example demonstrates unrolling recursive
-functions and not only loops.
+@racket[letrec] to unroll general recursive functions. Even in
+the @racket[named-let] example, calls to the loop do not need to be tail
+calls, so @racket[named-let] can unroll some recursive functions and not
+just loops.
 @todo{I don't like that paragraph}
 
 @subsection{Data type Selection}
@@ -293,7 +289,7 @@ straight-line code emitted later in the compiler. While profile directed
 meta-programming enables more of such low level optimizations, it
 also enables higher level decisions normally done by the programmer
 
-@figure-here["sequence-datatype"
+@figure**["sequence-datatype"
         "a macro that defines a sequence datatype based on profile information"
 @racketblock[ #:escape srsly-unsyntax
 (define-syntax define-sequence-datatype
@@ -314,7 +310,7 @@ also enables higher level decisions normally done by the programmer
     (define (choose-args name)
       (cond 
         [(assq name defs) => cdr]
-        [else (syntax-error name "not a valid sequence method:")]))
+        [else (syntax-error name "invalid method:")]))
     (define (choose name)
       (let ([seq-set!-count (hashtable-ref ht 'seq-set! 0)]
             [seq-ref-count (hashtable-ref ht 'seq-ref 0)]
@@ -324,15 +320,18 @@ also enables higher level decisions normally done by the programmer
         [(assq name defs) => 
           (lambda (x)
             (let ([x (cdr x)])
-              (if (> (+ seq-set!-count seq-ref-count) (+ seq-first-count seq-map-count))
+              (if (> (+ seq-set!-count seq-ref-count) 
+                     (+ seq-first-count seq-map-count))
                   (cdr x)
                   (car x))))]
-        [else (syntax-error name "not a valid sequence method:")])))
+        [else (syntax-error name "invalid method:")])))
     (lambda (x)
       (syntax-case x ()
         [(_ var (init* ...) name* ...)
          (for-each 
-           (lambda (name) (hashtable-set! ht name (or (profile-query-weight name) 0)))
+           (lambda (name) 
+             (hashtable-set! ht name 
+               (or (profile-query-weight name) 0)))
            (map syntax->datum #'(name* ...)))
          (with-syntax ([(body* ...) (map (lambda (name) (choose (syntax->datum name))) #'(name* ...))]
                        [(args* ...) (map (lambda (args) (choose-args (syntax->datum name))) #'(name* ...))])
@@ -341,31 +340,34 @@ also enables higher level decisions normally done by the programmer
 ]]
 
 @; Introduce example
-Consider a program in which a sequence is obviously required, but which
-data structure is best used to implement the sequence is not obvious.
-This example shows how to choose the implementation based on profile
-information. The example in @figure-ref{sequence-datatype} chooses
-between a list and a vector. If @racket[seq-set!] and @racket[seq-ref]
-operations are used more often than @racket[seq-map] and
-@racket[seq-first] then a @racket[vector] is used, otherwise a
+Consider a program in which a sequence type is required but the
+it is not obvious what should be used to implement the sequence. @todo{I
+don't like the first sentence.}
+The example in @figure-ref{sequence-datatype} chooses between a list and
+a vector using profile information. If @racket[seq-set!] and
+@racket[seq-ref] operations are used more often than @racket[seq-map]
+and @racket[seq-first], then a @racket[vector] is used, otherwise a
 @racket[list] is used.
 
-@figure-here["seq1-example"
-        "an example use of the define-sequence-datatype macro"
+@figure["seq1-example"
+        "Use of the define-sequence-datatype macro"
 @racketblock[
-(define-sequence-datatype seq1 (0 0 0 0)
-  seq? 
-  seq-map 
-  seq-first 
-  seq-ref 
-  seq-set!)
+(define-sequence-datatype seq1 (0 3 2 5)
+  seq? seq-map seq-first seq-ref seq-set!)
 ]]
 
+@todo{To hell with this example. We need to break it up and make it slightly
+more sensible to use. I hate to make it OO, but that would make it
+scoping issues easier. Maybe move @racket[choose] and nonsense to an
+appendix and just focus on the macro here.}
 @; Discuss quirks in example implementation
 @Figure-ref{seq1-example} demonstrates the usage of the
-@racket[define-sequence-datatype] macro. The macro requires the names of
-the sequence functions to be given.  The unique source information
-attached to each name is used to profile the operations of that
+@racket[define-sequence-datatype] macro. In this example, a sequence
+named @racket[seq1] is defined and initialized to contain elements
+@racket[0], @racket[3], @racket[2], and @racket[5]. The macro requires
+the function names 
+The unique source information
+attached to each function name is used to profile the operations of that
 @emph{particular} sequence. The definitions of each operation evaluate
 the name to ensure function inlining does not distort profile counts. A
 clever compiler might try to throw out the effect-free reference to
