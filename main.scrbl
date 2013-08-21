@@ -1,4 +1,5 @@
 #lang scribble/base
+@(require "bib.rkt")
 @;#lang scribble/sigplan
 
 @title{Profile directed meta-programming}
@@ -10,3 +11,4 @@
 @include-section["implementation.scrbl"]
 @;@include-section["results.scrbl"]
 @include-section["related.scrbl"]
+@(generate-bibliography)
