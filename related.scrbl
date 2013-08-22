@@ -7,7 +7,7 @@
 @section[#:tag "related" "Related and Future Work"]
 @todo{I'm not sure what I'm doing with this section yet.}
 Modern systems such as GCC, .NET, and LLVM use profile directed
-optimizations @~cite[lattern02 gcc .net]. However, these systems provide
+optimizations @~cite[lattner02 gcc .net]. However, these systems provide
 mostly low level optimizations, such as optimizations for block order
 and register allocation. In addition to limiting the kinds of
 optimizations the compiler can do, this low-level profile information is

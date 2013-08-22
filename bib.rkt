@@ -1,4 +1,11 @@
 #lang racket
+;(provide ~cite citet generate-bibliography)
+;(require scriblib/bibtex
+;         scriblib/autobib
+;         racket/runtime-path)
+;(define-runtime-path bib "bib.bib")
+;(define-bibtex-cite bib ~cite citet generate-bibliography #:style number-style)
+
 (require scriblib/autobib)
 (require racket/date)
 (provide (all-defined-out))
@@ -35,19 +42,21 @@
                  #:pages '(42 52))
     #:url "http://hpc.cs.tsinghua.edu.cn/research/cluster/papers_cwg/tamingsample.pdf"))
 
-(define lattern02
+(define lattner02
   (make-bib
     #:title "LLVM: An infrastructure for multi-stage optimization"
     ;#:author "Chris Authors Lattner"
     #:location (dissertation-location 
-                 #:institution "University of Illinois")
+                 #:institution "University of Illinois"
+                 #:degree "Master")
     #:date 2002))
 
 (define gcc
   (make-bib 
     #:title "Optimize Options - Using the GNU Compiler Collection"
     #:date (seconds->date (find-seconds 0 0 0 20 08 2013))
-    #:url "http://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Optimize-Options.html\\#index-fprofile_002duse-867"))
+    #:url
+    "http://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Optimize-Options.html#index-fprofile_002duse-867"))
 
 (define .net
   (make-bib 
