@@ -1,4 +1,4 @@
-#lang scribble/base
+#lang scribble/sigplan
 @(require scribble/manual)
 @(require "defs.rkt")
 @section[#:tag "intro" "Introduction"]

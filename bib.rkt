@@ -55,8 +55,7 @@
   (make-bib 
     #:title "Optimize Options - Using the GNU Compiler Collection"
     #:date (seconds->date (find-seconds 0 0 0 20 08 2013))
-    #:url
-    "http://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Optimize-Options.html#index-fprofile_002duse-867"))
+    #;#:url #;"http://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Optimize-Options.html#index-fprofile_002duse-867"))
 
 (define .net
   (make-bib 

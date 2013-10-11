@@ -1,0 +1,6 @@
+* Realistic examples
+* Benchmarks:
+  - case vs block reordering
+  - macro loop unrolling vs loop unrolling
+  - Sequence data type?
+* Make less Schemey
