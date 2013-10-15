@@ -1,6 +1,24 @@
+* Over-all motivation:
+  - Targetting the DSL writer, DSL library writer
+  - Similar to Languages as Libraries -- Profile directed optimizers as
+    libraries
 * Realistic examples
+  - loop unrolling -- loops in your DSL ({dependently typed} array
+    languages, remora, list comprehensions))
+  - exclusive-cond -- inline cache, Generic object method inling in your
+    DSL
+  - No case -- trivial, done to death
+  - Sequence data type -- FFTW, Scala & Java unified collection
+    interface but auto specialization.
+* API no more -- high level design
+  - Granularity -- per expression
+  - Source/block (only one at a time, but can be used together)
+  - Accessing profile information at runtime
 * Benchmarks:
   - case vs block reordering
   - macro loop unrolling vs loop unrolling
   - Sequence data type?
+
 * Make less Schemey
+  - remove as much domain specific content as possible
+  - compare to other meta-programming systems
