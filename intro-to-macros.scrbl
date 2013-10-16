@@ -1,6 +1,7 @@
 #lang scribble/sigplan
 @(require "defs.rkt")
 @title[#:tag "intro-to-macros" "Meta-programming in Scheme"]
+@todo{See Languages as Libraries for intro to macros.}
 As we present our examples using Scheme and Scheme macros, we briefly
 present Scheme macros and compare them with other meta-programming
 facilities.
