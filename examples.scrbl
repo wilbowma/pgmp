@@ -10,10 +10,11 @@ optimize the expanded code. The first example demonstrates unrolling
 loops based on profile information. While loop unrolling can be done
 with low level profile information, we discuss when it can be useful or
 even necessary to do at the meta-programming level.  The second example
-demonstrates reordering the clauses of a conditional branching structure
-,called @racket[exclusive-cond], based on profile information.  The
-final example demonstrates specializing a data structure based on
-profile information. 
+demonstrates call site optimization for a object-oriented DSL by
+reordering the clauses of a conditional branching structure, called
+@racket[exclusive-cond], based on profile information.  The final
+example demonstrates specializing a data structure based on profile
+information. 
 
 @section{Loop Unrolling}
 Loop unrolling is a standard compiler optimization.  However, striking
@@ -25,11 +26,12 @@ Profile directed loop unrolling can be done using low-level profile
 information. However, loop unrolling at a low-level requires associating
 loops with the low level profiled structures, such internal nodes or
 even basic blocks, and cannot easily handle arbitrary recursive
-functions. More importantly, with the rise of DSLs in `high productivity'
+functions. More importantly, with the rise in interest and use of DSLs
+@; in `high productivity' 
 @; https://www.usenix.org/system/files/conference/hotpar12/hotpar12-final37.pdf
-languages such as Python and Ruby, which lack sophisticated compilers,
-implementing loop unrolling via meta-programming may be necessary to get
-high performance loops in a DSL. 
+@; languages such as Python and Ruby, which lack sophisticated
+compilers, implementing loop unrolling via meta-programming may be
+necessary to get high performance loops in a DSL. 
 
 @; Explain a basic let-loop
 This loop example unrolls Scheme's named let @note{Strictly
@@ -39,7 +41,9 @@ defines a loop that runs for @racket[i=5] to @racket[i=0] computing
 factorial of @racket[5]. This named let might normally be implemented
 via a recursive function, as seen in @figure-ref{named-let-simple}. The
 example in @figure-ref{fact5} would produce a recursive function
-@racket[fact], and immediately call it on @racket[5].
+@racket[fact], and immediately call it on @racket[5]. With a
+reasonable compiler, this named let is equivalent to the C implementation
+in @figure-ref{c-fact5}
 
 @figure-here[
   "fact5"
@@ -49,6 +53,19 @@ example in @figure-ref{fact5} would produce a recursive function
   (if (zero? i)
       1
       (* n (fact (sub1 n)))))]]
+
+@figure-here[
+  "c-fact5"
+  "And in C"
+@verbatim{int i = 5;
+int n = 1;
+fact: if(i == 0){
+  n;
+} else {
+  n = n * --i;
+  goto fact;
+}
+}]
 
 @figure-here["named-let-simple"
         "a simple definition of a named let"
@@ -104,8 +121,8 @@ other expression during the profiled run, @racket[unroll-limit] is 3. If
 the weight is 0, meaning the expression is never executed during the
 profiled run, @racket[unroll-limit] is 0. Finally, @racket[named-let]
 generates a macro called @racket[name], where name is the identifier
-used in the source code, does the work of unrolling the loop up to
-@racket[unroll-limit] times.
+labeling the loop in the source code, does the work of unrolling the
+loop up to @racket[unroll-limit] times.
 
 @; Explain multiple call sites
 In fact, a named let defines a recursive function and immediately
@@ -123,32 +140,56 @@ Similar macros are easy to write for @racket[do] loops, and even
 for @racket[letrec] to inline general recursive functions. 
 
 @section{exclusive-cond}
+In this section we present a branching construct called
+@racket[exclusive-cond] that can automatically reorder the clauses based
+on which is mostly likely to be executed. This optimization is analogous
+to basic block reordering, but operates at a much higher level. 
+
+We consider this construct in the context of an object-oriented DSL with
+classes, inheratence, and virtual methods, similar to C++. Consider a
+class with a virtual method @racket[get_x], called @racket[Point].
+@racket[CartesianPoint] and @racket[PolarPoint] inherit 
+@racket[Point] and implement the virtual @racket[get_x]. We will use
+@racket[exclusive-cond] to inline virtual method calls.
+
+@todo{borrowed from
+http://courses.engr.illinois.edu/cs421/sp2011/project/self-type-feedback.pdf}
+
 @racket[cond] is a Scheme branching construct analogous to a series of
-if/else if statements. @Figure-ref{cond-example} shows syntax of a 
-@racket[cond] clause. The clauses of @racket[cond] are executed in order
-until the left-hand side of a clause is true. If there is an
-@racket[else] clause, the right-hand side of the @racket[else] clause is
-taken only if no other clause's left-hand side is true.
+if/else if statements. The clauses of
+@racket[cond] are executed in order until the left-hand side of a clause
+is true. If there is an @racket[else] clause, the right-hand side of the
+@racket[else] clause is taken only if no other clause's left-hand side
+is true.
+
+@Figure-ref{cond-example} shows an example of a @racket[cond] generated
+by our hypothetical OO DSL. The DSL compiler simply expands every
+virtual method call into a conditional branch for known instances of an
+object.
 
 @;@racketblock[#,(port->string (open-input-file "cond-all.ss"))]
 @figure-here["cond-example" (elem "An example of " @racket[cond])
 @racketblock[
 (cond
-  [p1 e1]
-  [p2 e2]
-  [p3 e3]
-  [else ee])]]
+ [(class-equal? obj CartesianPoint) 
+  (field obj x)]
+ [(class-equal? obj PolarPoint) 
+  (* (field obj rho) (cos (field obj theta)))]
+ [else (method obj "get_x")])]]
 
-The first clause has a test on the left-hand side and some expression on
-the right-hand side. If the left-hand side evaluates to a true value,
-then the right-hand side is executed.  
-The second form passes the value of the left-hand side to the function
-on the right-hand side only if the left-hand side evaluates to a true
-value. In Scheme, any value that is not @racket[#f] is true, so this
-can be used to post-process non-boolean true values.  
-The third form simply returns the value of the left-hand side if it
-evaluates to a true value. The last form is equivalent to the clause
-@racket[(e => (lambda (x) x))].
+By profiling the branches of the @racket[cond], we can sort the clauses
+in order of most likely to succeed, or even drop clauses that occur too
+infrequently inline. However, @racket[cond] is order dependent. While
+the programmer can see the clauses are mutually exclusive, the compiler
+cannot prove this in general and cannot reorder the clauses. 
+
+Instead of wishing our compiler was more clever, we use meta-programming
+to take advantage of this high-level knowledge. We define
+@racket[exclusive-cond], @figure-ref{exclusive-cond}, with the same
+syntax and semantics of @racket[cond] @note{We omit the alternative cond
+syntaxes for brevity.}, but with the restriction that
+clause order is not guaranteed. We then use profile information to
+reorder the clauses.
 
 @figure["exclusive-cond" 
         (elem "Implementation of " @racket[exclusive-cond])
@@ -156,86 +197,63 @@ evaluates to a true value. The last form is equivalent to the clause
 (racketblock 
 (define-syntax exclusive-cond
   (lambda (x)
-    (define-record-type clause
-      (nongenerative)
-      (fields (immutable clause) (immutable count))
-      (protocol
-        (lambda (new)
-          (lambda (e1 e2)
-            (new e1 (or (profile-query-weight e2) 0))))))
-    (define parse-clause
-      (lambda (clause)
-        (syntax-case clause (=>)
-          ;;[(e0) (make-clause clause ???)]
-          [(e0 => e1) (make-clause clause #'e1)]
-          [(e0 e1 e2 ...) (make-clause clause #'e1)]
-          [_ (syntax-error clause "invalid clause")])))
-    (define (helper clause* els) 
-      (define (sort-em clause*)
-        (sort (lambda (cl1 cl2) 
-                (> (clause-count cl1) (clause-count cl2))) 
-          (map parse-clause clause*)))
+    (define-record-type clause (fields syn weight))
+    (define (parse-clause clause)
+      (syntax-case clause ()
+        [(e0 e1 e2 ...) (make-clause clause (or (profile-query-weight #'e1) 0))]
+        [_ (syntax-error clause "invalid clause")]))
+    (define (sort-clauses clause*)
+      (sort (lambda (cl1 cl2) 
+              (> (clause-weight cl1) (clause-weight cl2))) 
+       (map parse-clause clause*)))
+    (define (reorder-cond clause* els) 
       #`(cond
-          #,@(map clause-clause (sort-em clause*))
+          #,@(map clause-syn (sort-clauses clause*))
           #,@(if els #`(,els) #'())))
     (syntax-case x (else)
-      [(_ m1 ... (else e1 e2 ...)) (helper #'(m1 ...) #'(else e1 e2 ...))]
-      [(_ m1 ...) (helper #'(m1 ...) #f)])))
+      [(_ m1 ... (else e1 e2 ...)) (reorder-cond #'(m1 ...) #'(else e1 e2 ...))]
+      [(_ m1 ...) (reorder-cond #'(m1 ...) #f)])))
 )]
 
 @; How does exclusive-cond use profile information to implement cond
-The @racket[exclusive-cond] macro, @figure-ref{exclusive-cond}, shows an
-implementation of @racket[cond] that will rearrange clauses based on
+The @racket[exclusive-cond] macro will rearrange clauses based on
 the profiling information of the right-hand sides. Since the left-hand
 sides will be executed depending on the order of the clauses, profiling
 information from the left-hand side is not enough to determine which
-clause is true most often. Unfortunately, this means we
-cannot @note{By manually hacking source objects, it may be possible
-but would not be pretty.} implement the third syntax in
-@figure-ref{cond-forms} which has only a left-hand side.
-
-@; How are clauses parsed
-In order to sort the clauses, all clauses are parsed before the code is
-generated. @racket[exclusive-cond] first parses each clause into a
-clause record.  The clause record stores the original syntax for the
-clause and the weighted profile count for that clause. @todo{Maybe why
-we pick an expression from the body of each clause here, instead of up
-there} Since a valid @racket[exclusive-cond] clause is also a valid
-@racket[cond] clause, the syntax is simply copied.
+clause is true most often.@note{Schemers will note this means we cannot
+handle the single expression cond clause syntax.} The clause record
+stores the original syntax for the clause and the weighted profile count
+for that clause. Since a valid @racket[exclusive-cond] clause is also a
+valid @racket[cond] clause, the syntax is simply copied, and a new
+@racket[cond] is generated with the clauses sorted according to profile
+weights. If an @racket[else] clause exists then it is emitted as the
+final clause.
 
 @;@todo{syntax or code?}
-
-@; How are clauses emitted in order
-After parsing each clause, the clause records are sorted by the profile
-weight. Once sorted, a @racket[cond] expression is generated by
-emitting each clause in sorted order. If an @racket[else] clause exists
-then it is emitted as the final clause.
 
 @figure-here["exclusive-cond-expansion"
         (elem "An example of " @racket[exclusive-cond] " and its expansion")
 @#reader scribble/comment-reader 
 (racketblock 
 (exclusive-cond
-  [(fixnum? n) e1] ;; e1 executed 3 times
-  [(flonum? n) e2] ;; e2 executed 8 times
-  [(bignum? n) e3] ;; e3 executed 5 times
-  [else e4])
+  [(class-equal? obj CartesianPoint) (field obj x)] ;; executed 2 times
+  [(class-equal? obj PolarPoint) 
+   (* (field obj rho) (cos (field obj theta)))] ;; executed 5 times
+  [else (method obj "get_x")]) ;; executed 8 times
 )
 @#reader scribble/comment-reader 
 (racketblock
 (cond
-  [(flonum? n) e2] ;; e2 executed 8 times
-  [(bignum? n) e3] ;; e3 executed 5 times
-  [(fixnum? n) e1] ;; e1 executed 3 times
-  [else e4])
+  [(class-equal? obj PolarPoint) (* (field obj rho) (cos (field obj theta)))]
+  [(class-equal? obj CartesianPoint) (field obj x)]
+  [else (method obj "get_x")]) ;; executed 8 times.
 )]
 
 @Figure-ref{exclusive-cond-expansion} shows an example of
 @racket[exclusive-cond] and the code to which it expands. In this
-example, we assume @racket[e1] is executed 3 times, @racket[e2] is
-executed 8 times, and @racket[e3] is executed 5 times.
+example, we assume the object is a @racket[PolarPoint] most of the time.  
 
-@subsection{case}
+@subsection{Another use of exclusive-cond}
 @; How does case work
 @racket[case] is a pattern matching construct that is easily given
 profile directed optimization by implementing it in terms of
@@ -288,13 +306,23 @@ dropped to preserve ordering constraints from @racket[case].
 
 @section{Data type Selection}
 @; Motivate an example that normal compilers just can't do
-The previous optimizations focus on low level changes that can improve
-code performance. Reordering clauses of a @racket[cond] can improve
-speed by maximizing straight-line code emitted later in the compiler.
-Loop unrolling can reduce overhead associate with loops and maximize
-straight-line code emitted later in the compiler. While profile directed
-meta-programming enables more of such low level optimizations, it
-also enables higher level decisions normally done by the programmer
+The previous examples show that we can easily bring well-known
+optimizations up to the meta-level, enabling the DSL writer to take
+advantage of traditional profile directed optimizations.
+While profile directed meta-programming enables such traditional
+optimizations, it also enables higher level decisions normally done by
+the programmer.
+
+In this example we present a library that provides a sequence datatype.
+We consider this in the context of a DSL or library writer whose users
+are domain experts, but not computer scientists. While a domain expert
+writing a program my know they need a sequence for their program, they
+may not have the knowledge to figure out if they should use a tree, or a
+list, or a vector. Past work has bridge this gap in knowledge by
+providing tools that can recommend changes and provide feedback
+@todo{http://dx.doi.org/10.1109/CGO.2009.36}. We take this a step
+further and provide a library that will automatically specialize the
+data structure based on usage.
 
 @figure**["sequence-datatype"
         "a macro that defines a sequence datatype based on profile information"
@@ -307,7 +335,7 @@ also enables higher level decisions normally done by the programmer
         (seq-first . #'(s))
         (seq-ref . #'(s n))
         (seq-set! . #'(s i obj))) )
-    (define defs 
+    (define defs
       `((make-seq . (,#'list . ,#'vector))
         (seq? . (,#'list? . ,#'vector?))
         (seq-map . (,#'map . ,#'for-each))
@@ -316,7 +344,7 @@ also enables higher level decisions normally done by the programmer
         (seq-set! . (,#'(lambda (ls n obj) (set-car! (list-tail ls n) obj)) . ,#'vector-set!))))
     (define (choose-args name)
       (cond 
-        [(assq name defs) => cdr]
+        [(assq name args) => cdr]
         [else (syntax-error name "invalid method:")]))
     (define (choose name)
       (let ([seq-set!-count (hashtable-ref ht 'seq-set! 0)]
@@ -325,12 +353,12 @@ also enables higher level decisions normally done by the programmer
             [seq-map-count (hashtable-ref ht 'seq-map 0)])
       (cond 
         [(assq name defs) => 
-          (lambda (x)
-            (let ([x (cdr x)])
-              (if (> (+ seq-set!-count seq-ref-count) 
-                     (+ seq-first-count seq-map-count))
-                  (cdr x)
-                  (car x))))]
+         (lambda (x)
+           (let ([x (cdr x)])
+             (if (> (+ seq-set!-count seq-ref-count) 
+                    (+ seq-first-count seq-map-count))
+                 (cdr x)
+                 (car x))))]
         [else (syntax-error name "invalid method:")])))
     (lambda (x)
       (syntax-case x ()
@@ -347,14 +375,11 @@ also enables higher level decisions normally done by the programmer
 ]]
 
 @; Introduce example
-Consider a program in which a sequence type is required but the
-it is not obvious what should be used to implement the sequence. @todo{I
-don't like the first sentence.}
 The example in @figure-ref{sequence-datatype} chooses between a list and
-a vector using profile information. If @racket[seq-set!] and
-@racket[seq-ref] operations are used more often than @racket[seq-map]
-and @racket[seq-first], then a @racket[vector] is used, otherwise a
-@racket[list] is used.
+a vector using profile information. If the program uses @racket[seq-set!] and
+@racket[seq-ref] operations more often than @racket[seq-map]
+and @racket[seq-first], then the sequence is implemented using a
+@racket[vector], otherwise using a @racket[list].
 
 @figure["seq1-example"
         "Use of the define-sequence-datatype macro"
@@ -371,12 +396,17 @@ appendix and just focus on the macro here.}
 @Figure-ref{seq1-example} demonstrates the usage of the
 @racket[define-sequence-datatype] macro. In this example, a sequence
 named @racket[seq1] is defined and initialized to contain elements
-@racket[0], @racket[3], @racket[2], and @racket[5]. The macro requires
-the function names 
-The unique source information
-attached to each function name is used to profile the operations of that
-@emph{particular} sequence. The definitions of each operation evaluate
-the name to ensure function inlining does not distort profile counts. A
-clever compiler might try to throw out the effect-free reference to
+@racket[0], @racket[3], @racket[2], and @racket[5]. The macro also takes
+the various sequence operations as arguments, though this is a hack. 
+@todo{How can we fabricate the source information?} To get unique per
+sequence source information, we simply use the source information from
+those extra arguments. A production example would omit this hack.
+@todo{I should omit this hack}
+
+The macro expands into a series of definitions for each sequence
+operations and a definition for the sequence datatype. This example
+redefines the operations for each new sequence and evaluates the name to
+ensure function inlining does not distort profile counts. A clever
+compiler might try to throw out the effect-free reference to
 @racket[name] in the body of each operation, so this implementation is
 fragile.

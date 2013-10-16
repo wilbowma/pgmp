@@ -13,6 +13,11 @@ and register allocation. In addition to limiting the kinds of
 optimizations the compiler can do, this low-level profile information is
 fragile.
 
+Recently there has been work to give programmers advice on which data
+structure to use http://dx.doi.org/10.1109/CGO.2009.36, but with our
+techniques we can automagically optimize the generated code instead of
+just advice the programmer.
+
 GCC profiles an internal control-flow graph (CFG). To maintain a
 consistent CFGs across instrumented and optimization builds, GCC
 requires similar optimization decisions across builds. By associating
