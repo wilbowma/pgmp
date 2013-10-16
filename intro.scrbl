@@ -67,7 +67,6 @@ prove such a property and must emit the clauses in the original order,
 so even traditional profile directed optimization cannot optimize
 @racket[cond].
 @todo{example, less about cond corner cases}
-@
 
 @; NB: How do we advance the state of the art?
 This paper presents a system for doing profile directed

@@ -32,7 +32,7 @@ implementing loop unrolling via meta-programming may be necessary to get
 high performance loops in a DSL. 
 
 @; Explain a basic let-loop
-This loop example unrolls Scheme's named let @footnote{Strictly
+This loop example unrolls Scheme's named let @note{Strictly
 speaking, we do not implement named let, since in loop unrolling macro,
 the name is not assignable.}, as seen in @figure-ref{fact5}. This
 defines a loop that runs for @racket[i=5] to @racket[i=0] computing
