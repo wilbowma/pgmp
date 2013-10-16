@@ -9,7 +9,7 @@
 @;@include-section["abstract.scrbl"]
 @include-section["intro.scrbl"]
 @;@include-section["intro-to-macros.scrbl"]
-@include-section["api.scrbl"]
+@include-section["design.scrbl"]
 @include-section["examples.scrbl"]
 @include-section["implementation.scrbl"]
 @;@;@include-section["results.scrbl"]

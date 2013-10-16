@@ -71,10 +71,11 @@ so even traditional profile directed optimization cannot optimize
 @; NB: How do we advance the state of the art?
 This paper presents a system for doing profile directed
 meta-programming, including a workflow for using it with traditional low
-level profile directed optimizations.  @Secref{api} presents the API,
-@secref{examples} presents several examples of Scheme macros that use
-this system, and @secref{implementation} discuses how this profiling
-system is implemented.  
+level profile directed optimizations.  @Secref{design} presents the
+design of our system at a high level and how other macro systems could
+use it, @secref{examples} presents several examples of Scheme macros
+that use this system, and @secref{implementation} discuses how this
+profiling system is implemented.  
 
 @;and @secref{results} presents some benchmark results @todo{maybe}.
 

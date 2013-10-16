@@ -155,6 +155,7 @@ class with a virtual method @racket[get_x], called @racket[Point].
 @todo{borrowed from
 http://courses.engr.illinois.edu/cs421/sp2011/project/self-type-feedback.pdf}
 
+@todo{This optimization is straight out of http://dl.acm.org/citation.cfm?id=217848}
 @racket[cond] is a Scheme branching construct analogous to a series of
 if/else if statements. The clauses of
 @racket[cond] are executed in order until the left-hand side of a clause
