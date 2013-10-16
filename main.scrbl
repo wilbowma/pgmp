@@ -5,8 +5,7 @@
 @(author (author+email "William J. Bowman" "wilbowma@ccs.neu.edu")
          (author+email "Swaha Miller" "swamille@cisco.com")
          (author+email "R. Kent Dybvig" "dyb@cisco.com") )
-@include-abstract["abstract.sigplan"]
-@;@include-section["abstract.scrbl"]
+@include-abstract["abstract.scrbl"]
 @include-section["intro.scrbl"]
 @;@include-section["intro-to-macros.scrbl"]
 @include-section["design.scrbl"]
