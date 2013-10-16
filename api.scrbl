@@ -1,5 +1,5 @@
 #lang scribble/sigplan
-@section[#:tag "api" "API"]
+@title[#:tag "api" "API"]
 @(require scribble/manual)
 This section presents the API to the profile system used in later examples.
 

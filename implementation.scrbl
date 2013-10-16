@@ -3,7 +3,7 @@
 @(require scribble/manual)
 @(require scriblib/footnote)
 @(require scriblib/figure)
-@section[#:tag "implementation" "Implementation"]
+@title[#:tag "implementation" "Implementation"]
 This section describes our implementation of the profiling system, and
 how source-level and block-level profile directed optimizations can work
 together in our system. First we present how code is instrumented to
@@ -13,7 +13,7 @@ block-level profile directed optimizations in the same system.
 
 @todo{Definitely going to need Kent to check this section.}
 
-@subsection{Instrumenting code}
+@section{Instrumenting code}
 The naive method for instrumenting code to collect source profile
 information is to attach the source information to each AST node
 internally. At an appropriately low level, that source information can
@@ -61,7 +61,7 @@ ignored and the list of sources from the source code is used when
 source-level profiling is enable.
 @todo{Maybe an example of creating fake sources}
 
-@subsection{Storing and Loading profile data}
+@section{Storing and Loading profile data}
 We store profile data by creating a hash table from source file names to
 hash tables. Each second level hash table maps the starting file position
 of the expression to the weighted count of the expression. This lookup
@@ -110,8 +110,8 @@ it 5 times might make sense. If we know a loop is executed 20%
 of the max, we do not know if the loop is executed 1 or 1,000,000
 times.
 
-@subsection{Source + block profiling}
-@todo{Not sure where this subsection belongs}
+@section{Source + block profiling}
+@todo{Not sure where this section belongs}
 Optimizations based on source-level profile information may result in a
 different set of blocks than the blocks generated on a previous run of a
 program. If blocks are profiled naively, for instance, by assigning each

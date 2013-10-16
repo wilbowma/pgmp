@@ -4,7 +4,7 @@
 @(require scribble/manual)
 @(require scriblib/footnote)
 @(require scriblib/figure)
-@section[#:tag "related" "Related and Future Work"]
+@title[#:tag "related" "Related and Future Work"]
 @todo{I'm not sure what I'm doing with this section yet.}
 Modern systems such as GCC, .NET, and LLVM use profile directed
 optimizations @~cite[lattner02 gcc .net]. However, these systems provide

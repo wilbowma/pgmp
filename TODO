@@ -7,7 +7,7 @@
     languages, remora, list comprehensions))
   - exclusive-cond -- inline cache, Generic object method inling in your
     DSL
-  - No case -- trivial, done to death
+  - No case -- trivial, done to death?
   - Sequence data type -- FFTW, Scala & Java unified collection
     interface but auto specialization.
 * API no more -- high level design

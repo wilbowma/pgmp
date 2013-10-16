@@ -8,6 +8,7 @@
 @include-abstract["abstract.sigplan"]
 @;@include-section["abstract.scrbl"]
 @include-section["intro.scrbl"]
+@include-section["intro-to-macros.scrbl"]
 @include-section["api.scrbl"]
 @include-section["examples.scrbl"]
 @include-section["implementation.scrbl"]
