@@ -1,8 +1,16 @@
 #lang scribble/sigplan
 @(require scribble/manual)
 @(require "defs.rkt")
+@(require "bib.rkt")
 @title[#:tag "intro" "Introduction"]
-@todo{Need to look at more related work before I can do this section justice}
+@; Introduce meta-programming
+Many languages, such as ML, C++, Haskell, Java, and Scheme, provide
+powerful meta-programming facilities that help programmers create
+generic libraries, new language constructs, and domain-specific
+languages (DSLs)@~cite[taha00 erdweg11 czarnecki04 sheard02 dybvig93].
+Meta-programming has been used to implement a number of DSLs and
+languages@todo{felleisen04, tobin-hochstadt06, tobin-hochstadt11}
+
 @; NB: What is profile directed optimization?
 Profile directed optimization is a standard compiler technique that uses
 sample data gathered at run-time to recompile and further optimize a
