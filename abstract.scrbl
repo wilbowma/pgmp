@@ -3,10 +3,9 @@
 Many languages, such as ML, C++, Haskell, Java, and Scheme, provide
 powerful meta-programming facilities that help programmers create
 generic libraries, new language constructs, and domain-specific
-languages (DSLs). Meta-programs manipulate source programs in ways
-reminiscent of a compiler. In some ways, meta-programs serve the same
-purpose as a compiler---to produce low-level code that is difficult to
-understand from the high-level code that is easy to understand. With
+languages (DSLs). In some ways, meta-programs serve the same purpose as
+a compiler---to produce low-level code that is difficult to understand
+from the high-level code that is easy to understand. With
 meta-programming increasingly prevalent, meta-programmers need some of
 the same tools and techniques compiler writers have been developing for
 decades. 

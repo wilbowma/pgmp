@@ -7,9 +7,14 @@
 Many languages, such as ML, C++, Haskell, Java, and Scheme, provide
 powerful meta-programming facilities that help programmers create
 generic libraries, new language constructs, and domain-specific
-languages (DSLs)@~cite[taha00 erdweg11 czarnecki04 sheard02 dybvig93].
-Meta-programming has been used to implement a number of DSLs and
-languages@todo{felleisen04, tobin-hochstadt06, tobin-hochstadt11}
+languages (DSLs)@~cite[taha00 erdweg11 czarnecki04 sheard02 dybvig93]
+@todo{veldhuizen95}.
+Meta-programming has been used to implement a number of DSLs and even
+new languages@todo{felleisen04, tobin-hochstadt06, tobin-hochstadt11}.
+Whole compilers and optimizers have been written as meta-programs
+@todo{tobin-hochstadt11}. Unfortunately, meta-programmers do not have
+all standard tools and techniques of traditional compiler writers, such
+as profile directed optimizations.
 
 @; NB: What is profile directed optimization?
 Profile directed optimization is a standard compiler technique that uses
@@ -19,19 +24,14 @@ in practice then this data can be more accurate than static heuristics
 and can lead to a more optimized program.
 
 @; NB: What do current compilers/techniques allow?
-Compilers such as .NET, GCC, and LLVM @todo{cite} do low level profile
-directed optimization such as reordering blocks, unrolling loops, and
-optimizing switch statements. These optimizations are often fragile
-because of their dependence on low level, compiler internal structures.
-Small changes to source code can imply large changes to low level
-representations. By bringing profile directed optimizations up to the
-source level, programmers can use specific knowledge of the problem
-domain, program, and the high-level code to optimize programs in ways a
-compiler can not. 
-
-@; NB: Why is this not sufficient?
-
-@todo{I need to more carfully read related work}
+Compilers such as .NET, GCC, and LLVM @todo{cite} profile low level
+language representations such as control flow graphs or basic blocks
+@todo{cite} and provide traditional profile directed optimizations such
+as reordering blocks, inlining functions, unrolling loops, and
+optimizing switch statements @todo{cite}. These traditional
+optimizations can provide significant performance gains @todo{cite}, but
+have been inaccessible to meta-programmers. This restricts how profile
+information can be used, and limits DSL writers and meta-programmers.
 
 @; NB: Motivate: Why is this an advance? Who can benefit? (where do I
 @; talk about DSLs)
@@ -63,27 +63,15 @@ compiler can not.
 @; understand enough about data structures to pick the write collection,
 @; and demonstrate datatype specialization based on profile information. 
 
-A simple example is a conditional branching construct like Scheme's
-@racket[cond]. @racket[cond] takes an arbitrary number of clauses of the
-form @racket[(lhs rhs)], executing the first right-hand side whose
-left-hand side is true, or executing a final @racket[else] clause if no
-left-hand side is true.  This construct essentially expands into a
-sequence of if/else expressions. However, if the programmer knows that
-each clause is mutually exclusive, it is beneficial to sort the clauses
-from most to least likely to succeed. In general, the compiler cannot
-prove such a property and must emit the clauses in the original order,
-so even traditional profile directed optimization cannot optimize
-@racket[cond].
-@todo{example, less about cond corner cases}
-
 @; NB: How do we advance the state of the art?
 This paper presents a system for doing profile directed
-meta-programming, including a workflow for using it with traditional low
-level profile directed optimizations.  @Secref{design} presents the
-design of our system at a high level and how other macro systems could
-use it, @secref{examples} presents several examples of Scheme macros
-that use this system, and @secref{implementation} discuses how this
-profiling system is implemented.  
+meta-programming, including a workflow to use our techniques with
+traditional low level profile directed optimizations.  We present this
+system through several motivating examples in @secref{examples}. 
+@Secref{design} presents the design of our system at a high level and
+how other macro systems could use it, and @secref{implementation}
+discuses how this profiling system is implemented.  @Secref{results}
+presents some arbitrary numbers @todo{make numbers less arbitrary}.
 
 @;and @secref{results} presents some benchmark results @todo{maybe}.
 

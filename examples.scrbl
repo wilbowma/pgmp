@@ -16,6 +16,9 @@ reordering the clauses of a conditional branching structure, called
 example demonstrates specializing a data structure based on profile
 information. 
 
+@section{Scheme macro primer}
+@todo{See languages as libraries intro to macros and add something here.}
+
 @section{Loop Unrolling}
 Loop unrolling is a standard compiler optimization.  However, striking
 a balance between code growth and execution speed when unrolling loops
@@ -26,12 +29,12 @@ Profile directed loop unrolling can be done using low-level profile
 information. However, loop unrolling at a low-level requires associating
 loops with the low level profiled structures, such internal nodes or
 even basic blocks, and cannot easily handle arbitrary recursive
-functions. More importantly, with the rise in interest and use of DSLs
+functions. More importantly, with the rise in interest DSLs,
 @; in `high productivity' 
 @; https://www.usenix.org/system/files/conference/hotpar12/hotpar12-final37.pdf
-@; languages such as Python and Ruby, which lack sophisticated
-compilers, implementing loop unrolling via meta-programming may be
-necessary to get high performance loops in a DSL. 
+@; languages such as Python and Ruby, which lack sophisticated compilers
+implementing loop unrolling via meta-programming may be necessary to get
+high performance loops in a DSL. 
 
 @; Explain a basic let-loop
 This loop example unrolls Scheme's named let @note{Strictly
@@ -39,11 +42,11 @@ speaking, we do not implement named let, since in loop unrolling macro,
 the name is not assignable.}, as seen in @figure-ref{fact5}. This
 defines a loop that runs for @racket[i=5] to @racket[i=0] computing
 factorial of @racket[5]. This named let might normally be implemented
-via a recursive function, as seen in @figure-ref{named-let-simple}. The
-example in @figure-ref{fact5} would produce a recursive function
-@racket[fact], and immediately call it on @racket[5]. With a
-reasonable compiler, this named let is equivalent to the C implementation
-in @figure-ref{c-fact5}
+via a recursive function, as seen in @figure-ref{named-let-simple}. With a
+high-performance compiler, this named let is equivalent to the C
+implementation in @figure-ref{c-fact5} The example in @figure-ref{fact5}
+would produce a recursive function @racket[fact], and immediately call
+it on @racket[5]. 
 
 @figure-here[
   "fact5"
@@ -78,7 +81,7 @@ fact: if(i == 0){
      ((lambda (x ...) body1 body2 ...) e ...)]))
 ]]
 
-@figure-here["named-let"
+@figure**["named-let"
         "a macro that does profile directed loop unrolling"
 @racketblock[#:escape srsly-unsyntax
 (define-syntax named-let
@@ -108,21 +111,19 @@ fact: if(i == 0){
           e ...)])))]]
 
 @; Explain how to do a profile directed named let unrolling
-@Figure-ref{named-let} defines a macro, @racket[named-let], that unrolls
-the loop between 1 and 3 times, depending on profile information. At
-compile time, the macro-expander runs @racket[(or (profile-query-weight
-#'b1) 0)]. This asks the runtime for the profile information associated
-with @racket[b1], the first expression in the body of the loop. Recall
-that @racket[profile-query-weight] returns a value between 0 and 1 if
-there is profile information for a piece of syntax, and false otherwise.
-Using the profile weight, we calculate @racket[unroll-limit]. If the
-profile weight is 1, meaning the expression is executed more than any
-other expression during the profiled run, @racket[unroll-limit] is 3. If
-the weight is 0, meaning the expression is never executed during the
-profiled run, @racket[unroll-limit] is 0. Finally, @racket[named-let]
-generates a macro called @racket[name], where name is the identifier
-labeling the loop in the source code, does the work of unrolling the
-loop up to @racket[unroll-limit] times.
+@Figure-ref{named-let} defines a macro, @racket[named-let], that create
+a loop and unrolls it between 1 and 3 times, depending on profile
+information. At compile time, the compiler runs @racket[(or
+(profile-query-weight #'b1) 0)]. This looks up the profile information
+associated with @racket[b1], the first expression in the body of the
+loop. If the profile weight is 1, meaning the expression is executed
+more than any other expression during the profiled run,
+@racket[unroll-limit] is 3. If the weight is 0, meaning the expression
+is never executed during the profiled run, @racket[unroll-limit] is 0.
+Finally, @racket[named-let] generates another macro called @racket[name],
+where name is the identifier labeling the loop in the source code, which
+inlines the body of the loop according to @racket[unroll-limit] and
+@racket[profile-weight].
 
 @; Explain multiple call sites
 In fact, a named let defines a recursive function and immediately
@@ -136,10 +137,10 @@ growth. For brevity, we restrict the example and assume
 @racket[named-let] is used as a simple loop. Each call site is unrolled
 the same number of times.
 
-Similar macros are easy to write for @racket[do] loops, and even
-for @racket[letrec] to inline general recursive functions. 
+@;Similar macros are easy to write for @racket[do] loops, and even
+@;for @racket[letrec] to inline general recursive functions. 
 
-@section{exclusive-cond}
+@section{Call site optimization}
 In this section we present a branching construct called
 @racket[exclusive-cond] that can automatically reorder the clauses based
 on which is mostly likely to be executed. This optimization is analogous
@@ -192,7 +193,7 @@ syntaxes for brevity.}, but with the restriction that
 clause order is not guaranteed. We then use profile information to
 reorder the clauses.
 
-@figure["exclusive-cond" 
+@figure**["exclusive-cond" 
         (elem "Implementation of " @racket[exclusive-cond])
 @#reader scribble/comment-reader 
 (racketblock 
@@ -232,7 +233,7 @@ final clause.
 
 @;@todo{syntax or code?}
 
-@figure-here["exclusive-cond-expansion"
+@figure**["exclusive-cond-expansion"
         (elem "An example of " @racket[exclusive-cond] " and its expansion")
 @#reader scribble/comment-reader 
 (racketblock 
@@ -254,9 +255,10 @@ final clause.
 @racket[exclusive-cond] and the code to which it expands. In this
 example, we assume the object is a @racket[PolarPoint] most of the time.  
 
-@subsection{Another use of exclusive-cond}
+@subsection[@racket[case]": Another use of exclusive-cond"]
 @; How does case work
-@racket[case] is a pattern matching construct that is easily given
+@racket[case] is a pattern matching construct, similar to C's
+@racket[switch], that is easily given
 profile directed optimization by implementing it in terms of
 @racket[exclusive-cond]. @racket[case] takes an expression
 @racket[key-expr] and an arbitrary number of clauses, followed by an

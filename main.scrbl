@@ -11,6 +11,6 @@
 @include-section["design.scrbl"]
 @include-section["examples.scrbl"]
 @include-section["implementation.scrbl"]
-@;@;@include-section["results.scrbl"]
+@include-section["results.scrbl"]
 @include-section["related.scrbl"]
 @(generate-bibliography)
