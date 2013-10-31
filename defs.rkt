@@ -1,4 +1,7 @@
-#lang racket/base
+#lang racket
 (require scribble/base)
+(require scriblib/footnote)
 (provide todo)
-(define todo margin-note*)
+(define (todo . x) (apply note "TODO: " x))
+
+#;(define-code chez (curry to-paragraph #:wrap-elem smaller))
