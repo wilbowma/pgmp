@@ -158,3 +158,10 @@
     #:date (seconds->date (find-seconds 0 0 0 20 08 2013))
     #:url "http://msdn.microsoft.com/en-us/library/e7k32f4k(v=vs.90).aspx"))
 
+(define boost
+  (make-bib 
+    #:title "Boost C++ Libraries"
+    #:author (authors "B. Dawes" "D. Abrahams")
+    #:date 2009
+    #:url "http://www.boost.org"))
+

@@ -25,7 +25,7 @@ does. The meta-program could take advantage of @racket[case]'s
 unspecified order of execution to reorder the clauses based on profile
 information, while optimizations done on the generate source program
 could do no such optimization. More generally, meta-programmers
-implementing abstract libraries, such as Boost@todo{Cite?}, and new
+implementing abstract libraries, such as Boost@~cite[boost], and new
 languages, such as Typed Racket@~cite[tobin-hochstadt11], could take
 advantage of flexibility at the meta-language level to implement
 optimizations that would be impossible for a compiler at the
