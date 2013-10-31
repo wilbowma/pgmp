@@ -1,4 +1,4 @@
-#lang scribble/sigplan
+#lang scribble/base
 @(require "defs.rkt")
 @(require "bib.rkt")
 @(require scribble/manual)

@@ -1,4 +1,4 @@
-#lang scribble/sigplan
+#lang scribble/base
 @(require "defs.rkt")
 @title[#:tag "intro-to-macros" "Meta-programming in Scheme"]
 @todo{See Languages as Libraries for intro to macros.}

@@ -1,4 +1,4 @@
-#lang scribble/sigplan
+#lang scribble/base
 @(require "defs.rkt")
 @(require scribble/manual)
 @(require scriblib/footnote)

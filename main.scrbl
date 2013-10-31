@@ -1,4 +1,4 @@
-#lang scribble/sigplan @preprint
+#lang scribble/sigplan @preprint @onecolumn 
 @(require "bib.rkt")
 
 @title{Profile directed meta-programming}
@@ -7,10 +7,8 @@
          (author+email "R. Kent Dybvig" "dyb@cisco.com") )
 @include-abstract["abstract.scrbl"]
 @include-section["intro.scrbl"]
-@;@include-section["intro-to-macros.scrbl"]
 @include-section["design.scrbl"]
 @include-section["examples.scrbl"]
 @include-section["implementation.scrbl"]
-@include-section["results.scrbl"]
 @include-section["related.scrbl"]
 @(generate-bibliography)

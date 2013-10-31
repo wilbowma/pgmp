@@ -1,4 +1,4 @@
-#lang scribble/sigplan
+#lang scribble/base
 @(require "defs.rkt")
 @title[#:tag "design" "Design"]
 @(require scribble/manual)

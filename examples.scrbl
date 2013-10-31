@@ -1,4 +1,4 @@
-#lang scribble/sigplan
+#lang scribble/base
 @(require "defs.rkt")
 @(require scribble/manual)
 @(require scriblib/footnote)
@@ -60,7 +60,7 @@ it on @racket[5].
 @figure-here[
   "c-fact5"
   "And in C"
-@verbatim{int i = 5;
+@codeblock|{int i = 5;
 int n = 1;
 fact: if(i == 0){
   n;
@@ -68,7 +68,7 @@ fact: if(i == 0){
   n = n * --i;
   goto fact;
 }
-}]
+}|]
 
 @figure-here["named-let-simple"
         "a simple definition of a named let"
@@ -76,7 +76,9 @@ fact: if(i == 0){
 (define-syntax let
   (syntax-rules ()
     [(_ name ([x e] ...) body1 body2 ...)
-     ((letrec ([name (lambda (x ...) body1 body2 ...)])) e ...)]i
+     ((letrec 
+        ([name (lambda (x ...) 
+                 body1 body2 ...)])) e ...)]
     #;[(_ ([x e] ...) body1 body2 ...)
      ((lambda (x ...) body1 body2 ...) e ...)]))
 ]]
