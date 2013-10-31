@@ -1,9 +1,11 @@
 #lang racket
 (require scriblib/autobib
+         scriblib/bibtex
          racket/date)
 (provide (all-defined-out))
 
 (define-cite ~cite citet generate-bibliography #:style number-style)
+(define-bibtex-cite* "bib.bib" ~cite citet ~citea citeta)
 
 (define conte96
   (make-bib
@@ -109,6 +111,41 @@
     #:date 1993
     #:url "http://pdf.aminer.org/001/006/789/syntactic_abstraction_in_scheme.pdf"))
 
+(define felleisen04 
+  (make-bib
+    #:title "Building little languages with macros."
+    #:author (authors "Matthias Felleisen" "R. Findler" "Matthew Flatt"
+                      "Shriram Krishnamurthi")
+    #:location (journal-location
+                 "Dr. Dobb's Journal"
+                 #:pages '(45 49)
+                 #:number 4)
+    #:date 2004
+    #:url "http://fortissimo.unice.fr/twiki/pub/Minfo03/DrK/Building.pdf"))
+
+(define tobin-hochstadt11
+  (make-bib
+    #:title "Languages as Libraries"
+    #:author (authors "Sam Tobin-Hochstadt" "Vincent St-Amour" "Ryan
+                       Culpepper" "Matthew Flatt" "Matthias Felleisen")
+    #:location (proceedings-location 
+                 "Proceedings of Conference on Programming Language
+                 Design and Implementation (PLDI)"
+                 #:pages '(132 141))
+    #:date 2011
+    #:url "http://www.ccs.neu.edu/racket/pubs/pldi11-thacff.pdf"))
+
+(define burger98
+  (make-bib
+    #:title "An infrastructure for profile-driven dynamic recompilation."
+    #:author (authors "Robert G. Burder" "R. Kent Dybvig")
+    #:location (proceedings-location
+                 "Computer Languages, 1998. Proceedings. 1998
+                 International Conference on"
+                 #:pages '(240 249))
+    #:date 1998
+    #:url "http://pdf.aminer.org/000/289/483/an_infrastructure_for_profile_driven_dynamic_recompilation.pdf"))
+ 
 (define gcc
   (make-bib 
     #:title "Optimize Options - Using the GNU Compiler Collection"

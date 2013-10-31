@@ -1,7 +1,7 @@
 #lang scribble/sigplan @preprint @onecolumn 
 @(require "bib.rkt")
 
-@title{Profile directed meta-programming}
+@title{Profile directed (meta-)programming}
 @(authorinfo "William J. Bowman" "wilbowma@ccs.neu.edu" "Northeastern
 University")
 @(authorinfo "Swaha Miller" "swamille@cisco.com" "Cisco Systems, Inc")

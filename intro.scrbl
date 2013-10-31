@@ -26,13 +26,12 @@ unspecified order of execution to reorder the clauses based on profile
 information, while optimizations done on the generate source program
 could do no such optimization. More generally, meta-programmers
 implementing abstract libraries, such as Boost@todo{Cite?}, and new
-languages, such as Typed Racket @todo{felleisen04, tobin-hochstadt06,
-tobin-hochstadt11}, could take advantage of flexibility at the
-meta-language level to implement optimizations that would be impossible
-for a compiler at the source-level language. To do this,
-meta-programmers need the same techniques and tools to generate
-source-language code that compiler writers use to generate machine
-code.
+languages, such as Typed Racket@~cite[tobin-hochstadt11], could take
+advantage of flexibility at the meta-language level to implement
+optimizations that would be impossible for a compiler at the
+source-level language. To do this, meta-programmers need the same
+techniques and tools to generate source-language code that compiler
+writers use to generate machine code.
 
 @; NB: What is profile directed optimization?
 Profile-directed optimization is a compiler technique that uses
@@ -58,7 +57,7 @@ the meta-language, clearly a meta-program cannot use this `block-level'
 profiling information. Existing techniques that use profile information
 at the level of the source language, i.e. `source-level' information,
 introduce a layer of tooling support between the profile information and
-the compiler@todo{Cite 1, 2 from Swahah, stuff from related work}.
+the compiler@~citea["chen06" "cavazos06"]@todo{stuff from related work}.
 These tools are essentially highly specialized meta-programs.  However,
 the source-level information is unusable to the compiler and unavailable
 to the meta-language. So this extra layer reproduces the profiling

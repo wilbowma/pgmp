@@ -1,5 +1,6 @@
 #lang scribble/base
 @(require "defs.rkt")
+@(require "bib.rkt")
 @title[#:tag "design" "Design"]
 @(require scribble/manual)
 This section presents the design of our profile system. We discuss the
@@ -54,9 +55,9 @@ Ideally we would track both relative and exact information, but this
 doubles profiling overhead. One of our design goals is to enable
 `always on' profiling, so even release builds of software can have
 profiling enabled without too much performance impact. Using previous
-work to decrease profiling overhead @todo{cite}, running a set of
-benchmarks with profiling enables gives only 10% slowdown @todo{Make
-these reproducable}.
+work to decrease profiling overhead@~cite[burger98], running a set of
+benchmarks with profiling enables gives only 10% slowdown @todo{Run
+these on some reproducable benchmarks}.
 
 @section{Source + block profiling}
 When designing our source level profiling system, we aimed to take
