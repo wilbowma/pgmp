@@ -6,16 +6,16 @@
 @; Introduce meta-programming
 Meta-programming is a technique for creating programs by defining
 meta-language constructs that generate programs in a source language.
-Many languages have some kind of meta-programming; C preprocess macros,
+Many languages have some kind of meta-programming; C preprocessor macros,
 C++ templates, Template Haskell, Scheme macros, and MetaML are all
 examples of meta-programming@~cite[taha00 erdweg11 czarnecki04 sheard02
-dybvig93]. Note all constructs in the meta-language will have an
-equivalent construct, with the same expressivity, in the source
-language. The translation from meta-language to source-language will
-necessarily impose additional restrictions not specified in the original
-program. That is, the compiler operating on the generated source-program
-has to make optimization decisions based on an overspecification of the
-orignal program and has less flexibility when optimizing. 
+dybvig93]. Not all constructs in the meta-language will have an
+equivalent construct with the same expressivity in the source language.
+The translation from meta-language to source-language will necessarily
+impose additional restrictions not specified in the original program.
+That is, the compiler operating on the generated source-program has to
+make optimization decisions based on an overspecification of the orignal
+program and has less flexibility when optimizing. 
 
 For instance, Scheme's @racket[case] construct (similar to C's
 @racket[switch] statement) is a meta-program that generates a series of
@@ -25,8 +25,8 @@ does. The meta-program could take advantage of @racket[case]'s
 unspecified order of execution to reorder the clauses based on profile
 information, while optimizations done on the generate source program
 could do no such optimization. More generally, meta-programmers
-implementing abstract libraries, such as Boost, and new
-languages, such as Typed racket @todo{felleisen04, tobin-hochstadt06,
+implementing abstract libraries, such as Boost@todo{Cite?}, and new
+languages, such as Typed Racket @todo{felleisen04, tobin-hochstadt06,
 tobin-hochstadt11}, could take advantage of flexibility at the
 meta-language level to implement optimizations that would be impossible
 for a compiler at the source-level language. To do this,
@@ -63,10 +63,8 @@ These tools are essentially highly specialized meta-programs.  However,
 the source-level information is unusable to the compiler and unavailable
 to the meta-language. So this extra layer reproduces the profiling
 effort of the compiler and does not help meta-programmers in general.
-@todo{Not always; there is some tooling support... this tool amounts to
-highly specialized meta-programs, not reusable by meta-programmers in
-general}. Instead, it's up to the programmer to optimize code @emph{by
-hand} in the general case.
+Instead, it's up to the programmer to use source-level information to
+optimize code @emph{by hand} in the general case.
 
 @; To motivate why these low level optimizations are not enough, and
 @; demonstrate our framework, we consider three problems that the writer of
@@ -96,12 +94,13 @@ hand} in the general case.
 @; and demonstrate datatype specialization based on profile information. 
 
 @; NB: How do we advance the state of the art?
-We present a technique for collecting and using per-source expression
+We present a technique for collecting and using per source-expression
 profile information directly in a compiler. This source-level
-information is available to the meta-language, and during run-time,
-enabling profile-directed optimizations and profile-directed run-time
-decisions. Our technique also addressed combining source-level 
-information from multiple execution profiles and performing both
+information is available to the meta-language so meta-programs can
+perform high-level profile-directed optimizations. The profile information
+is also available during run-time, enabling profile-directed run-time
+decisions. Our technique also addresses combining source-level
+information from multiple execution profiles, and performing both
 source-level and block-level profile-directed optimizations on the same
 program.
 
