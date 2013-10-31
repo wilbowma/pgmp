@@ -2,9 +2,10 @@
 @(require "bib.rkt")
 
 @title{Profile directed meta-programming}
-@(author (author+email "William J. Bowman" "wilbowma@ccs.neu.edu")
-         (author+email "Swaha Miller" "swamille@cisco.com")
-         (author+email "R. Kent Dybvig" "dyb@cisco.com") )
+@(authorinfo "William J. Bowman" "wilbowma@ccs.neu.edu" "Northeastern
+University")
+@(authorinfo "Swaha Miller" "swamille@cisco.com" "Cisco Systems, Inc")
+@(authorinfo "R. Kent Dybvig" "dyb@cisco.com" "Cisco Systems, Inc")
 @include-abstract["abstract.scrbl"]
 @include-section["intro.scrbl"]
 @include-section["design.scrbl"]
