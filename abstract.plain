@@ -1,15 +1,21 @@
-Profile directed optimization is a compiler technique that uses sample data
-gathered at run-time to recompile and further optimize a program. The profile
-data can be more accurate than heuristics normally used in a compiler and thus
-can lead to more optimized code. Modern compilers like .NET, LLVM, and
-GCC use profile directed optimization by profiling the low level code
-and performing low level optimizations, such as reordering basic blocks.
+Meta-programming is a technique for creating programs by specifying the
+behavior in a meta-language that generates programs in a source
+language. Like a compiler, when a meta-program generates code, it may
+impose constraints not specified in the original program. 
 
-Modern languages such as Haskell, C++, and Scheme provide powerful
-meta-programming facilities that help programmers create generic
-libraries, new language constructs, or even domain specific
-languages. Meta-programs can manipulate source programs in way
-reminiscent of a compiler. This paper presents a system for using
-profile information to optimize programs in the meta-programming
-language. The system is implemented and used in a high-performance
-implementation of Scheme. 
+Profile-guided optimization (PGO) is a compiler technique that uses
+information such as execution counts, gathered from a sample run of a
+program, to inform optimization decisions.  PGO done in the
+meta-language would allow meta-programs to take advantage of the
+original specification to generate more optimized code. This would
+enable high-level optimizations not possible further along in a
+compiler. Until now, meta-programmers have not had access to profile
+information. 
+
+This work presents a technique for doing profile-guided optimizations
+in meta-programs. We present a profiling system that gives per-source
+expression profile information, provides a way to access this profile
+information in the meta-language and at runtime, and work with
+traditional PGOs. This system is implemented in the high-performance
+Chez Scheme compiler, and used in implementing an internal Cisco
+project.
