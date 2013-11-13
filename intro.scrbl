@@ -94,7 +94,6 @@ which Scheme supports meta-programming.  It would be straightforward to
 adapt to most meta-programming systems with compilers that already
 support profiling.
 
-
 @;These low-level optimizations are important, but the low-level profile
 @;information is useless at the meta-language level. If the profile
 @;information is gathered by profiling basic blocks which don't exist in
@@ -151,5 +150,11 @@ support profiling.
 The reminder of the paper is organized as follows. @Secref{design}
 presents the design of our system at a high level. 
 @Secref{examples} demonstrates how to use our mechanism to implement several
-optimizations as meta-programs. @Secref{implementation} discusses our
-implementation and how it works with traditional PGOs.
+optimizations as meta-programs. These example demonstrate how our
+work can be used to implement and build on past work in a single,
+general system. In particular, we show our work could be used to
+automate the recommendataions produced by Liu and Rus by
+automatically specialize an abstract sequence datatype@~citea{liu09}. We also
+demonstrate how to implement profile-guided receiver class
+prediction using our mechanism@~citea{grove95}. @Secref{implementation}
+discusses our implementation and how it works with traditional PGOs.
