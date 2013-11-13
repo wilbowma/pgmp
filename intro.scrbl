@@ -94,59 +94,6 @@ which Scheme supports meta-programming.  It would be straightforward to
 adapt to most meta-programming systems with compilers that already
 support profiling.
 
-@;These low-level optimizations are important, but the low-level profile
-@;information is useless at the meta-language level. If the profile
-@;information is gathered by profiling basic blocks which don't exist in
-@;the meta-language, clearly a meta-program cannot use this `block-level'
-@;profiling information. Existing techniques that use profile information
-@;at the level of the source language, i.e. `source-level' information,
-@;introduce a layer of tooling support between the profile information and
-@;the compiler@~citea["chen06" "cavazos06"]@todo{stuff from related work}.
-@;These tools are essentially highly specialized meta-programs.  However,
-@;the source-level information is unusable to the compiler and unavailable
-@;to the meta-language. So this extra layer reproduces the profiling
-@;effort of the compiler and does not help meta-programmers in general.
-@;Instead, it's up to the programmer to use source-level information to
-@;optimize code @emph{by hand} in the general case.
-
-@; To motivate why these low level optimizations are not enough, and
-@; demonstrate our framework, we consider three problems that the writer of
-@; a domain-specific language (DSL) or DSL library writer might want to
-@; solve. First we consider the standard technique of loop unrolling and
-@; demonstrate unrolling loops and general recursive functions based on
-@; profile information. Next we consider the problem of inline caching for
-@; a DSL with objects and demonstrate reordering clauses of a generic
-@; branching construct based on profile information. Finally we consider
-@; the EDSL library writer with users that don't understand enough about
-@; data structures to pick the write collection, and demonstrate datatype
-@; specialization based on profile information. 
-@; 
-@; 
-@; First we consider the standard technique of loop unrolling and
-@; demonstrate unrolling loops and general recursive functions based on
-@; profile information. While loops can be unrolled using traditional low
-@; level profile information, we show the fine granularity of source level
-@; information makes this problem trivial.
-@; 
-@; Next we consider the problem of inline caching for a DSL with objects
-@; and demonstrate reordering clauses of a generic branching construct
-@; based on profile information.  
-@; 
-@; Finally we consider the EDSL library writer with users that don't
-@; understand enough about data structures to pick the write collection,
-@; and demonstrate datatype specialization based on profile information. 
-
-@; NB: How do we advance the state of the art?
-@;We present a technique for collecting and using per source-expression
-@;profile information directly in a compiler. This source-level
-@;information is available to the meta-language so meta-programs can
-@;perform high-level profile-directed optimizations. The profile information
-@;is also available during run-time, enabling profile-directed run-time
-@;decisions. Our technique also addresses combining source-level
-@;information from multiple execution profiles, and performing both
-@;source-level and block-level profile-directed optimizations on the same
-@;program.
-
 The reminder of the paper is organized as follows. @Secref{design}
 presents the design of our system at a high level. 
 @Secref{examples} demonstrates how to use our mechanism to implement several
