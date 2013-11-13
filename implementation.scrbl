@@ -11,7 +11,53 @@ collect profile information. Then we present how profile information is
 stored and accessed. Finally we present how we use both source-level and
 block-level profile directed optimizations in the same system. 
 
-@todo{Definitely going to need Kent to check this section.}
+@section{Source + block profiling}
+@todo{Move this}
+When designing our source level profiling system, we aimed to take
+advantage of prior work on low level profile directed optimizations
+@todo{cite}. However, optimizations based on source-level profile
+information may result in a different set of blocks than the blocks
+generated for the profiled run of a program. If blocks are profiled
+for instance, by assigning each block a number in the order in
+which the blocks are generated, then the block numbers will not be
+consistent after optimizing with source information. Therefore
+optimization using source profile information and those using block
+profile information cannot be done after a single profiled run of a
+program.
+
+We take the @todo{Not naive} naive approach to block profiling and use the following
+workflow to take advantage of both source and block leve profile
+directed optimizations. First we compile and instrument a program to
+collect source-level information. We run this program and collect only
+source-level information. Next we recompile and optimize the program
+using the source-level information only, and instrument the program to
+collect block-level information. The profile directed meta-programs
+reoptimize at this point.  We run this program and collect only the
+block-level information.  Finally, we recompile the program with both
+source-level and block-level information. Since the source information
+has not changed, the meta-programs generate the same source code, and
+thus the compiler generates the same blocks. The blocks are then
+optimized with the correct profile information.
+
+While the workflow seems to significantly complicate the compilation
+process, the different between using only block-level profiling
+and using both source-level and block-level profiling is small. To use
+any kind of profile directed optimizations requires a 300% increase in
+the number of steps (from compile to compile-profile-compile). To use
+both source-level and block-level profile directed optimizations
+requires only an additional 66% increase in number of steps
+(compile-profile-compile to compile-profile-compile-profile-compile).
+
+
+@todo{Fix up, reorganize}
+We represent profile information as a floating point number between 0
+and 1. Profile information is not stored as exact counts, but as
+execution frequency with respect to the most executed expression
+(refered to as `percent of max'). If an expression @racket[e1] is
+executed 1 time, and the most frequently executed expression
+@racket[e10] is executed 10 times, then @racket[(profile-query-weight
+e1)] returns .1, while @racket[(profile-query-weight e10)] returns 1. 
+
 
 @section{Instrumenting code}
 The naive method for instrumenting code to collect source profile
