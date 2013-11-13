@@ -1,38 +1,56 @@
 #lang scribble/base
 @(require "defs.rkt")
+@(require "bib.rkt")
 @(require scribble/manual)
 @(require scriblib/footnote)
 @(require scriblib/figure)
 @(require racket/port)
 @title[#:tag "examples" "Examples"]
 This section demonstrates how our to use our mechanism, and how it
-generalizes past work on profile-guided meta-programs and optimizations. 
-The first example demonstrates call site optimization for a
-object-oriented DSL by reordering the clauses of a conditional branching
-structure, called @racket[exclusive-cond], based on profile information.
-The final example demonstrates specializing a data structure based on
-profile information. 
+generalizes and advances past work on profile-guided meta-programs.  The
+first example demonstrates profile-guided receiver class prediction for
+a object-oriented DSL based on profile information.  The final example
+demonstrates specializing a data structure based on profile information.
 
 @section{Scheme macro primer}
-@todo{See languages as libraries intro to macros and add something here.}
+@figure-here["Sample macro" (elem "Sample macro")
+@#reader scribble/comment-reader
+@(racketblock
+;; defines a macro (meta-program)
+(define-syntax (do-n-times stx)
+  ;; pattern matches on the inputs syntax
+  (syntax-case stx ()
+    ;; Example:
+    ;; (do-n-times 5 (display “*”)) => *****
+    [(do-n-times n body …)
+    ;; #' creates a piece of syntax 
+     #'(let loop [(i n)]  ;; the syntax `n', taken as input, is copied
+              (if (zero? i)
+                  (void)
+                  (begin body … (loop (sub1 i)))))]))
+)]
 
-@section{Call site optimization}
-In this section we present a branching construct called
-@racket[exclusive-cond] that can automatically reorder the clauses based
-on which is mostly likely to be executed. This optimization is analogous
-to basic block reordering, but operates at a much higher level. 
+@tt{#'}, @tt{#`}, and @tt{#,} implement Lisp's quote,
+quasiquote, and unquote but on syntax instead of lists. 
+@todo{expand, fix tt}
 
-We consider this construct in the context of an object-oriented DSL with
-classes, inheratence, and virtual methods, similar to C++. Consider a
-class with a virtual method @racket[get_x], called @racket[Point].
-@racket[CartesianPoint] and @racket[PolarPoint] inherit 
+@section{Profile-guided receiver class prediction}
+In this example we demonstrate how to implement profile-guided receiver
+class prediction@~citea{grove95} for a hypothetical object-oriented DSL
+with virtual methods, similar to C++. We perform this optimization
+through a general meta-program called @racket[exclusive-cond], a
+branching construct that can automatically reorder the clauses based on
+which is mostly likely to be executed. 
+
+@todo{Use example from grove95; it's simpler}
+Consider a class with a virtual method @racket[get_x], called
+@racket[Point].  @racket[CartesianPoint] and @racket[PolarPoint] inherit
 @racket[Point] and implement the virtual @racket[get_x]. We will use
 @racket[exclusive-cond] to inline virtual method calls.
 
 @todo{borrowed from
 http://courses.engr.illinois.edu/cs421/sp2011/project/self-type-feedback.pdf}
 
-@todo{This optimization is straight out of http://dl.acm.org/citation.cfm?id=217848}
 @racket[cond] is a Scheme branching construct analogous to a series of
 if/else if statements. The clauses of
 @racket[cond] are executed in order until the left-hand side of a clause
