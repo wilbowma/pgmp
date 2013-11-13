@@ -165,3 +165,11 @@
     #:date 2009
     #:url "http://www.boost.org"))
 
+(define burmako2013scala
+  (make-bib
+    #:title "Scala Macros: Let Our Powers Combine!"
+    #:author "Eugene Burmako"
+    #:location (proceedings-location
+                 "Proceedings of the 4th Annual Scala Workshop")
+    #:date 2013))
+
