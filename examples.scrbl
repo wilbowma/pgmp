@@ -5,142 +5,16 @@
 @(require scriblib/figure)
 @(require racket/port)
 @title[#:tag "examples" "Examples"]
-This section presents several macros that use profiling information to
-optimize the expanded code. The first example demonstrates unrolling
-loops based on profile information. While loop unrolling can be done
-with low level profile information, we discuss when it can be useful or
-even necessary to do at the meta-programming level.  The second example
-demonstrates call site optimization for a object-oriented DSL by
-reordering the clauses of a conditional branching structure, called
-@racket[exclusive-cond], based on profile information.  The final
-example demonstrates specializing a data structure based on profile
-information. 
+This section demonstrates how our to use our mechanism, and how it
+generalizes past work on profile-guided meta-programs and optimizations. 
+The first example demonstrates call site optimization for a
+object-oriented DSL by reordering the clauses of a conditional branching
+structure, called @racket[exclusive-cond], based on profile information.
+The final example demonstrates specializing a data structure based on
+profile information. 
 
 @section{Scheme macro primer}
 @todo{See languages as libraries intro to macros and add something here.}
-
-@section{Loop Unrolling}
-Loop unrolling is a standard compiler optimization.  However, striking
-a balance between code growth and execution speed when unrolling loops
-is tricky.  Profile information can help the compiler focus on the most
-executed loops. 
-
-Profile directed loop unrolling can be done using low-level profile
-information. However, loop unrolling at a low-level requires associating
-loops with the low level profiled structures, such internal nodes or
-even basic blocks, and cannot easily handle arbitrary recursive
-functions. More importantly, with the rise in interest DSLs,
-@; in `high productivity' 
-@; https://www.usenix.org/system/files/conference/hotpar12/hotpar12-final37.pdf
-@; languages such as Python and Ruby, which lack sophisticated compilers
-implementing loop unrolling via meta-programming may be necessary to get
-high performance loops in a DSL. 
-
-@; Explain a basic let-loop
-This loop example unrolls Scheme's named let @note{Strictly
-speaking, we do not implement named let, since in loop unrolling macro,
-the name is not assignable.}, as seen in @figure-ref{fact5}. This
-defines a loop that runs for @racket[i=5] to @racket[i=0] computing
-factorial of @racket[5]. This named let might normally be implemented
-via a recursive function, as seen in @figure-ref{named-let-simple}. With a
-high-performance compiler, this named let is equivalent to the C
-implementation in @figure-ref{c-fact5} The example in @figure-ref{fact5}
-would produce a recursive function @racket[fact], and immediately call
-it on @racket[5]. 
-
-@figure-here[
-  "fact5"
-  "The most executed program in all of computer science" 
-@racketblock[
-(let fact ([i 5])
-  (if (zero? i)
-      1
-      (* n (fact (sub1 n)))))]]
-
-@figure-here[
-  "c-fact5"
-  "And in C"
-@codeblock|{int i = 5;
-int n = 1;
-fact: if(i == 0){
-  n;
-} else {
-  n = n * --i;
-  goto fact;
-}
-}|]
-
-@figure-here["named-let-simple"
-        "a simple definition of a named let"
-@racketblock[
-(define-syntax let
-  (syntax-rules ()
-    [(_ name ([x e] ...) body1 body2 ...)
-     ((letrec 
-        ([name (lambda (x ...) 
-                 body1 body2 ...)])) e ...)]
-    #;[(_ ([x e] ...) body1 body2 ...)
-     ((lambda (x ...) body1 body2 ...) e ...)]))
-]]
-
-@figure**["named-let"
-        "a macro that does profile directed loop unrolling"
-@racketblock[#:escape srsly-unsyntax
-(define-syntax named-let
-  (lambda (x)
-    (syntax-case x ()
-      [(_ name ([x e] ...) b1 b2 ...)
-       #`((letrec ([tmp (lambda (x ...)
-            #,(let* ([profile-weight 
-                       (or (profile-query-weight #'b1) 0)]
-                     [unroll-limit 
-                       (floor (* 3 profile-weight))])
-                #`(define-syntax name
-                    (let ([count #,unroll-limit]
-                          [weight #,profile-weight])
-                      (lambda (q)
-                        (syntax-case q ()
-                          [(_ enew (... ...))
-                            (if (or (= count 0)
-                                    (< weight .1))
-                                #'(tmp enew (... ...))
-                                (begin
-                                  (set! count (- count 1))
-                                  #'((lambda (x ...) b1 b2 ...) 
-                                     enew (... ...))))])))))
-             b1 b2 ...)])
-            tmp)
-          e ...)])))]]
-
-@; Explain how to do a profile directed named let unrolling
-@Figure-ref{named-let} defines a macro, @racket[named-let], that create
-a loop and unrolls it between 1 and 3 times, depending on profile
-information. At compile time, the compiler runs @racket[(or
-(profile-query-weight #'b1) 0)]. This looks up the profile information
-associated with @racket[b1], the first expression in the body of the
-loop. If the profile weight is 1, meaning the expression is executed
-more than any other expression during the profiled run,
-@racket[unroll-limit] is 3. If the weight is 0, meaning the expression
-is never executed during the profiled run, @racket[unroll-limit] is 0.
-Finally, @racket[named-let] generates another macro called @racket[name],
-where name is the identifier labeling the loop in the source code, which
-inlines the body of the loop according to @racket[unroll-limit] and
-@racket[profile-weight].
-
-@; Explain multiple call sites
-In fact, a named let defines a recursive function and immediately
-calls it. While this can be used for simple loops, a named let may have
-non-tail calls or even multiple recursive calls along different
-branches. This macro does more than loop unrolling--it does recursive
-function lining. A more clever macro could unroll each call site a
-different number of times, depending on how many times that particular
-call is executed. This would allow more fine grain control over code
-growth. For brevity, we restrict the example and assume
-@racket[named-let] is used as a simple loop. Each call site is unrolled
-the same number of times.
-
-@;Similar macros are easy to write for @racket[do] loops, and even
-@;for @racket[letrec] to inline general recursive functions. 
 
 @section{Call site optimization}
 In this section we present a branching construct called
