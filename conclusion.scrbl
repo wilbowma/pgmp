@@ -1,39 +1,44 @@
 #lang scribble/base
 @(require "defs.rkt")
+@(require "bib.rkt")
 @(require scribble/manual)
 @(require scriblib/footnote)
 @(require scriblib/figure)
 @title[#:tag "conclusion" "Conclusion"]
+We have presented a general mechanism for profile-guided meta-program
+optimizations implemented in Scheme. While our mechanism should easily
+extend to other meta-programming facilities, we conclude by discussing
+precisely how other common meta-programming facilities need to be
+extended to use our mechanism.
 
-@section{Comparison to other meta-programming languages}
-We take advantage of Scheme's powerful meta-programming facilities that
-allows running full-fledged Scheme programs at compile time.  While many
-programming langauges have meta-programming systems, their
-expressiveness and support for manipulating syntax varies.
+Template Haskell, MetaOcaml, and Scala all feature powerful
+meta-programming facilities similar to Scheme's@~cite[burmako2013scala
+sheard02 dybvig93 taha00 czarnecki04]. They allow executing arbitrary
+code at compile-time, provide quoting and unquoting of syntax, and
+provide direct representations of the source AST. Source objects could
+be attached to the AST, and @racket[profile-query-weight] could access
+the source objects given a AST. These languages all appear to lack
+source profilers, however.
 
-@todo{figure out if (profile-query-weight ) could be run in C++,
-MetaOCaml at compile time}
+C++ template meta-programming does not support running arbitrary
+programs at compile time. This might limit the kinds of
+optimizations that could be implemented using C++ template
+meta-programming as it exists today. Many source level profilers already
+exist for C++, so the challenge is in implementing source objects and
+@racket[profile-query-weight]. C++ templates offers no way to directly
+access and manipulate syntax, so it is not clear where to attach source
+objects.
 
-@para{C++} limits inspecting syntax and does not allow IO at
-compile-time. Without compile-time IO, it seem that template
-meta-programming in C++ cannot currently support profile directed
-optimization through meta-programming. 
+C preprocessor macros do support using syntax as input and output to
+macros, but are very limited in what can be done at compile time. Adding
+directives to create, instrument, and read source profile points might
+be enough to support limited profile-guided meta-programming using C
+preprocessor macros.
 
-@para{Template Haskell} @todo{cite} supports generating Haskell code via
-quotes and splicing, similar to Scheme and MetaOCaml, but also provides
-constructors to create Haskell ASTs directly. Template Haskell allows IO
-and running ordinary Haskell functions at compile-time. This suggests 
-compilers DSLs written in Haskell can easily incorporate a source
-expression profiler and allow profile directed optimizations at compile
-time. Because Template Haskell can manipulate Haskell syntax, it should
-be simple to even write an optimization for Haskell in Template Haskell. 
-
-@para{MetaOCaml} @todo{cite} supports generating OCaml code through
-quotes and splicing, similar to Scheme and Template Haskell. MetaOCaml
-allows IO and running ordinary OCaml functions at compile-time, however,
-it discourages inspecting OCaml syntax. This suggest compilers for DSLs
-written as OCaml data can easily incorporate a source expression
-profiler and allow  profile directed optimizations at compile time.
-
-@todo{Look at some other systems}
-@todo{cite Czarnecki04} for more in-depth comparison of those three.
+Meta-programming is being used to implement high-level optimizations,
+generate code from high-level specifications, and create DSLs. Each of
+these can take advantage of PGO to optimize before information is lost
+of constraints are imposed. Until now, such optimizations have been
+implemented via toolchains designed for a specific meta-program or
+optimization. We have described a general mechanism for implementing
+arbitrary profile-guided meta-program optimizations.
