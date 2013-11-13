@@ -132,17 +132,22 @@ final clause.
 @#reader scribble/comment-reader 
 (racketblock 
 (exclusive-cond
-  [(class-equal? obj CartesianPoint) (field obj x)] ;; executed 2 times
+  [(class-equal? obj CartesianPoint) 
+   ;; executed 2 times
+   (field obj x)]  
   [(class-equal? obj PolarPoint) 
-   (* (field obj rho) (cos (field obj theta)))] ;; executed 5 times
-  [else (method obj "get_x")]) ;; executed 8 times
+   ;; executed 5 times
+   (* (field obj rho) (cos (field obj theta)))] 
+  [else (method obj "get_x")]) 
 )
 @#reader scribble/comment-reader 
 (racketblock
 (cond
-  [(class-equal? obj PolarPoint) (* (field obj rho) (cos (field obj theta)))]
-  [(class-equal? obj CartesianPoint) (field obj x)]
-  [else (method obj "get_x")]) ;; executed 8 times.
+  [(class-equal? obj PolarPoint) 
+   (* (field obj rho) (cos (field obj theta)))]
+  [(class-equal? obj CartesianPoint) 
+   (field obj x)]
+  [else (method obj "get_x")]) 
 )]
 
 @Figure-ref{exclusive-cond-expansion} shows an example of
@@ -222,54 +227,49 @@ further and provide a library that will automatically specialize the
 data structure based on usage.
 
 @figure**["sequence-datatype"
-        "a macro that defines a sequence datatype based on profile information"
-@racketblock[ #:escape srsly-unsyntax
+          (elem "Implementation of " @racket[define-sequence-datatype])
+@#reader scribble/COMMENT-READER-T 
+(RACKETBLOCK 
 (define-syntax define-sequence-datatype
-  (let ([ht (make-eq-hashtable)])
-    (define args
-      `((seq? . #'(x))
-        (seq-map . #'(f s))
-        (seq-first . #'(s))
-        (seq-ref . #'(s n))
-        (seq-set! . #'(s i obj))) )
-    (define defs
-      `((make-seq . (,#'list . ,#'vector))
-        (seq? . (,#'list? . ,#'vector?))
-        (seq-map . (,#'map . ,#'for-each))
-        (seq-first . (,#'car . ,#'(lambda (x) (vector-ref x 0))))
-        (seq-ref . (,#'list-ref . ,#'vector-ref))
-        (seq-set! . (,#'(lambda (ls n obj) (set-car! (list-tail ls n) obj)) . ,#'vector-set!))))
-    (define (choose-args name)
-      (cond 
-        [(assq name args) => cdr]
-        [else (syntax-error name "invalid method:")]))
-    (define (choose name)
-      (let ([seq-set!-count (hashtable-ref ht 'seq-set! 0)]
-            [seq-ref-count (hashtable-ref ht 'seq-ref 0)]
-            [seq-first-count (hashtable-ref ht 'seq-first 0)]
-            [seq-map-count (hashtable-ref ht 'seq-map 0)])
-      (cond 
-        [(assq name defs) => 
-         (lambda (x)
-           (let ([x (cdr x)])
-             (if (> (+ seq-set!-count seq-ref-count) 
-                    (+ seq-first-count seq-map-count))
-                 (cdr x)
-                 (car x))))]
-        [else (syntax-error name "invalid method:")])))
-    (lambda (x)
+   (lambda (x)
+      ;; Create fresh source object. list-src profiles operations that are
+      ;; fast on lists, and vector-src profiles operations that are fast on
+      ;; vectors.
+      (define list-src (make-source-obj))
+      (define vector-src (make-source-obj))
+      ;; Defines all the sequences operations, giving implementations for
+      ;; lists and vectors. 
+      (define op*
+        `((make-seq ,#'list ,#'vector)
+          (seq? ,#'list? ,#'vector?)
+          ;; Wrap the operations we care about with a profile form
+          (seq-map ,#`(lambda (f ls) (profile #,list-src) (map f ls))
+                   ,#`(lambda (f ls) (profile #,list-src) (vector-map f ls)))
+          (seq-first ,#'first ,#'(lambda (x) (vector-ref x 0)))
+          (seq-ref ,#`(lambda (ls n) (profile #,vector-src) (list-ref ls n))
+                   ,#`(lambda (v n) (profile #,vector-src (vector-ref v n))))
+          (seq-set! ,#`(lambda (ls n obj) 
+                         (profile #,vector-src) (set-car! (list-tail ls n) obj)
+                    ,#`(lambda (v n obj) 
+                         (profile #,vector-src) (vector-set! v n obj))))))
+        ;; Default to list; switch to vector when profile information
+        ;; suggests we should.
+        (define (choose-op name)
+          ((if (> (profile-query-weight vector-src)
+                  (profile-query-weight list-src))
+              third
+              second)
+           (assq name op*)))
       (syntax-case x ()
-        [(_ var (init* ...) name* ...)
-         (for-each 
-           (lambda (name) 
-             (hashtable-set! ht name 
-               (or (profile-query-weight name) 0)))
-           (map syntax->datum #'(name* ...)))
-         (with-syntax ([(body* ...) (map (lambda (name) (choose (syntax->datum name))) #'(name* ...))]
-                       [(args* ...) (map (lambda (args) (choose-args (syntax->datum name))) #'(name* ...))])
-           #`(begin (define (name* args* ...) (begin name* (body* args* ...))) ...
-                    (define var (#,(choose 'make-seq) init* ...))))]))))
-]]
+        [(_ var (init* ...))
+         ;; Create lists of syntax for operation names and definitions
+         (with-syntax ([(name* ...) (map first op*)]
+                       [(def* ...) (map choose (map first op*))])
+           ;; and generate them
+           #`(begin (define name* def*) ...
+           ;; Finally, bind the sequence.
+                    (define var (#,(choose 'make-seq) init* ...))))])))
+)]
 
 @; Introduce example
 The example in @figure-ref{sequence-datatype} chooses between a list and
@@ -281,29 +281,16 @@ and @racket[seq-first], then the sequence is implemented using a
 @figure["seq1-example"
         "Use of the define-sequence-datatype macro"
 @racketblock[
-(define-sequence-datatype seq1 (0 3 2 5)
-  seq? seq-map seq-first seq-ref seq-set!)
+(define-sequence-datatype seq1 (0 3 2 5))
 ]]
 
-@todo{To hell with this example. We need to break it up and make it slightly
-more sensible to use. I hate to make it OO, but that would make it
-scoping issues easier. Maybe move @racket[choose] and nonsense to an
-appendix and just focus on the macro here.}
-@; Discuss quirks in example implementation
 @Figure-ref{seq1-example} demonstrates the usage of the
 @racket[define-sequence-datatype] macro. In this example, a sequence
 named @racket[seq1] is defined and initialized to contain elements
-@racket[0], @racket[3], @racket[2], and @racket[5]. The macro also takes
-the various sequence operations as arguments, though this is a hack. 
-@todo{How can we fabricate the source information?} To get unique per
-sequence source information, we simply use the source information from
-those extra arguments. A production example would omit this hack.
-@todo{I should omit this hack}
+@racket[0], @racket[3], @racket[2], and @racket[5].
 
 The macro expands into a series of definitions for each sequence
 operations and a definition for the sequence datatype. This example
-redefines the operations for each new sequence and evaluates the name to
-ensure function inlining does not distort profile counts. A clever
-compiler might try to throw out the effect-free reference to
-@racket[name] in the body of each operation, so this implementation is
-fragile.
+redefines the operations for each new sequence, creating fresh source
+objects and new profiled operations for each seperate sequence. This
+ensures each instance of a sequence is profiled seperately.

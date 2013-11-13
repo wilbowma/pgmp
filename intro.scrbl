@@ -10,7 +10,7 @@ syntactic abstractions, to compiler generators, to domain-specific
 languages (DSLs). To name a few, C, C++, Haskell, Scheme, ML, and Scala
 have support for meta-programming @~cite[taha00 erdweg11
 czarnecki04 sheard02 dybvig93 burmako2013scala].
-In the ideal, meta-programs would not be concerned with generating
+Ideally, meta-programs would not be concerned with generating
 optimized code but instead leave that to the target-language compiler.
 However, information is sometimes lost or obscured during the
 translation into the target-language program.

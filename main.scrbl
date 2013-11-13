@@ -1,4 +1,4 @@
-#lang scribble/sigplan @preprint @onecolumn 
+#lang scribble/sigplan @preprint 
 @(require "bib.rkt")
 
 @title{Profile-guided meta-program optimization}
