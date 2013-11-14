@@ -13,28 +13,48 @@ a object-oriented DSL based on profile information.  The final example
 demonstrates specializing a data structure based on profile information.
 
 @section{Scheme macro primer}
-@figure-here["Sample macro" (elem "Sample macro")
-@#reader scribble/comment-reader
-@(racketblock
-;; defines a macro (meta-program)
+Our system and examples are implemented in Scheme, so we give a quick
+intro to Scheme meta-programming and its syntax.
+
+@figure-here["sample-macro" (elem "Sample macro")
+@#reader scribble/COMMENT-READER-T
+@(RACKETBLOCK
+;; Defines a macro (meta-program) `do-n-times'
+;; Example:
+;; (do-n-times 3 (display “*”)) expands into 
+;; (begin (display "*") 
+;;          (display "*") 
+;;        (display "*"))
 (define-syntax (do-n-times stx)
   ;; pattern matches on the inputs syntax
   (syntax-case stx ()
-    ;; Example:
-    ;; (do-n-times 5 (display “*”)) => *****
-    [(do-n-times n body …)
-    ;; #' creates a piece of syntax 
-     #'(let loop [(i n)]  ;; the syntax `n', taken as input, is copied
+    [(do-n-times n body)
+     ;; Start generating code
+     #`(begin
+         ;; Runs at compile time then
+         ;; splices the result into the 
+         ;; generated code
+         #,@(let loop [(i (syntax->datum n))] 
+              ;; Loops from n to 0
               (if (zero? i)
-                  (void)
-                  (begin body … (loop (sub1 i)))))]))
+                  '()
+                   ;; Create a list #'body copies
+                   (cons #'body (loop (sub1 i))))))]))
 )]
 
-@tt{#'}, @tt{#`}, and @tt{#,} implement Lisp's quote,
-quasiquote, and unquote but on syntax instead of lists. 
-@todo{expand, fix tt}
+The meta-program in @figure-ref{sample-macro} expects a number
+@racket[n] and an expression @racket[body] and duplicates the expression
+@racket[n] times. Each meta-program, created by @racket[define-syntax],
+takes a single piece of syntax as its argument. We use @racket[syntax-case]
+to pattern matches on the syntax. @racketmetafont{#'},
+@racketmetafont{#`}, and @racketmetafont{#,} implement Lisp's quote,
+quasiquote, and unquote but on syntax instead of lists. In the example,
+we run a loop at compile-time that generates a list with @racket[n]
+copies of the syntax @racket[body], and then unquote-splice
+(@racketmetafont["#,@"]) the list of syntax into the program at
+compile-time.@;%
 
-@section{Profile-guided receiver class prediction}
+@section[#:tag "virtual-call"]{Profile-guided receiver class prediction}
 In this example we demonstrate how to implement profile-guided receiver
 class prediction@~citea{grove95} for a hypothetical object-oriented DSL
 with virtual methods, similar to C++. We perform this optimization
@@ -50,15 +70,18 @@ is true. If there is an @racket[else] clause, the right-hand side of the
 is true.
 
 @Figure-ref{cond-example} shows an example of a @racket[cond] generated
-by our hypothetical OO DSL. The DSL compiler simply expands every
-virtual method call into a conditional branch for known instances of an
-object.
+by our hypothetical OO DSL. We assume the DSL compiler simply expands
+every virtual method call into a conditional branch for known instances
+of objects and relies on another meta-program to reorder branches and
+throw out uncommon cases.
 
 We borrow the following example from Grove et. al.@~citea{grove95}.
 Consider a class @racket[Shape] with a virtual method @racket[area].
 @racket[Square] and @racket[Circle] inherit @racket[Shape]
 and implement the virtual @racket[area]. We will use
-@racket[exclusive-cond] to inline virtual method calls.
+@racket[exclusive-cond] to reorder inlined virtual method calls to
+optimize the common case, and fall back to dynamic virtual method
+dispatch.
 
 @;@racketblock[#,(port->string (open-input-file "cond-all.ss"))]
 @figure-here["cond-example" (elem "An example of " @racket[cond])
@@ -109,19 +132,19 @@ reorder the clauses.
 )]
 
 @; How does exclusive-cond use profile information to implement cond
-The @racket[exclusive-cond] macro will rearrange clauses based on
+The @racket[exclusive-cond] macro rearranges clauses based on
 the profiling information of the right-hand sides. Since the left-hand
-sides will be executed depending on the order of the clauses, profiling
+sides are executed depending on the order of the clauses, profiling
 information from the left-hand side is not enough to determine which
-clause is true most often. The clause record
-stores the original syntax for the clause and the weighted profile count
-for that clause. Since a valid @racket[exclusive-cond] clause is also a
-valid @racket[cond] clause, the syntax is simply copied, and a new
+clause is executed most often. The clause structure stores the original
+syntax for the clause and the weighted profile count for that clause.
+Since a valid @racket[exclusive-cond] clause is also a valid
+@racket[cond] clause, the syntax is simply copied, and a new
 @racket[cond] is generated with the clauses sorted according to profile
 weights. If an @racket[else] clause exists then it is emitted as the
 final clause.
 
-@figure**["exclusive-cond-expansion"
+@figure-here["exclusive-cond-expansion"
         (elem "An example of " @racket[exclusive-cond] " and its expansion")
 @#reader scribble/comment-reader 
 (racketblock
@@ -146,15 +169,19 @@ final clause.
  [else (method obj "area")])
 )]
 
-@Figure-ref{exclusive-cond-expansion} shows an example of
-@racket[exclusive-cond] and the code to which it expands. In this
-example, we assume the object is a @racket[Circle] most of the time.  
+@Figure-ref{exclusive-cond-expansion} shows how our receiver
+class prediction example is optimized through 
+@racket[exclusive-cond]. The generated @racket[cond] will test for
+@racket[Circle] (the common case) first.
 
 @section{Fast Path Lexical Analyzer}
-A lexical analyzer in Scheme can be written naturally using
-@racket[cond] or @racket[case], a pattern matching construct similar to
-C's @racket[switch]. Such a lexical analyzer can be easily optimized
-using the @racket[exclusive-cond] macro we saw earlier. 
+In this example we demonstrate how to use the general meta-program,
+@racket[exclusive-cond], presented in the previous example to optimize a
+lexical analyzer. A lexical analyzer in Scheme can be written naturally
+using @racket[cond] or @racket[case], a pattern matching construct
+similar to C's @racket[switch]. Such a lexical analyzer can be easily
+optimized be instead using the @racket[exclusive-cond] macro we saw
+earlier. 
 
 @racket[case] takes an expression @racket[key-expr] and an arbitrary
 number of clauses, followed by an optional @racket[else] clause. The
@@ -210,25 +237,27 @@ expression from @figure-ref{case-example} expands into
 @racket[exclusive-cond]. Note the duplicate right paren in the third
 clause is dropped to preserve ordering constraints from @racket[case].
 
-@section{Datatype Specialization}
+@section{Data Structure Specialization}
 @; Motivate an example that normal compilers just can't do
-The previous examples show that we can easily bring well-known
-optimizations up to the meta-level, enabling the DSL writer to take
-advantage of traditional profile directed optimizations.
-While profile directed meta-programming enables such traditional
-optimizations, it also enables higher level decisions normally done by
-the programmer.
+The example in @secref{virtual-call} shows that we can easily bring
+well-known optimizations up to the meta-level, enabling the DSL writer
+to take advantage of traditional profile directed optimizations.  While
+profile-guided meta-programming enables such traditional optimizations,
+it also enables higher level decisions normally done by the programmer.
 
-In this example we present a library that provides a sequence datatype.
-We consider this in the context of a DSL or library writer whose users
-are domain experts, but not computer scientists. While a domain expert
-writing a program my know they need a sequence for their program, they
-may not have the knowledge to figure out if they should use a tree, or a
-list, or a vector. Past work has bridge this gap in knowledge by
-providing tools that can recommend changes and provide feedback
-@todo{http://dx.doi.org/10.1109/CGO.2009.36}. We take this a step
-further and provide a library that will automatically specialize the
-data structure based on usage.
+Past work has used profile information to give programmer feedback when
+they make suboptimal use of algorithms and data structures provided by
+standard libraries@~citea{liu09}, but left it up to the programmer to
+change the code. Our mechanism enables automating these changes. By 
+giving meta-programs access to profile information we can automatically
+generate optimized code. 
+
+In this example, we provide an abstract sequence data structure that
+changes its implementation based on profile information. This simple
+example default to a list, but specializes to a vector (array) when
+vector operations are more common than list operations. While
+simplified, this example shows that our mechanism support making
+high-level decisions normally left to the programmer.
 
 @figure**["sequence-datatype"
           (elem "Implementation of " @racket[define-sequence-datatype])
@@ -250,6 +279,16 @@ data structure based on usage.
           (seq-map ,#`(lambda (f ls) (profile #,list-src) (map f ls))
                    ,#`(lambda (f ls) (profile #,list-src) (vector-map f ls)))
           (seq-first ,#'first ,#'(lambda (x) (vector-ref x 0)))
+          (seq-cons ,#`(lambda (x ls) (profile #,list-src) (cons x ls)) 
+                    ,#`(lambda (x v) 
+                         (profile #,list-src)
+                         (let ([i 0]
+                               [v-new (make-vector (add1 (vector-length v)))])
+                           (vector-for-each 
+                             (lambda (x) 
+                               (vector-set! v-new i x)
+                               (set! i (add1 i))) 
+                             v))))
           (seq-ref ,#`(lambda (ls n) (profile #,vector-src) (list-ref ls n))
                    ,#`(lambda (v n) (profile #,vector-src (vector-ref v n))))
           (seq-set! ,#`(lambda (ls n obj) 
@@ -273,28 +312,32 @@ data structure based on usage.
            #`(begin (define name* def*) ...
            ;; Finally, bind the sequence.
                     (define var (#,(choose 'make-seq) init* ...))))])))
+
+;; Define an abstrace sequence
+(define-sequence-datatype seq1 (0 3 2 5))
 )]
 
 @; Introduce example
 The example in @figure-ref{sequence-datatype} chooses between a list and
 a vector using profile information. If the program uses @racket[seq-set!] and
 @racket[seq-ref] operations more often than @racket[seq-map]
-and @racket[seq-first], then the sequence is implemented using a
+and @racket[seq-cons], then the sequence is implemented using a
 @racket[vector], otherwise using a @racket[list].
 
-@figure["seq1-example"
-        "Use of the define-sequence-datatype macro"
-@racketblock[
-(define-sequence-datatype seq1 (0 3 2 5))
-]]
+The last line of @figure-ref{sequence-datatype} demonstrates the usage
+of the @racket[define-sequence-datatype] macro. In this example, a
+sequence named @racket[seq1] is defined and initialized to contain
+elements @racket[0], @racket[3], @racket[2], and @racket[5].
 
-@Figure-ref{seq1-example} demonstrates the usage of the
-@racket[define-sequence-datatype] macro. In this example, a sequence
-named @racket[seq1] is defined and initialized to contain elements
-@racket[0], @racket[3], @racket[2], and @racket[5].
+The macro defines new profiled version of the sequence operations and
+defines a new instance of sequence. The profiled operations are
+redefined for @emph{each} new sequence, creating fresh source objects,
+for each seperate sequence. This ensures each instance of a sequence is
+profiled and specialized seperately.
 
-The macro expands into a series of definitions for each sequence
-operations and a definition for the sequence datatype. This example
-redefines the operations for each new sequence, creating fresh source
-objects and new profiled operations for each seperate sequence. This
-ensures each instance of a sequence is profiled seperately.
+In this section, we presented several examples of profile-guided
+meta-program optimizations. These examples are simplified versions of
+past work, but demonstrate that a single general mechanism can be used
+to implement and improve optimizations language implementors develop
+whole toolchains to implement.
+@todo{This paragraph might be unnecessary}

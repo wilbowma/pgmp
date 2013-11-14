@@ -1,5 +1,5 @@
 # Need my custom hacked version now.
-SCRIBBLE=~/workspace/racket-dev-goodies/plt-bin scribble
+SCRIBBLE=. ~/workspace/racket-dev-goodies/plt-alias.bash; ~/workspace/racket-dev-goodies/plt-bin scribble
 
 all: main.pdf
 
