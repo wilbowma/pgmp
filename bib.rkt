@@ -173,3 +173,13 @@
                  "Proceedings of the 4th Annual Scala Workshop")
     #:date 2013))
 
+(define dybvig09csug
+  (make-bib
+    #:title "Chez Scheme Version 8 User's Guide"
+    #:author "R. Kent Dybvig"
+    #:location (book-location #:edition "8.4" #:publisher "Cadence Research Systems")
+    #:url "http://www.scheme.com/csug8"
+    #:date 2011))
+
+(define csug-ch11 (in-bib dybvig09csug " Chapter 11"))
+  

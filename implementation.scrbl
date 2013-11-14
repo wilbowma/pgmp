@@ -25,7 +25,7 @@ from a file, but Chez Scheme also provides an API to programmatically
 manipulate source objects. This is useful when using Chez Scheme as
 a target language. Custom source objects can be attached to
 target syntax to provide error messages with line and character
-positions in the source language.
+positions in the source language@~cite[csug-ch11].
 
 To create custom source objects for for fresh profile counter, we can
 use arbitrary filenames, lines numbers, and character positions. For
@@ -40,8 +40,6 @@ be created as seen in @figure-ref{really-make-source}.
 (define list-src (make-source-object "sequence-generate-src" 0 0 0))
 (define vector-src (make-source-object "sequence-generate-src" 1 0 0))
 ...)]
-
-@todo{cite http://www.scheme.com/csug8/syntax.html#./syntax:s40 ?}
 
 @section{Profile weights}
 We represent profile information as a floating point number between 0
@@ -134,9 +132,9 @@ file position.
 @section{Source and block PGO}
 When designing our source level profiling system, we aimed to take
 advantage of prior work on low level profile-guided optimizations
-@todo{cite}. However, optimizations based on source-level profile
-information may result in a different set of blocks, so the block-level
-profile information will be stale. Therefore
+@~citea["hwu89" "pettis90"]. However, optimizations based on
+source-level profile information may result in a different set of
+blocks, so the block-level profile information will be stale. Therefore
 optimization using source profile information and those using block
 profile information cannot be done after a single profiled run of a
 program.
