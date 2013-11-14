@@ -5,7 +5,7 @@
 @(require scriblib/footnote)
 @(require scriblib/figure)
 @(require racket/port)
-@title[#:tag "examples" "Examples"]
+@title[#:tag "examples"]{Examples}
 This section demonstrates how our to use our mechanism, and how it
 generalizes and advances past work on profile-guided meta-programs.  The
 first example demonstrates profile-guided receiver class prediction for
@@ -54,7 +54,7 @@ copies of the syntax @racket[body], and then unquote-splice
 (@racketmetafont["#,@"]) the list of syntax into the program at
 compile-time.@;%
 
-@section[#:tag "virtual-call"]{Profile-guided receiver class prediction}
+@section[#:tag "eg-virtual-call"]{Profile-guided receiver class prediction}
 In this example we demonstrate how to implement profile-guided receiver
 class prediction@~citea{grove95} for a hypothetical object-oriented DSL
 with virtual methods, similar to C++. We perform this optimization
@@ -110,7 +110,7 @@ reorder the clauses.
 @figure**["exclusive-cond" 
         (elem "Implementation of " @racket[exclusive-cond])
 @#reader scribble/comment-reader 
-(racketblock 
+(RACKETBLOCK 
 (define-syntax exclusive-cond
   (lambda (x)
     (define-record-type clause (fields syn weight))
@@ -122,13 +122,12 @@ reorder the clauses.
       (sort (lambda (cl1 cl2) 
               (> (clause-weight cl1) (clause-weight cl2))) 
        (map parse-clause clause*)))
-    (define (reorder-cond clause* els) 
+    (define (reorder-cond clause* els?) 
       #`(cond
-          #,@(map clause-syn (sort-clauses clause*))
-          #,@(if els #`(,els) #'())))
+          #,@(map clause-syn (sort-clauses clause*)) . #,els?))
     (syntax-case x (else)
-      [(_ m1 ... (else e1 e2 ...)) (reorder-cond #'(m1 ...) #'(else e1 e2 ...))]
-      [(_ m1 ...) (reorder-cond #'(m1 ...) #f)])))
+      [(_ m1 ... (else e1 e2 ...)) (reorder-cond #'(m1 ...) #'([else e1 e2 ...]))]
+      [(_ m1 ...) (reorder-cond #'(m1 ...) #'())])))
 )]
 
 @; How does exclusive-cond use profile information to implement cond
@@ -218,8 +217,52 @@ elements before clauses can be reordered. We parse each clause is parsed
 into the set of left-hand side keys and right-hand side bodies. We
 remove overlapping keys are removed by keeping only the first instance
 of each key when processing the clauses in the original order. After
-removing overlapping keys, an @racket[exclusive-cond] is generated. 
+removing overlapping keys, an @racket[exclusive-cond] is generated.
+@Figure-ref{case-impl} shows the full implementation of case. The
+majority of the work is in @racket[trim-keys!], which removes duplicate
+keys.
 
+@figure**["case-impl" (elem "Implementation of " @racket[case] " using "
+@racket[exclusive-cond])
+@#reader scribble/COMMENT-READER-T 
+(RACKETBLOCK 
+(define-syntax (case x)
+  (define (helper key-expr clause* els?)
+    (define-record-type clause (fields (mutable keys) body))
+    (define (parse-clause clause)
+      (syntax-case clause ()
+        [((k ...) e1 e2 ...) (make-clause #'(k ...) #'(e1 e2 ...))]
+        [_ (syntax-error "invalid case clause" clause)]))
+    (define (emit clause*)
+      #`(let ([t #,key-expr])
+          (exclusive-cond
+            #,@(map (lambda (clause) 
+                      #`[(memv t '#,(clause-keys clause)) 
+                         #,@(clause-body clause)])
+                    clause*)
+            . #,els?)))
+    (let ([clause* (map parse-clause clause*)])
+       (define ht (make-hashtable equal-hash equal?))
+       (define (trim-keys! clause)
+         (clause-keys-set! clause
+            (let f ([keys (clause-keys clause)])
+              (if (null? keys)
+                  '()
+                  (let* ([key (car keys)]
+                         [datum-key (syntax->datum key)])
+                    (if (hashtable-ref ht datum-key #f)
+                        (f (cdr keys))
+                        (begin
+                          (hashtable-set! ht datum-key #t)
+                          (cons key (f (cdr keys))))))))))
+                (for-each trim-keys! clause*)
+                (emit clause*)))
+    (syntax-case x (else)
+      [(_ e clause ... [else e1 e2 ...])
+       (helper #'e #'(clause ...) #'([else e1 e2 ...]))]
+      [(_ e clause ...)
+       (helper #'e #'(clause ...) #'())]))
+)]
 @figure-here["case-expansion"
         (elem "The expansion of " @figure-ref{case-example})
 @racketblock[
@@ -237,9 +280,9 @@ expression from @figure-ref{case-example} expands into
 @racket[exclusive-cond]. Note the duplicate right paren in the third
 clause is dropped to preserve ordering constraints from @racket[case].
 
-@section{Data Structure Specialization}
+@section[#:tag "eg-datatype"]{Data Structure Specialization}
 @; Motivate an example that normal compilers just can't do
-The example in @secref{virtual-call} shows that we can easily bring
+The example in @secref{eg-virtual-call} shows that we can easily bring
 well-known optimizations up to the meta-level, enabling the DSL writer
 to take advantage of traditional profile directed optimizations.  While
 profile-guided meta-programming enables such traditional optimizations,
