@@ -89,7 +89,8 @@ available via an API accessible from the high-level syntactic
 abstraction facility through which Scheme supports meta-programming, and
 even accessible at run-time. It should be straightforward to adapt to
 most meta-programming systems with compilers that already support
-profiling. Our implementation is used in an internal corporate project.
+profiling. Our implementation is used in an internal corporate
+project.@todo{I want to say something about our lack of benchmarks here.}
 
 The remainder of the paper is organized as follows. @Secref{design}
 presents the design of our system at a high level. 
