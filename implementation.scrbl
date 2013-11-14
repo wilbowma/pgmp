@@ -132,7 +132,7 @@ file position.
 @section{Source and block PGO}
 When designing our source level profiling system, we aimed to take
 advantage of prior work on low level profile-guided optimizations
-@~citea["hwu89" "pettis90"]. However, optimizations based on
+@~citea["hwu89" "pettis90"#;"gupta02"]@todo{Fix auto-bib}. However, optimizations based on
 source-level profile information may result in a different set of
 blocks, so the block-level profile information will be stale. Therefore
 optimization using source profile information and those using block

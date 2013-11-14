@@ -23,7 +23,7 @@ intro to Scheme meta-programming and its syntax.
 ;; Example:
 ;; (do-n-times 3 (display “*”)) expands into 
 ;; (begin (display "*") 
-;;          (display "*") 
+;;        (display "*") 
 ;;        (display "*"))
 (define-syntax (do-n-times stx)
   ;; pattern matches on the inputs syntax
@@ -38,7 +38,7 @@ intro to Scheme meta-programming and its syntax.
               ;; Loops from n to 0
               (if (zero? i)
                   '()
-                   ;; Create a list #'body copies
+                   ;; Create a list #'body 
                    (cons #'body (loop (sub1 i))))))]))
 )]
 
