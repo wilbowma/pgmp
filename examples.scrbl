@@ -49,7 +49,7 @@ The meta-program in @figure-ref{sample-macro} expects a number
 @racket[n] and an expression @racket[body] and duplicates the expression
 @racket[n] times. Each meta-program, created by @racket[define-syntax],
 takes a single piece of syntax as its argument. We use @racket[syntax-case]
-to perform pattern matches on the syntax. @racketmetafont{#'},
+to access the subforms of the syntax via pattern matching. @racketmetafont{#'},
 @racketmetafont{#`}, and @racketmetafont{#,} implement Lisp's quote,
 quasiquote, and unquote but on syntax instead of lists. In the example,
 we run a loop at compile-time that generates a list with @racket[n]
