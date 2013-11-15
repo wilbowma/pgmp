@@ -16,7 +16,7 @@ consistent CFGs across instrumented and optimization builds, GCC
 requires similar optimization decisions across builds@~cite[chen10]. In
 addition to the common optimizations noted previously, .NET extends
 their profiling system to probe values in @racketkeywordfont{switch}
-statements. They can use this value information to reorder optimize
+statements. They can use this value information to optimize
 @racketkeywordfont{switch} branches, similar to the implementation of
 @racket[case] we presented in @secref{eg-case}. 
 
@@ -48,7 +48,8 @@ mechanism to automatically reload profile information, such as whenever
 @racket[profile-query-weight] is called, instead of manually loading
 information from a file. This is a trivial change to our system, but we
 have not optimizations in mind that make use of profile-guided at
-runtime.
+runtime. It may also increase overhead, since we compute profile
+weights and many counters when loading new profile data.
 
 @section{Meta-program optimizations}
 Meta-programming has proven successful at providing high-levels of
