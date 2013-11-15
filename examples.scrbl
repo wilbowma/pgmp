@@ -14,9 +14,10 @@ information. We then reuse part of that meta-program to optimize a
 tokenizer. The final example demonstrates specializing a data
 structure based on profile information.
 
-@section{Scheme macro primer}
-Our system and examples are implemented in Scheme, so we give a quick
-intro to Scheme meta-programming and its syntax.
+@section{Scheme macro example}
+Our system and examples are implemented in Scheme, so we give below
+a simple example to briefly introduce Scheme meta-programming and
+its syntax.
 
 @figure-here["sample-macro" (elem "Sample macro")
 @#reader scribble/COMMENT-READER-T
@@ -48,7 +49,7 @@ The meta-program in @figure-ref{sample-macro} expects a number
 @racket[n] and an expression @racket[body] and duplicates the expression
 @racket[n] times. Each meta-program, created by @racket[define-syntax],
 takes a single piece of syntax as its argument. We use @racket[syntax-case]
-to pattern matches on the syntax. @racketmetafont{#'},
+to perform pattern matches on the syntax. @racketmetafont{#'},
 @racketmetafont{#`}, and @racketmetafont{#,} implement Lisp's quote,
 quasiquote, and unquote but on syntax instead of lists. In the example,
 we run a loop at compile-time that generates a list with @racket[n]
@@ -214,8 +215,8 @@ majority of the work is in @racket[trim-keys!], which removes duplicate
 keys to ensure mutually exclusive clauses. Since @racket[case] permits
 clauses to have overlapping elements and uses order to determine which
 branch to take, we must remove overlapping elements before reordering
-clauses. We parse each clause is parsed into the set of left-hand side
-keys and right-hand side bodies. We remove overlapping keys are removed
+clauses. We parse each clause into the set of left-hand side
+keys and right-hand side bodies. We remove overlapping keys
 by keeping only the first instance of each key when processing the
 clauses in the original order.  After removing overlapping keys, we
 generate an @racket[exclusive-cond].
@@ -375,9 +376,3 @@ redefined for @emph{each} new sequence, creating fresh source objects,
 for each seperate sequence. This ensures each instance of a sequence is
 profiled and specialized seperately.
 
-In this section, we presented several examples of profile-guided
-meta-program optimizations. These examples are simplified versions of
-past work, but demonstrate that a single general mechanism can be used
-to implement and improve optimizations language implementors develop
-whole toolchains to implement.
-@todo{This paragraph might be unnecessary}
