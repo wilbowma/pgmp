@@ -172,7 +172,7 @@ class prediction example is optimized through
 @racket[exclusive-cond]. The generated @racket[cond] will test for
 @racket[Circle] (the common case) first.
 
-@section{Fast Path Tokenizer}
+@section[#:tag "eg-case"]{Fast Path Tokenizer}
 In this example we demonstrate how to use the general meta-program,
 @racket[exclusive-cond], presented in the previous example to optimize a
 tokenizer. A tokenizer in Scheme can be written naturally
