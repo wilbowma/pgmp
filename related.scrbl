@@ -51,8 +51,33 @@ have not optimizations in mind that make use of profile-guided at
 runtime.
 
 @section{Meta-program optimizations}
-Stuff and things
-@todo{felleisen04,tobin-hochstadt06}
+Meta-programming has proven successful at providing high-levels of
+abstraction while still producing efficient code. Meta-programming has
+been used to implement abstract libraries@~cite[boost]@todo{STL?}, 
+domain specific languages@~citea["sujeeth13" "flatt09"], and even whole
+general purpose languages@~citea["rafkind12" "tobin-hochstadt11"
+"tobin-hochstadt08" "barzilay05"]. These meta-programs can lose or
+obscure information during the translation into target-language code. 
+
+We're not the first to realize this. Many meta-program optimizations
+exist. Tobin-Hochstadt et. al. implement the optimizer for Typed Racket
+as a meta-program@~citea{tobin-hochstadt11}. Sujeeth et. al. provide a
+framework for generated optimized code from DSLs @~citea{sujeeth13}.
+Hawkins et. al. implement a compiler for a language that generates C++
+implementations of data structures based on high-level
+specifications@~citea["hawkins11" "hawkins12"]. 
+
+Even using profile information to perform optimizations in meta-programs
+is not new. Chen et. al. implement their own profile and meta-program
+tools to provide a profile-guided meta-program for performing process
+placement for SMP clusters@~citea{chen06}. Liu and Rus provide a tools
+that uses profile information to identify suboptimial usage of the C++
+STL. 
+
+We support these works by providing a single, general-purpose mechanism
+in which we can implement new languages, DSLs, abstract libraries, and
+arbitrary meta-programs, all taking advantage of progile-guided
+optimizations.
 
 @section{More PGO}
 We have previously presented some past work on both low-level PGOs and
