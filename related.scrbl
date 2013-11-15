@@ -5,56 +5,70 @@
 @(require scriblib/footnote)
 @(require scriblib/figure)
 @title[#:tag "related" "Related and Future Work"]
-@todo{felleisen04,tobin-hochstadt06}
-@todo{I'm not sure what I'm doing with this section yet.}
+@section{Low-level PGO}
 Modern systems such as GCC, .NET, and LLVM use profile directed
-optimizations @~cite[lattner02 gcc .net]. However, these systems provide
-mostly low level optimizations, such as optimizations for block order
-and register allocation. In addition to limiting the kinds of
-optimizations the compiler can do, this low-level profile information is
-fragile.
-
-Recently there has been work to give programmers advice on which data
-structure to use http://dx.doi.org/10.1109/CGO.2009.36, but with our
-techniques we can automagically optimize the generated code instead of
-just advice the programmer.
+optimizations @~cite[lattner02 gcc .net]. These systems uses profile
+information to guide decisions about code positioning, register
+allocation, inlining, and branch optimizations.
 
 GCC profiles an internal control-flow graph (CFG). To maintain a
 consistent CFGs across instrumented and optimization builds, GCC
-requires similar optimization decisions across builds. By associating
-profile information with source expression we can more easily reuse
-profile information @~cite[chen10].  In our system, all profile information for a source
-file is usuable as long as the source file does not change.
+requires similar optimization decisions across builds@~cite[chen10]. In
+addition to the common optimizations noted previously, .NET extends
+their profiling system to probe values in @racketkeywordfont{switch}
+statements. They can use this value information to reorder optimize
+@racketkeywordfont{switch} branches, similar to the implementation of
+@racket[case] we presented in @secref{eg-case}. 
 
-.NET provides some higher level optimizations, such as function inlining
-and conditional branch optimization similar to @racket[exclusive-cond]
-and @racket[case] presented here. To optimize @racketkeywordfont{switch} statements,
-.NET uses @emph{value} profiling in addition to execution count
-profiling @~cite[.net]. By probing the values used in a switch statement,
-the compiler can attempt to reorder the cases of the @racketkeywordfont{switch} 
-statement. @todo{Value probes seem like a pretty ad-hoc method to get a
-very specific optimization. I don't know if I want to say that.}
+Our system supports all these optimizations and has several advantages.
+While .NET extends their profiling system to get additional
+optimizations, we can support all the above optimizations in a single
+general-purpose system. By using profile information associated with
+source expressions, we reduce reliance specific internal compiler
+decisions and make profile information more reusable. When there is
+no substitute for block-level information, such as when reordering basic
+blocks, we support both source and block profiling in the same system.
 
-The standard model for profile directed optimizations requires the
-instrument-profile-optimize workflow. LLVM has a different model for
-profile directed optimization. LLVM uses a runtime reoptimizer that
-monitors the running program. The runtime reoptimizer can profile the
-program as it runs ``in the field'' and perform simple optimizations to
-the machine code, or call off to an offline optimizer for more complex
+@section{Dynamic Recompilation}
+The standard model for PGO requires the instrument-profile-optimize
+workflow. LLVM has a different model for PGO. LLVM uses a runtime
+reoptimizer that monitors the running program. The runtime can profile
+the program as it runs ``in the field'' and perform simple optimizations
+to the machine code, or call to an offline optimizer for more complex
 optimiztions on the LLVM bytecode. 
 
-Meta-programs generate code at compile time, so the examples presented
-in @secref{examples} require the standard instrument-profile-optimize 
-workflow. However, because we expose an API to access profiling
-information, we could use this system to perform runtime decisions based
-on profile information. To truly be beneficial, this requires keeping
-the runtime overhead of profiling very low, which is not usually the
-case @~cite[conte96 chen10]. However, our techniques for reducing
-the number of counters and our careful representation of profile forms
-allows accurate source profiling with little overhead @todo{measure
-overhead on a standard set of benchmarks. The benchmarks I ran at cisco
-suggest ~10% overhead, but those are not publically accessible. This
-sentence belongs in implementation}. 
+While not currently enabled, our mechanism supports this kind of
+reoptimization. We build on the work of Burger and Dybvig, who present
+an infrastructure for profile-directed dynamic
+reoptimization@~cite[burger98]. Their work shows just 14% run-time
+overhead for instrumented code, but they express concerns that dynamic
+recompilation will not overcome this cost. Our internal benchmarks show
+similar overhead. To enable dynamic PGO, we would need to modify our
+mechanism to automatically reload profile information, such as whenever
+@racket[profile-query-weight] is called, instead of manually loading
+information from a file. This is a trivial change to our system, but we
+have not optimizations in mind that make use of profile-guided at
+runtime.
+
+@section{Meta-program optimizations}
+Stuff and things
+@todo{felleisen04,tobin-hochstadt06}
+
+@section{More PGO}
+We have previously presented some past work on both low-level PGOs and
+profile-guided meta-programs. But the use of profile information
+is still an active area of research. Furr et. al. present a system for
+inferring types in dynamic languages to assist in
+debugging@~citea{furr09}. Chen et. al. use profile information to
+reorganize the heap and optimize garbage collection@~citea{chen06}. Luk
+et. al. use profile information to guide data
+prefetching@~citea{luk02}. Debray and Evans use profile information to
+compress infrequently executed code on memory constrained
+systems@~citea{debray02}. 
+
+With so many profile-guided optimizations, we need a general-purpose
+mechanism in which to implement them without reimplementing profiling,
+compiling, and meta-programing tools.
 
 @; PDO has some limitations. If profile data is inaccurate it can slow down
 @; a program by optimizing for the wrong cases. This can happen when
@@ -65,3 +79,5 @@ sentence belongs in implementation}.
 @; find 
 
 @;http://dl.acm.org/citation.cfm?id=582432
+
+
