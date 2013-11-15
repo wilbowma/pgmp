@@ -143,6 +143,10 @@ and generate a new @racket[cond] with the clauses sorted according to
 profile weights. Of course we do not include the @racket[else] clause
 when reordering other clauses; it is always last.
 
+We use the function @racket[profile-query-weight] to access the profile
+information. Given a source object or source expression, it returns the
+associated profile weight.
+
 @figure-here["exclusive-cond-expansion"
         (elem "An example of " @racket[exclusive-cond] " and its expansion")
 @#reader scribble/comment-reader 

@@ -59,12 +59,12 @@ points with similar importance.
 To understand how we compute profile weights, consider a program with
 two loops, @racket[A] and @racket[B]. If @racket[A] is executed 5 times,
 and @racket[B] is executed 10 times, we store
-@racket[(profile-query-weight A)] @tt{= 5/10 = 0.5} and
-@racket[(profile-query-weight B)] @tt{= 10/10 = 1}. To support multiple data
+@racket[A]@tt{ → 5/10 = 0.5} and
+@racket[B]@tt{ → 10/10 = 1}. To support multiple data
 sets, we simply compute the average of these weights. For instance, if
 in a second data set @racket[A] is executed 100 times and @racket[B] is
-executed 10 times, then @racket[(profile-query-weight A)] @tt{= ((5/10) +
-(100/100))/2 = 0.75} and @racket[(profile-query-weight B)] @tt{= ((10/10) +
+executed 10 times, then @racket[A]@tt{ → ((5/10) +
+(100/100))/2 = 0.75} and @racket[B]@tt{ → ((10/10) +
 (10/100))/2 = 0.55}.
 @todo{Diagram} Multiple data sets enable reuse and
 help the developer collect representative profile data. This is

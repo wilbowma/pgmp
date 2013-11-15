@@ -7,7 +7,7 @@
 @title[#:tag "related" "Related and Future Work"]
 @section{Low-level PGO}
 Modern systems such as GCC, .NET, and LLVM use profile directed
-optimizations @~cite[lattner02 gcc .net]. These systems uses profile
+optimizations@~cite[lattner02 gcc .net]. These systems uses profile
 information to guide decisions about code positioning, register
 allocation, inlining, and branch optimizations.
 

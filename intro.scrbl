@@ -35,7 +35,7 @@ generated with static optimization heuristics.
 @; For instance, a compiler
 @; can decide which loops to unroll based on which loops are
 @; executed more frequently.
-Compilers that support PGO include .NET, GCC, and LLVM.@todo{need citations}
+Compilers that support PGO include .NET, GCC, and LLVM@~cite[lattner02 gcc .net]
 The profile information used by these compilers,
 such as execution counts of basic blocks or control flow graph nodes, is
 low-level compared to the source-language operated on by meta-programs.
