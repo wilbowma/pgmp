@@ -10,13 +10,13 @@ sets. We delay giving implementation details until
 @secref{implementation}.
 
 In a typical meta-programming situation, a meta-program takes as input
-a \emph{source program} in a high-level domain-specific language (DSL)
-and produces a \emph{target program} in some other language, e.g., C,
+a @emph{source program} in a high-level domain-specific language (DSL)
+and produces a @emph{target program} in some other language, e.g., C,
 Haskell, or Scheme.
 To perform arbitrary meta-program optimizations, we might require profile
 information for arbitrary points in the source program, arbitrary points
 in the target program, or both.
-We use \emph{source objects}~@[cite dybvig93] to uniquely identify these
+We use @emph{source objects}@~cite[dybvig93] to uniquely identify these
 points, and the compiler maintains a database associating source objects
 with profile information, whenever profile information from earlier
 program runs has been supplied.
@@ -35,7 +35,7 @@ corresponding points in the source program.
 
 @section{Profile weight}
 Instead of storing exact counts in the profile database, we store
-\emph{weights} instead.
+@emph{weights} instead.
 The weight of a source point in a given dataset is the ratio of the exact
 count for the source point and the maximum count for any source point,
 represented as a floating-point number in the range [0,1].

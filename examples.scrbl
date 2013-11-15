@@ -19,7 +19,7 @@ Our system and examples are implemented in Scheme, so we give below
 a simple example to briefly introduce Scheme meta-programming and
 its syntax.
 
-@figure-here["sample-macro" (elem "Sample macro")
+@figure-here["sample-macro" "Sample macro"
 @#reader scribble/COMMENT-READER-T
 @(RACKETBLOCK
 ;; Defines a macro (meta-program) `do-n-times'

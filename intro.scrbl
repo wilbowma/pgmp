@@ -32,10 +32,10 @@ The resulting code usually
 exhibits improved performance, at least on the represented class
 of inputs, than code
 generated with static optimization heuristics.
-% For instance, a compiler
-% can decide which loops to unroll based on which loops are
-% executed more frequently.
-Compilers that support PGO include .NET, GCC, and LLVM.@todo[need citations]
+@; For instance, a compiler
+@; can decide which loops to unroll based on which loops are
+@; executed more frequently.
+Compilers that support PGO include .NET, GCC, and LLVM.@todo{need citations}
 The profile information used by these compilers,
 such as execution counts of basic blocks or control flow graph nodes, is
 low-level compared to the source-language operated on by meta-programs.
@@ -56,9 +56,9 @@ for these kinds of meta-program optimizations introduce a custom
 toolchain, or expect the programmer to optimize code by hand. Chen et.
 al. implement their own profile and meta-program tools to provide a
 profile-guided meta-program for performing process placement for SMP
-clusters@~citea["chen06"]. Liu and Rus provide a tools that uses
+clusters@~citea{chen06}. Liu and Rus provide a tools that uses
 profile information to identify suboptimial usage of the C++ STL, but leaves it
-up to the programmer to take corrective action@~citea["liu09"]. Hawkins et.
+up to the programmer to take corrective action@~citea{liu09}. Hawkins et.
 al. implement a compiler for a language that generates C++
 implementations of data structures based on high-level
 specifications@~citea["hawkins11" "hawkins12"]. These works implement
