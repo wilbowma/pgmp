@@ -139,7 +139,7 @@
 (define burger98
   (make-bib
     #:title "An infrastructure for profile-driven dynamic recompilation."
-    #:author (authors "Robert G. Burder" "R. Kent Dybvig")
+    #:author (authors "Robert G. Burger" "R. Kent Dybvig")
     #:location (proceedings-location
                  "Computer Languages, 1998. Proceedings. 1998
                  International Conference on"

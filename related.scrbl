@@ -52,7 +52,7 @@ runtime. It may also increase overhead, since we compute profile
 weights and many counters when loading new profile data.
 
 @section{Meta-program optimizations}
-Meta-programming has proven successful at providing high-levels of
+Meta-programming has proven successful at providing higher levels of
 abstraction while still producing efficient code. Meta-programming has
 been used to implement abstract libraries@~cite[boost]@todo{STL?}, 
 domain specific languages@~citea["sujeeth13" "flatt09"], and even whole
@@ -81,7 +81,7 @@ arbitrary meta-programs, all taking advantage of profile-guided
 optimizations.
 
 @section{More PGO}
-We have previously presented some past work on both low-level PGOs and
+We have referred to past work on both low-level PGOs and
 profile-guided meta-programs. But the use of profile information
 is still an active area of research. Furr et. al. present a system for
 inferring types in dynamic languages to assist in

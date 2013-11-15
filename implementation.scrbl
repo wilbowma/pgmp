@@ -15,17 +15,17 @@ block-level profile-guided optimizations work together in our system.
 @;block-level profile directed optimizations in the same system. 
 
 @section{Source objects}
-In the previous sections we elided what exactly a source object is,
-assuming that we can use them as keys, create fresh ones, and attach
-them to syntax. Chez Scheme implements source objects to use in
+In the previous sections we assumed that a source objects can be created
+arbitrarily, attached to source points in the surface syntax and be used
+as keys. Chez Scheme implements source objects to use in
 error messages. A source object contains a filename, line number, and
 starting and ending character positions. The Chez Scheme reader
 automatically creates and attaches these to each piece of syntax read
 from a file, but Chez Scheme also provides an API to programmatically
 manipulate source objects. This is useful when using Chez Scheme as
-a target language. Custom source objects can be attached to
-target syntax to provide error messages with line and character
-positions in the source language@~cite[csug-ch11].
+a target language for a DSL with a different surface syntax. Custom 
+source objects can be attached to target syntax to provide error messages 
+with line and character positions in the source language@~cite[csug-ch11].
 
 To create custom source objects for fresh profile counters, we can
 use arbitrary filenames, lines numbers, and character positions. For
@@ -49,8 +49,8 @@ be created as seen in @figure-ref{really-make-source}.
 ...)]
 
 @section{Profile weights}
-We represent profile information as a floating point number between 0
-and 1. We store @racket[#f] (false) when there is no profile
+We represent profile information as a set of floating point numbers 
+between 0 and 1. We store @racket[#f] (false) when there is no profile
 information, and 0 when the counter was never executed. As mentioned in
 @secref{design}, profile information is not stored as exact counts, but
 as a weighted relative count. We considered using Scheme fixnums
@@ -65,10 +65,8 @@ only when a new data set is manually loaded via
 
 @section{Instrumenting code}
 The naive method for instrumenting code to collect source profile
-information is to attach the source information to each expression (AST node)
-internally. At an appropriately low level, that source information can
-be used to generate code that increments profile counters. However this
-method can easily distort the profile counts. As expressions are
+information would be to add a counter for each source expression.
+However this method can easily distort the profile counts. As expressions are
 duplicated or thrown out during optimizations, the source information is
 also duplicated or lost.
 
@@ -87,17 +85,17 @@ framework@~citea{keep2013nanopass}.
 We keep profile forms until generating basic blocks. While
 generating basic blocks, the source objects from the profile forms are
 gathered up and attached to the basic block in which they appear. When a
-basic-block is entered, every instruction in that block will be
-executed, so any profile counters in the block must be incremented.
-Since all the profile counters must be incremented, it is safe to
-increment them all at the top of the block. 
+basic block is entered, every instruction in that block will be
+executed. For every instruction in the block, the profile counter 
+must be incremented. So it is safe to increment the counters for all
+the instructions in the block at the top of the block. 
 
 In our implementation, we minimize the number of counters
 incremented at runtime. After generating basic blocks and attaching the
 counters to blocks, we analyze the blocks to determine which
 counters can be calculated in terms of other counters. If possible, a
 counter is computed as the sum of a list of other counters.
-This complicated the internal representation of counters and the
+This complicates the internal representation of counters and the
 generation of counters, but decreases the overhead of profiling. These
 techniques are based on the work of Burger and Dybvig@~cite[burger98].
 We generate at most one increment per block, and fewer in practice.

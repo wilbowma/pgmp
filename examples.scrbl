@@ -210,7 +210,7 @@ the token is a space, @racket[e1] is executed. If the token is a right
 paren then @racket[e2] is executed. If the token is a left paren then
 @racket[e3] is executed. If no other clauses match, then @racket[e-else]
 is executed. Note that the third clause has an extra right paren
-character that can never be reached, since it would first match teh
+character that can never be reached, since it would first match the
 second clause.
 
 @; How are clauses parsed
