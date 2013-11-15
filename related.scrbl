@@ -76,7 +76,7 @@ STL.
 
 We support these works by providing a single, general-purpose mechanism
 in which we can implement new languages, DSLs, abstract libraries, and
-arbitrary meta-programs, all taking advantage of progile-guided
+arbitrary meta-programs, all taking advantage of profile-guided
 optimizations.
 
 @section{More PGO}

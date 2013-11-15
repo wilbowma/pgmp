@@ -38,7 +38,7 @@ preprocessor macros.
 Meta-programming is being used to implement high-level optimizations,
 generate code from high-level specifications, and create DSLs. Each of
 these can take advantage of PGO to optimize before information is lost
-of constraints are imposed. Until now, such optimizations have been
+or constraints are imposed. Until now, such optimizations have been
 implemented via toolchains designed for a specific meta-program or
 optimization. We have described a general mechanism for implementing
 arbitrary profile-guided meta-program optimizations, and demonstrated
