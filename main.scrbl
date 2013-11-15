@@ -1,7 +1,7 @@
 #lang scribble/sigplan @preprint 
 @(require "bib.rkt")
 
-@title{Profile-guided meta-program optimization}
+@title{Profile-Guided Meta-Program Optimization}
 @(authorinfo "William J. Bowman" "wilbowma@ccs.neu.edu" "Northeastern
 University")
 @(authorinfo "Swaha Miller" "swamille@cisco.com" "Cisco Systems, Inc")
