@@ -15,20 +15,21 @@ block-level profile-guided optimizations work together in our system.
 @;block-level profile directed optimizations in the same system. 
 
 @section{Source objects}
-In the previous sections we assumed that a source objects can be created
+In the previous sections we assumed that source objects can be created
 arbitrarily, attached to source points in the surface syntax and be used
-as keys. Chez Scheme implements source objects to use in
-error messages. A source object contains a filename, line number, and
+as keys. In Chez Scheme, a source object usually contains a filename and
 starting and ending character positions. The Chez Scheme reader
 automatically creates and attaches these to each piece of syntax read
-from a file, but Chez Scheme also provides an API to programmatically
-manipulate source objects. This is useful when using Chez Scheme as
+from a file.
+Chez Scheme also provides an API to programmatically
+manipulate source objects@~cite[csug-ch11].
+This is useful when using Chez Scheme as
 a target language for a DSL with a different surface syntax. Custom 
-source objects can be attached to target syntax to provide error messages 
-with line and character positions in the source language@~cite[csug-ch11].
+source objects can be attached to target syntax as well to support
+profile-guided meta-programming.
 
 To create custom source objects for fresh profile counters, we can
-use arbitrary filenames, lines numbers, and character positions. For
+use arbitrary filenames and positions. For
 instance, in @secref{eg-datatype} we create custom source objects to
 profile list and vector operations. In our implementation, these might
 be created as seen in @figure-ref{really-make-source}.
@@ -40,7 +41,7 @@ be created as seen in @figure-ref{really-make-source}.
   (let ([x 0])
     (lambda ()
       (let ([src (make-source-object 
-                   "sequence-src" x x x)])
+                   "sequence-src" x x)])
         (set! x (add1 x))
         src))))
 ...
