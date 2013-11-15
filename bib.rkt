@@ -1,5 +1,6 @@
 #lang racket
-(require scriblib/autobib
+(require scribble/base
+         scriblib/autobib
          scriblib/bibtex
          racket/date)
 (provide (all-defined-out))
@@ -55,7 +56,7 @@
                       "Christian Kästner"
                       "Klaus Ostermann")
     #:location (proceedings-location 
-                 "Proceedings of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)"
+                 "of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)"
                  #:pages '(391 406))
     #:url "http://www.informatik.uni-marburg.de/~seba/publications/sugarj.pdf"
     ;; TODO: autobib chokes when url contains "%20" or "%7E"; should convert
@@ -130,7 +131,7 @@
     #:author (authors "Sam Tobin-Hochstadt" "Vincent St-Amour" "Ryan
                        Culpepper" "Matthew Flatt" "Matthias Felleisen")
     #:location (proceedings-location 
-                 "Proceedings of Conference on Programming Language
+                 "of Conference on Programming Language
                  Design and Implementation (PLDI)"
                  #:pages '(132 141))
     #:date 2011
@@ -141,8 +142,7 @@
     #:title "An infrastructure for profile-driven dynamic recompilation."
     #:author (authors "Robert G. Burder" "R. Kent Dybvig")
     #:location (proceedings-location
-                 "Computer Languages, 1998. Proceedings. 1998
-                 International Conference on"
+                 "International Conference on Computer Languages, 1998."
                  #:pages '(240 249))
     #:date 1998
     #:url "http://pdf.aminer.org/000/289/483/an_infrastructure_for_profile_driven_dynamic_recompilation.pdf"))
@@ -171,7 +171,7 @@
     #:title "Scala Macros: Let Our Powers Combine!"
     #:author "Eugene Burmako"
     #:location (proceedings-location
-                 "Proceedings of the 4th Annual Scala Workshop")
+                 "of the 4th Annual Scala Workshop")
     #:date 2013))
 
 (define dybvig09csug
@@ -184,11 +184,20 @@
 
 (define csug-ch11 (in-bib dybvig09csug " Chapter 11"))
 
-(define srikant2007compiler
+;(define srikant2007compiler
+;  (make-bib
+;    #:title "The compiler design handbook: optimizations and machine code generation"
+;    #:author (editor (authors "YN Srikant" "Priti Shankar"))
+;    #:location (book-location #:edition "1" #:publisher "CRC Press")
+;    #:date 2002))
+;(define gupta02 (in-bib srikant2007compiler " Chapter 4"))
+;; Awful hack
+(define gupta02 
   (make-bib
-    #:title "The compiler design handbook: optimizations and machine code generation"
-    #:author (authors "YN Srikant" "Priti Shankar")
-    #:location (book-location #:edition "1" #:publisher "CRC Press")
+    #:title (elem "Profile Guided Code Optimization. In " (editor (authors "YN Srikant" "Priti Shankar")))
+    #:author (authors "R. Gupta" "E. Mehofer" "Y. Zhang")
+    #:location (journal-location
+                 "The compiler design handbook: optimizations and machine code generation")
     #:date 2002))
-(define gupta02 (in-bib srikant2007compiler " Chapter 4"))
+
   
