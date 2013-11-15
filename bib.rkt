@@ -41,7 +41,7 @@
 (define lattner02
   (make-bib
     #:title "LLVM: An infrastructure for multi-stage optimization"
-    ;#:author "Chris Authors Lattner"
+    #:author "Chris Authors Lattner"
     #:location (dissertation-location 
                  #:institution "University of Illinois"
                  #:degree "Master")
@@ -58,7 +58,8 @@
                  "Proceedings of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)"
                  #:pages '(391 406))
     #:url "http://www.informatik.uni-marburg.de/~seba/publications/sugarj.pdf"
-    ;; TODO: autobib chokes when url contains %20 or %7E
+    ;; TODO: autobib chokes when url contains "%20" or "%7E"; should convert
+    ;; to " " and "~"
     #:date 2011))
 
 (define taha00 

@@ -3,6 +3,6 @@ SCRIBBLE=. ~/workspace/racket-dev-goodies/plt-alias.bash; ~/workspace/racket-dev
 
 all: main.pdf
 
-main.pdf: abstract.scrbl design.scrbl conclusion.scrbl examples.scrbl implementation.scrbl intro.scrbl main.scrbl related.scrbl defs.rkt bib.rkt results.scrbl
+main.pdf: abstract.scrbl design.scrbl conclusion.scrbl examples.scrbl implementation.scrbl intro.scrbl main.scrbl related.scrbl defs.rkt bib.rkt results.scrbl bib.bib
 	$(SCRIBBLE) ++style smaller.tex --pdf main.scrbl
 
