@@ -313,17 +313,26 @@ high-level decisions normally left to the programmer.
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
   ;; vectors.
-  (define list-src (make-source-obj))
-  (define vector-src (make-source-obj))
+  (define list-src (make-fresh-source-obj!))
+  (define vector-src (make-fresh-source-obj!))
   ;; Defines all the sequences operations, giving implementations for
   ;; lists and vectors. 
   (define op*
     `((make-seq ,#'list ,#'vector)
       (seq? ,#'list? ,#'vector?)
-      ;; Wrap the operations we care about with a profile form
-      (seq-map ,#`(lambda (f ls) (profile #,list-src) (map f ls))
-               ,#`(lambda (f ls) (profile #,list-src) (vector-map f ls)))
+      (seq-map ,#'map #'vector-map)
       (seq-first ,#'first ,#'(lambda (x) (vector-ref x 0)))
+      ;; Wrap the operations we care about with a profile form
+      (seq-rest ,#`(lambda (ls) (profile #,list-src) (rest ls))
+                ,#`(lambda (v) 
+                     (profile #,list-src)
+                     (let ([i 1]
+                           [v-new (make-vector (sub1 (vector-length v)))])
+                       (vector-for-each 
+                         (lambda (x) 
+                           (vector-set! v-new i x)
+                           (set! i (add1 i))) 
+                         v))))
       (seq-cons ,#`(lambda (x ls) (profile #,list-src) (cons x ls)) 
                 ,#`(lambda (x v) 
                      (profile #,list-src)
@@ -365,7 +374,7 @@ high-level decisions normally left to the programmer.
 @; Introduce example
 The example in @figure-ref{sequence-datatype} chooses between a list and
 a vector using profile information. If the program uses @racket[seq-set!] and
-@racket[seq-ref] operations more often than @racket[seq-map]
+@racket[seq-ref] operations more often than @racket[seq-rest]
 and @racket[seq-cons], then the sequence is implemented using a
 @racket[vector], otherwise using a @racket[list].
 
@@ -378,5 +387,6 @@ The macro defines new profiled version of the sequence operations and
 defines a new instance of sequence. The profiled operations are
 redefined for @emph{each} new sequence, creating fresh source objects,
 for each seperate sequence. This ensures each instance of a sequence is
-profiled and specialized seperately.
-
+profiled and specialized seperately. Here we assume we can create fresh
+source objects via the function @racket[make-fresh-source-object!]. We
+discuss its implementation in @secref{implementation}.

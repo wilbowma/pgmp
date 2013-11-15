@@ -36,9 +36,16 @@ be created as seen in @figure-ref{really-make-source}.
 @figure["really-make-source" "Creating custom source objects"
 @#reader scribble/COMMENT-READER-T
 @(RACKETBLOCK
+(define make-fresh-source-obj!
+  (let ([x 0])
+    (lambda ()
+      (let ([src (make-source-object 
+                   "sequence-src" x x x)])
+        (set! x (add1 x))
+        src))))
 ...
-(define list-src (make-source-object "sequence-generate-src" 0 0 0))
-(define vector-src (make-source-object "sequence-generate-src" 1 0 0))
+(define list-src (make-fresh-source-obj!))
+(define vector-src (make-fresh-source-obj!))
 ...)]
 
 @section{Profile weights}
