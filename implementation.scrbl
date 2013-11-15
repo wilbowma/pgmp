@@ -18,17 +18,17 @@ block-level profile-guided optimizations work together in our system.
 In the previous sections we elided what exactly a source object is,
 assuming that we can use them as keys, create fresh ones, and attach
 them to syntax. Chez Scheme implements source objects to use in
-error messages. A source object contains a filename, line number, and
-starting and ending character positions. The Chez Scheme reader
+error messages. A source object contains a filename, 
+starting file position, and ending file positions. The Chez Scheme reader
 automatically creates and attaches these to each piece of syntax read
 from a file, but Chez Scheme also provides an API to programmatically
 manipulate source objects. This is useful when using Chez Scheme as
 a target language. Custom source objects can be attached to
-target syntax to provide error messages with line and character
+target syntax to provide error messages with line number and character
 positions in the source language@~cite[csug-ch11].
 
 To create custom source objects for fresh profile counters, we can
-use arbitrary filenames, lines numbers, and character positions. For
+use arbitrary filenames and positions. For
 instance, in @secref{eg-datatype} we create custom source objects to
 profile list and vector operations. In our implementation, these might
 be created as seen in @figure-ref{really-make-source}.
@@ -40,7 +40,7 @@ be created as seen in @figure-ref{really-make-source}.
   (let ([x 0])
     (lambda ()
       (let ([src (make-source-object 
-                   "sequence-src" x x x)])
+                   "sequence-src" x x)])
         (set! x (add1 x))
         src))))
 ...
