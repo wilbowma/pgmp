@@ -5,17 +5,17 @@
 @(require scriblib/footnote)
 @(require scriblib/figure)
 @title[#:tag "implementation" "Implementation"]
-This section describes details of how profile
-information is represented, how code is instrumented, and how
-source-level and block-level profile directed optimizations can work
-together in our system. First we present how we represent source objects
-and profile information. Next we describe how code is instrumented to
-collect profile information. Then we present how profile information is
-stored and accessed. Finally we present how we use both source-level and
-block-level profile directed optimizations in the same system. 
+This section describes the details of how we represent profile
+information, how we instrument code, and how we ensure source-level and
+block-level profile-guided optimizations work together in our system. 
+@;First we present how we represent source objects
+@;and profile information. Next we describe how code is instrumented to
+@;collect profile information. Then we present how profile information is
+@;stored and accessed. Finally we present how we use both source-level and
+@;block-level profile directed optimizations in the same system. 
 
 @section{Source objects}
-In the previous sections we elided what exact a source object is,
+In the previous sections we elided what exactly a source object is,
 assuming that we can use them as keys, create fresh ones, and attach
 them to syntax. Chez Scheme implements source objects to use in
 error messages. A source object contains a filename, line number, and
@@ -27,7 +27,7 @@ a target language. Custom source objects can be attached to
 target syntax to provide error messages with line and character
 positions in the source language@~cite[csug-ch11].
 
-To create custom source objects for for fresh profile counter, we can
+To create custom source objects for fresh profile counters, we can
 use arbitrary filenames, lines numbers, and character positions. For
 instance, in @secref{eg-datatype} we create custom source objects to
 profile list and vector operations. In our implementation, these might
@@ -43,32 +43,34 @@ be created as seen in @figure-ref{really-make-source}.
 
 @section{Profile weights}
 We represent profile information as a floating point number between 0
-and 1. As mentioned in @secref{design}, profile information is not
-stored as exact counts, but as a weighted relative count. We considered
-using Scheme fixnums (integers) for additional speed, but fixnums
-quickly loose precision, particularly when working with multiple data
-sets.
+and 1. We store @racket[#f] (false) when there is no profile
+information, and 0 when the counter was never executed. As mentioned in
+@secref{design}, profile information is not stored as exact counts, but
+as a weighted relative count. We considered using Scheme fixnums
+(integers) for additional speed, but fixnums quickly loose precision,
+particularly when working with multiple data sets.
 
-We store profile weights by creating a hash table from source file names to
-hash tables. Each second level hash table maps the starting file position
-to a profile weight. These tables are not updated in real time, only
-when a new data set is manually loaded via @racket[profile-load-data].
+We store profile weights by creating a hash table from source filenames to
+hash tables. Each second level hash table maps the starting character
+position to a profile weight. These tables are not updated in real time,
+only when a new data set is manually loaded via
+@racket[profile-load-data].
 
 @section{Instrumenting code}
 The naive method for instrumenting code to collect source profile
-information is to attach the source information to each AST node
+information is to attach the source information to each expression (AST node)
 internally. At an appropriately low level, that source information can
 be used to generate code that increments profile counters. However this
-method can easily distort the profile counts. As nodes are duplicated or
-thrown out during optimizations, the source information is also
-duplicated or lost.
+method can easily distort the profile counts. As expressions are
+duplicated or thrown out during optimizations, the source information is
+also duplicated or lost.
 
 Instead we create a separate profile form that is created after macro
-expansion. Each expression @racket[e] that has source information
-attached is expanded internally to @racket[(begin (profile src) e)],
-where @racket[src] is the source object attached to @racket[e]. The
-profile form is consider an effectful expression internally and should
-never be thrown out or duplicated, even if @racket[e] is. This has the
+expansion. Each expression @racket[_e] that has a source object
+attached is expanded internally to @racket[(begin (profile _src) _e)],
+where @racket[_src] is the source object attached to @racket[_e]. The
+profile form is considered an effectful expression and should
+never be thrown out or duplicated, even if @racket[_e] is. This has the
 side-effect of allowing profile information to be used for checking
 code-coverage of test suites. While the separate profile form has
 benefits, it can interfere with optimizations based on pattern-matching
@@ -83,20 +85,21 @@ executed, so any profile counters in the block must be incremented.
 Since all the profile counters must be incremented, it is safe to
 increment them all at the top of the block. 
 
-In our implementation, we attempt to minimize the number of counters
-executed at runtime. After generating basic blocks and attaching the
-source objects to their blocks, we analyze the blocks to determine which
+In our implementation, we minimize the number of counters
+incremented at runtime. After generating basic blocks and attaching the
+counters to blocks, we analyze the blocks to determine which
 counters can be calculated in terms of other counters. If possible, a
 counter is computed as the sum of a list of other counters.
 This complicated the internal representation of counters and the
 generation of counters, but decreases the overhead of profiling. These
-techniques are based on the work of Burger and Dybvig@~cite[burger98]
+techniques are based on the work of Burger and Dybvig@~cite[burger98].
+We generate at most one increment per block, and fewer in practice.
 
 To instrument block-level profiling, we reuse the above infrastructure
 by creating fake source objects. Before compiling a file, we reset
 global initial block number to 0, and create a fake source file
-based on the file name. We give each block a source object using the
-fake file name and using the blocks number as the starting and ending
+based on the filename. We give each block a source object using the
+fake filename and using the blocks number as the starting and ending
 file position. 
 
 @;@section{Storing and Loading profile data}
@@ -130,8 +133,8 @@ file position.
 @;with each new data set.
 
 @section{Source and block PGO}
-When designing our source level profiling system, we aimed to take
-advantage of prior work on low level profile-guided optimizations
+When designing our source level profiling system, we wanted to continue
+using prior work on low level profile-guided optimizations
 @~citea["hwu89" "pettis90"#;"gupta02"]@todo{Fix auto-bib}. However, optimizations based on
 source-level profile information may result in a different set of
 blocks, so the block-level profile information will be stale. Therefore
@@ -143,11 +146,11 @@ To take advantage of both source and block-level PGO, first we compile
 and instrument a program to collect source-level information. We run
 this program and collect only source-level information. Next we
 recompile and optimize the program using the source-level information
-only, and instrument the program to collect block-level information. The
-profile directed meta-programs reoptimize at this point.  We run this
-program and collect only the block-level information.  Finally, we
-recompile the program with both source-level and block-level
-information. Since the source information has not changed, the
-meta-programs generate the same source code, and thus the compiler
-generates the same blocks. The blocks are then optimized with the
-correct profile information.
+only, and instrument the program to collect block-level information.
+From this point on, source-level optimizations should run
+and the blocks should remain stable.  We run this program and collect
+only the block-level information.  Finally, we recompile the program
+with both source-level and block-level information. Since the source
+information has not changed, the meta-programs generate the same source
+code, and thus the compiler generates the same blocks. The blocks are
+then optimized with the correct profile information.

@@ -182,4 +182,12 @@
     #:date 2011))
 
 (define csug-ch11 (in-bib dybvig09csug " Chapter 11"))
+
+(define srikant2007compiler
+  (make-bib
+    #:title "The compiler design handbook: optimizations and machine code generation"
+    #:author (authors "YN Srikant" "Priti Shankar")
+    #:location (book-location #:edition "1" #:publisher "CRC Press")
+    #:date 2002))
+(define gupta02 (in-bib srikant2007compiler " Chapter 4"))
   

@@ -5,8 +5,9 @@
 @(require scribble/manual)
 This section presents the essential points of our system. We first
 discuss how source points are identified and manufactured. We then
-discuss how we store profile information and handle multiple data sets.
-We elide implementation particulars until @secref{implementation}.
+discuss what profile information we use and how we handle multiple data
+sets. We elide implementation details until
+@secref{implementation}.
 
 @section{Source objcets}
 To perform arbitrary meta-program optimizations, we require profile
@@ -15,10 +16,11 @@ using source objects, which act as unique keys to how often a particular
 point in the code is reached. Each source expression of a
 program is annotated with a unique source object. We can create new
 (fresh) source objects using @racket[(make-source-object)], and can
-create a new profile point by using @racket[(profile src)], where
-@racket[src] is some source object. We access the profile information
+create a new profile point by using @racket[(profile _src)], where
+@racket[_src] is some source object. We access the profile information
 through the function @racket[profile-query-weight], which takes a source
-object and returns a number representing the execution frequency.
+object or source expression and returns a number representing the
+execution frequency.
 
 @section{Profile weight}
 Instead of exact counts, we store execution counts relative to the most
@@ -28,7 +30,7 @@ supports using multiple profile data sets. These profile weights are
 associated with each source object, and returned by
 @racket[profile-query-weight]. 
 
-We considered comparing to the total number of expressions executed and
+We considered comparing to the total number of expressions executed or
 the average number of times an expression is executed.  In both cases,
 the results are distorted when there are a large number of expressions
 that are executed infrequently. In that case, a main loop might look
@@ -37,7 +39,7 @@ comparing to the most expensive expression, we have a relatively stable
 comparison of how expensive some expression is, even in cases with many
 unused expressions or a few very expensive expressions.
 
-To understand how we handle profile weights, consider a program with
+To understand how we compute profile weights, consider a program with
 two loops, @racket[A] and @racket[B]. If @racket[A] is executed 5 times,
 and @racket[B] is executed 10 times, we store
 @racket[(profile-query-weight A)] @tt{= 5/10 = 0.5} and

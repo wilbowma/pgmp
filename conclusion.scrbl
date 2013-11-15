@@ -17,7 +17,7 @@ sheard02 dybvig93 taha00 czarnecki04]. They allow executing arbitrary
 code at compile-time, provide quoting and unquoting of syntax, and
 provide direct representations of the source AST. Source objects could
 be attached to the AST, and @racket[profile-query-weight] could access
-the source objects given a AST. These languages all appear to lack
+the source objects given an AST. These languages all appear to lack
 source profilers, however.
 
 C++ template meta-programming does not support running arbitrary
@@ -41,4 +41,6 @@ these can take advantage of PGO to optimize before information is lost
 of constraints are imposed. Until now, such optimizations have been
 implemented via toolchains designed for a specific meta-program or
 optimization. We have described a general mechanism for implementing
-arbitrary profile-guided meta-program optimizations.
+arbitrary profile-guided meta-program optimizations, and demonstrated
+its use by implementing several optimizations previously implemented in
+seperate, specialized toolchains.

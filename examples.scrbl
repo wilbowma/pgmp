@@ -6,11 +6,13 @@
 @(require scriblib/figure)
 @(require racket/port)
 @title[#:tag "examples"]{Examples}
-This section demonstrates how our to use our mechanism, and how it
+This section demonstrates how to use our mechanism, and how it
 generalizes and advances past work on profile-guided meta-programs.  The
-first example demonstrates profile-guided receiver class prediction for
-a object-oriented DSL based on profile information.  The final example
-demonstrates specializing a data structure based on profile information.
+first example demonstrates profile-guided receiver class
+prediction@~citea{grove95} for an object-oriented DSL based on profile
+information. We then reuse part of that meta-program to optimize a
+tokenizer. The final example demonstrates specializing a data
+structure based on profile information.
 
 @section{Scheme macro primer}
 Our system and examples are implemented in Scheme, so we give a quick
@@ -50,9 +52,8 @@ to pattern matches on the syntax. @racketmetafont{#'},
 @racketmetafont{#`}, and @racketmetafont{#,} implement Lisp's quote,
 quasiquote, and unquote but on syntax instead of lists. In the example,
 we run a loop at compile-time that generates a list with @racket[n]
-copies of the syntax @racket[body], and then unquote-splice
-(@racketmetafont["#,@"]) the list of syntax into the program at
-compile-time.@;%
+copies of the syntax @racket[body], and then splice
+(@racketmetafont["#,@"]) the copies into the generated program. 
 
 @section[#:tag "eg-virtual-call"]{Profile-guided receiver class prediction}
 In this example we demonstrate how to implement profile-guided receiver
@@ -94,40 +95,38 @@ dispatch.
  [else (method obj "area")])]]
 
 By profiling the branches of the @racket[cond], we can sort the clauses
-in order of most likely to succeed, or even drop clauses that occur too
-infrequently inline. However, @racket[cond] is order dependent. While
-the programmer can see the clauses are mutually exclusive, the compiler
-cannot prove this in general and cannot reorder the clauses. 
+in order of most likely to succeed. However, @racket[cond] is order
+dependent. While the programmer can see the clauses are mutually
+exclusive, the compiler cannot prove this in general and cannot reorder
+the clauses. 
 
-Instead of wishing our compiler was more clever, we use meta-programming
-to take advantage of this high-level knowledge. We define
+Instead of cursing Rice's theorem, we use meta-programming
+to encode and take advantage of this high-level knowledge. We define
 @racket[exclusive-cond], @figure-ref{exclusive-cond}, with the same
 syntax and semantics of @racket[cond] @note{Schemers: we omit the
-alternative cond syntaxes for brevity.}, but with the restriction that
-clause order is not guaranteed. We then use profile information to
-reorder the clauses.
+alternative cond syntaxes for brevity.}, but without the specific order
+of execution. We then use profile information to reorder the clauses.
 
 @figure**["exclusive-cond" 
         (elem "Implementation of " @racket[exclusive-cond])
 @#reader scribble/comment-reader 
 (RACKETBLOCK 
-(define-syntax exclusive-cond
-  (lambda (x)
-    (define-record-type clause (fields syn weight))
-    (define (parse-clause clause)
-      (syntax-case clause ()
-        [(e0 e1 e2 ...) (make-clause clause (or (profile-query-weight #'e1) 0))]
-        [_ (syntax-error clause "invalid clause")]))
-    (define (sort-clauses clause*)
-      (sort (lambda (cl1 cl2) 
-              (> (clause-weight cl1) (clause-weight cl2))) 
-       (map parse-clause clause*)))
-    (define (reorder-cond clause* els?) 
-      #`(cond
-          #,@(map clause-syn (sort-clauses clause*)) . #,els?))
-    (syntax-case x (else)
-      [(_ m1 ... (else e1 e2 ...)) (reorder-cond #'(m1 ...) #'([else e1 e2 ...]))]
-      [(_ m1 ...) (reorder-cond #'(m1 ...) #'())])))
+(define-syntax (exclusive-cond x)
+  (define-record-type clause (fields syn weight))
+  (define (parse-clause clause)
+    (syntax-case clause ()
+      [(e0 e1 e2 ...) (make-clause clause (or (profile-query-weight #'e1) 0))]
+      [_ (syntax-error clause "invalid clause")]))
+  (define (sort-clauses clause*)
+    (sort (lambda (cl1 cl2) 
+            (> (clause-weight cl1) (clause-weight cl2))) 
+     (map parse-clause clause*)))
+  (define (reorder-cond clause* els?) 
+    #`(cond
+        #,@(map clause-syn (sort-clauses clause*)) . #,els?))
+  (syntax-case x (else)
+    [(_ m1 ... (else e1 e2 ...)) (reorder-cond #'(m1 ...) #'([else e1 e2 ...]))]
+    [(_ m1 ...) (reorder-cond #'(m1 ...) #'())]))
 )]
 
 @; How does exclusive-cond use profile information to implement cond
@@ -135,13 +134,13 @@ The @racket[exclusive-cond] macro rearranges clauses based on
 the profiling information of the right-hand sides. Since the left-hand
 sides are executed depending on the order of the clauses, profiling
 information from the left-hand side is not enough to determine which
-clause is executed most often. The clause structure stores the original
-syntax for the clause and the weighted profile count for that clause.
-Since a valid @racket[exclusive-cond] clause is also a valid
-@racket[cond] clause, the syntax is simply copied, and a new
-@racket[cond] is generated with the clauses sorted according to profile
-weights. If an @racket[else] clause exists then it is emitted as the
-final clause.
+clause is executed most often. The @racket[clause] structure stores the
+original syntax for @racket[exclusive-cond] clause and the weighted
+profile count for that clause.  Since a valid @racket[exclusive-cond]
+clause is also a valid @racket[cond] clause, we copy the syntax 
+and generate a new @racket[cond] with the clauses sorted according to
+profile weights. Of course we do not include the @racket[else] clause
+when reordering other clauses; it is always last.
 
 @figure-here["exclusive-cond-expansion"
         (elem "An example of " @racket[exclusive-cond] " and its expansion")
@@ -173,14 +172,13 @@ class prediction example is optimized through
 @racket[exclusive-cond]. The generated @racket[cond] will test for
 @racket[Circle] (the common case) first.
 
-@section{Fast Path Lexical Analyzer}
+@section{Fast Path Tokenizer}
 In this example we demonstrate how to use the general meta-program,
 @racket[exclusive-cond], presented in the previous example to optimize a
-lexical analyzer. A lexical analyzer in Scheme can be written naturally
+tokenizer. A tokenizer in Scheme can be written naturally
 using @racket[cond] or @racket[case], a pattern matching construct
-similar to C's @racket[switch]. Such a lexical analyzer can be easily
-optimized be instead using the @racket[exclusive-cond] macro we saw
-earlier. 
+similar to C's @racket[switch]. Such a tokenizercan be easily
+optimized by using the @racket[exclusive-cond] macro we saw earlier. 
 
 @racket[case] takes an expression @racket[key-expr] and an arbitrary
 number of clauses, followed by an optional @racket[else] clause. The
@@ -211,16 +209,16 @@ character that can never be reached, since it would first match teh
 second clause.
 
 @; How are clauses parsed
-Since @racket[case] permits clauses to have overlapping elements and
-uses order to determine which branch to take, we must remove overlapping
-elements before clauses can be reordered. We parse each clause is parsed
-into the set of left-hand side keys and right-hand side bodies. We
-remove overlapping keys are removed by keeping only the first instance
-of each key when processing the clauses in the original order. After
-removing overlapping keys, an @racket[exclusive-cond] is generated.
 @Figure-ref{case-impl} shows the full implementation of case. The
 majority of the work is in @racket[trim-keys!], which removes duplicate
-keys.
+keys to ensure mutually exclusive clauses. Since @racket[case] permits
+clauses to have overlapping elements and uses order to determine which
+branch to take, we must remove overlapping elements before reordering
+clauses. We parse each clause is parsed into the set of left-hand side
+keys and right-hand side bodies. We remove overlapping keys are removed
+by keeping only the first instance of each key when processing the
+clauses in the original order.  After removing overlapping keys, we
+generate an @racket[exclusive-cond].
 
 @figure**["case-impl" (elem "Implementation of " @racket[case] " using "
 @racket[exclusive-cond])
@@ -284,7 +282,7 @@ clause is dropped to preserve ordering constraints from @racket[case].
 @; Motivate an example that normal compilers just can't do
 The example in @secref{eg-virtual-call} shows that we can easily bring
 well-known optimizations up to the meta-level, enabling the DSL writer
-to take advantage of traditional profile directed optimizations.  While
+to take advantage of traditional profile-guided optimizations.  While
 profile-guided meta-programming enables such traditional optimizations,
 it also enables higher level decisions normally done by the programmer.
 
@@ -297,7 +295,7 @@ generate optimized code.
 
 In this example, we provide an abstract sequence data structure that
 changes its implementation based on profile information. This simple
-example default to a list, but specializes to a vector (array) when
+example defaults to a list, but specializes to a vector (array) when
 vector operations are more common than list operations. While
 simplified, this example shows that our mechanism support making
 high-level decisions normally left to the programmer.
@@ -306,57 +304,56 @@ high-level decisions normally left to the programmer.
           (elem "Implementation of " @racket[define-sequence-datatype])
 @#reader scribble/COMMENT-READER-T 
 (RACKETBLOCK 
-(define-syntax define-sequence-datatype
-   (lambda (x)
-      ;; Create fresh source object. list-src profiles operations that are
-      ;; fast on lists, and vector-src profiles operations that are fast on
-      ;; vectors.
-      (define list-src (make-source-obj))
-      (define vector-src (make-source-obj))
-      ;; Defines all the sequences operations, giving implementations for
-      ;; lists and vectors. 
-      (define op*
-        `((make-seq ,#'list ,#'vector)
-          (seq? ,#'list? ,#'vector?)
-          ;; Wrap the operations we care about with a profile form
-          (seq-map ,#`(lambda (f ls) (profile #,list-src) (map f ls))
-                   ,#`(lambda (f ls) (profile #,list-src) (vector-map f ls)))
-          (seq-first ,#'first ,#'(lambda (x) (vector-ref x 0)))
-          (seq-cons ,#`(lambda (x ls) (profile #,list-src) (cons x ls)) 
-                    ,#`(lambda (x v) 
-                         (profile #,list-src)
-                         (let ([i 0]
-                               [v-new (make-vector (add1 (vector-length v)))])
-                           (vector-for-each 
-                             (lambda (x) 
-                               (vector-set! v-new i x)
-                               (set! i (add1 i))) 
-                             v))))
-          (seq-ref ,#`(lambda (ls n) (profile #,vector-src) (list-ref ls n))
-                   ,#`(lambda (v n) (profile #,vector-src (vector-ref v n))))
-          (seq-set! ,#`(lambda (ls n obj) 
-                         (profile #,vector-src) (set-car! (list-tail ls n) obj)
-                    ,#`(lambda (v n obj) 
-                         (profile #,vector-src) (vector-set! v n obj))))))
-        ;; Default to list; switch to vector when profile information
-        ;; suggests we should.
-        (define (choose-op name)
-          ((if (> (profile-query-weight vector-src)
-                  (profile-query-weight list-src))
-              third
-              second)
-           (assq name op*)))
-      (syntax-case x ()
-        [(_ var (init* ...))
-         ;; Create lists of syntax for operation names and definitions
-         (with-syntax ([(name* ...) (map first op*)]
-                       [(def* ...) (map choose (map first op*))])
-           ;; and generate them
-           #`(begin (define name* def*) ...
-           ;; Finally, bind the sequence.
-                    (define var (#,(choose 'make-seq) init* ...))))])))
+(define-syntax (define-sequence-datatype x)
+  ;; Create fresh source object. list-src profiles operations that are
+  ;; fast on lists, and vector-src profiles operations that are fast on
+  ;; vectors.
+  (define list-src (make-source-obj))
+  (define vector-src (make-source-obj))
+  ;; Defines all the sequences operations, giving implementations for
+  ;; lists and vectors. 
+  (define op*
+    `((make-seq ,#'list ,#'vector)
+      (seq? ,#'list? ,#'vector?)
+      ;; Wrap the operations we care about with a profile form
+      (seq-map ,#`(lambda (f ls) (profile #,list-src) (map f ls))
+               ,#`(lambda (f ls) (profile #,list-src) (vector-map f ls)))
+      (seq-first ,#'first ,#'(lambda (x) (vector-ref x 0)))
+      (seq-cons ,#`(lambda (x ls) (profile #,list-src) (cons x ls)) 
+                ,#`(lambda (x v) 
+                     (profile #,list-src)
+                     (let ([i 0]
+                           [v-new (make-vector (add1 (vector-length v)))])
+                       (vector-for-each 
+                         (lambda (x) 
+                           (vector-set! v-new i x)
+                           (set! i (add1 i))) 
+                         v))))
+      (seq-ref ,#`(lambda (ls n) (profile #,vector-src) (list-ref ls n))
+               ,#`(lambda (v n) (profile #,vector-src (vector-ref v n))))
+      (seq-set! ,#`(lambda (ls n obj) 
+                     (profile #,vector-src) (set-car! (list-tail ls n) obj)
+                ,#`(lambda (v n obj) 
+                     (profile #,vector-src) (vector-set! v n obj))))))
+    ;; Default to list; switch to vector when profile information
+    ;; suggests we should.
+    (define (choose-op name)
+      ((if (> (profile-query-weight vector-src)
+              (profile-query-weight list-src))
+          third
+          second)
+       (assq name op*)))
+  (syntax-case x ()
+    [(_ var (init* ...))
+     ;; Create lists of syntax for operation names and definitions
+     (with-syntax ([(name* ...) (map first op*)]
+                   [(def* ...) (map choose (map first op*))])
+       ;; and generate them
+       #`(begin (define name* def*) ...
+       ;; Finally, bind the sequence.
+                (define var (#,(choose 'make-seq) init* ...))))]))
 
-;; Define an abstrace sequence
+;; Define an abstract sequence
 (define-sequence-datatype seq1 (0 3 2 5))
 )]
 
