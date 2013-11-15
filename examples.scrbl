@@ -388,5 +388,5 @@ defines a new instance of sequence. The profiled operations are
 redefined for @emph{each} new sequence, creating fresh source objects,
 for each seperate sequence. This ensures each instance of a sequence is
 profiled and specialized seperately. Here we assume we can create fresh
-source objects via the function @racket[make-fresh-source-object!]. We
+source objects via the function @racket[make-fresh-source-obj!]. We
 discuss its implementation in @secref{implementation}.
