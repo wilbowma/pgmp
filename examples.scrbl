@@ -320,7 +320,7 @@ high-level decisions normally left to the programmer.
   (define op*
     `((make-seq ,#'list ,#'vector)
       (seq? ,#'list? ,#'vector?)
-      (seq-map ,#'map #'vector-map)
+      (seq-map ,#'map ,#'vector-map)
       (seq-first ,#'first ,#'(lambda (x) (vector-ref x 0)))
       ;; Wrap the operations we care about with a profile form
       (seq-rest ,#`(lambda (ls) (profile #,list-src) (rest ls))
