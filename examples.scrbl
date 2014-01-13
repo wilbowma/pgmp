@@ -24,9 +24,9 @@ its syntax.
 @(RACKETBLOCK
 ;; Defines a macro (meta-program) `do-n-times'
 ;; Example:
-;; (do-n-times 3 (display “*”)) expands into 
-;; (begin (display "*") 
-;;        (display "*") 
+;; (do-n-times 3 (display “*”)) expands into
+;; (begin (display "*")
+;;        (display "*")
 ;;        (display "*"))
 (define-syntax (do-n-times stx)
   ;; pattern matches on the inputs syntax
@@ -35,13 +35,13 @@ its syntax.
      ;; Start generating code
      #`(begin
          ;; Runs at compile time then
-         ;; splices the result into the 
+         ;; splices the result into the
          ;; generated code
-         #,@(let loop [(i (syntax->datum n))] 
+         #,@(let loop [(i (syntax->datum n))]
               ;; Loops from n to 0
               (if (zero? i)
                   '()
-                   ;; Create a list #'body 
+                   ;; Create a list #'body
                    (cons #'body (loop (sub1 i))))))]))
 )]
 
@@ -54,7 +54,7 @@ to access the subforms of the syntax via pattern matching. @racketmetafont{#'},
 quasiquote, and unquote but on syntax instead of lists. In the example,
 we run a loop at compile-time that generates a list with @racket[n]
 copies of the syntax @racket[body], and then splice
-(@racketmetafont["#,@"]) the copies into the generated program. 
+(@racketmetafont["#,@"]) the copies into the generated program.
 
 @section[#:tag "eg-virtual-call"]{Profile-guided receiver class prediction}
 In this example we demonstrate how to implement profile-guided receiver
@@ -62,7 +62,7 @@ class prediction@~citea{grove95} for a hypothetical object-oriented DSL
 with virtual methods, similar to C++. We perform this optimization
 through a general meta-program called @racket[exclusive-cond], a
 branching construct that can automatically reorder its clauses based on
-which is most likely to be executed. 
+which is most likely to be executed.
 
 @racket[cond] is a Scheme branching construct analogous to a series of
 if/else if statements. The clauses of
@@ -89,9 +89,9 @@ dispatch.
 @figure-here["cond-example" (elem "An example of " @racket[cond])
 @racketblock[
 (cond
- [(class-equal? obj Square) 
+ [(class-equal? obj Square)
   (* (field obj length) (field obj width))]
- [(class-equal? obj Circle) 
+ [(class-equal? obj Circle)
   (* pi (sqr (field obj r)))]
  [else (method obj "area")])]]
 
@@ -99,7 +99,7 @@ By profiling the branches of the @racket[cond], we can sort the clauses
 in order of most likely to succeed. However, @racket[cond] is order
 dependent. While the programmer can see the clauses are mutually
 exclusive, the compiler cannot prove this in general and cannot reorder
-the clauses. 
+the clauses.
 
 Instead of cursing Rice's theorem, we use meta-programming
 to encode and take advantage of this high-level knowledge. We define
@@ -108,10 +108,11 @@ syntax and semantics of @racket[cond] @note{Schemers: we omit the
 alternative cond syntaxes for brevity.}, but without the specific order
 of execution. We then use profile information to reorder the clauses.
 
-@figure**["exclusive-cond" 
+@figure**["exclusive-cond"
         (elem "Implementation of " @racket[exclusive-cond])
-@#reader scribble/comment-reader 
-(RACKETBLOCK 
+@todo{Ensure this is runnable}
+@#reader scribble/comment-reader
+(RACKETBLOCK
 (define-syntax (exclusive-cond x)
   (define-record-type clause (fields syn weight))
   (define (parse-clause clause)
@@ -119,10 +120,10 @@ of execution. We then use profile information to reorder the clauses.
       [(e0 e1 e2 ...) (make-clause clause (or (profile-query-weight #'e1) 0))]
       [_ (syntax-error clause "invalid clause")]))
   (define (sort-clauses clause*)
-    (sort (lambda (cl1 cl2) 
-            (> (clause-weight cl1) (clause-weight cl2))) 
+    (sort (lambda (cl1 cl2)
+            (> (clause-weight cl1) (clause-weight cl2)))
      (map parse-clause clause*)))
-  (define (reorder-cond clause* els?) 
+  (define (reorder-cond clause* els?)
     #`(cond
         #,@(map clause-syn (sort-clauses clause*)) . #,els?))
   (syntax-case x (else)
@@ -138,7 +139,7 @@ information from the left-hand side is not enough to determine which
 clause is executed most often. The @racket[clause] structure stores the
 original syntax for @racket[exclusive-cond] clause and the weighted
 profile count for that clause.  Since a valid @racket[exclusive-cond]
-clause is also a valid @racket[cond] clause, we copy the syntax 
+clause is also a valid @racket[cond] clause, we copy the syntax
 and generate a new @racket[cond] with the clauses sorted according to
 profile weights. Of course we do not include the @racket[else] clause
 when reordering other clauses; it is always last.
@@ -149,31 +150,31 @@ associated profile weight.
 
 @figure-here["exclusive-cond-expansion"
         (elem "An example of " @racket[exclusive-cond] " and its expansion")
-@#reader scribble/comment-reader 
+@#reader scribble/comment-reader
 (racketblock
 (exclusive-cond
- [(class-equal? obj Square) 
+ [(class-equal? obj Square)
   ;; executed 2 times
   (* (field obj length) (field obj width))]
- [(class-equal? obj Circle) 
+ [(class-equal? obj Circle)
   ;; executed 5 times
   (* pi (sqr (field obj r)))]
  [else (method obj "area")]))
 
-@#reader scribble/comment-reader 
+@#reader scribble/comment-reader
 (racketblock
 (cond
- [(class-equal? obj Circle) 
+ [(class-equal? obj Circle)
   ;; executed 5 times
   (* pi (sqr (field obj r)))]
- [(class-equal? obj Square) 
+ [(class-equal? obj Square)
   ;; executed 2 times
   (* (field obj length) (field obj width))]
  [else (method obj "area")])
 )]
 
 @Figure-ref{exclusive-cond-expansion} shows how our receiver
-class prediction example is optimized through 
+class prediction example is optimized through
 @racket[exclusive-cond]. The generated @racket[cond] will test for
 @racket[Circle] (the common case) first.
 
@@ -183,7 +184,7 @@ In this example we demonstrate how to use the general meta-program,
 tokenizer. A tokenizer in Scheme can be written naturally
 using @racket[cond] or @racket[case], a pattern matching construct
 similar to C's @racket[switch]. Such a tokenizercan be easily
-optimized by using the @racket[exclusive-cond] macro we saw earlier. 
+optimized by using the @racket[exclusive-cond] macro we saw earlier.
 
 @racket[case] takes an expression @racket[key-expr] and an arbitrary
 number of clauses, followed by an optional @racket[else] clause. The
@@ -200,7 +201,7 @@ side and an @racket[else] clause exists then the right-hand side of the
   (case (read-token)
         [(#\space) e1]
         [(#\)) e2]
-        [(#\( #\)) e3] 
+        [(#\( #\)) e3]
         ...
         [else e-else])
 ]]
@@ -227,8 +228,9 @@ generate an @racket[exclusive-cond].
 
 @figure**["case-impl" (elem "Implementation of " @racket[case] " using "
 @racket[exclusive-cond])
-@#reader scribble/COMMENT-READER-T 
-(RACKETBLOCK 
+@todo{Ensure this is runnable}
+@#reader scribble/COMMENT-READER-T
+(RACKETBLOCK
 (define-syntax (case x)
   (define (helper key-expr clause* els?)
     (define-record-type clause (fields (mutable keys) body))
@@ -239,8 +241,8 @@ generate an @racket[exclusive-cond].
     (define (emit clause*)
       #`(let ([t #,key-expr])
           (exclusive-cond
-            #,@(map (lambda (clause) 
-                      #`[(memv t '#,(clause-keys clause)) 
+            #,@(map (lambda (clause)
+                      #`[(memv t '#,(clause-keys clause))
                          #,@(clause-body clause)])
                     clause*)
             . #,els?)))
@@ -270,7 +272,7 @@ generate an @racket[exclusive-cond].
         (elem "The expansion of " @figure-ref{case-example})
 @racketblock[
 (let ([x (read-token)])
-  (exclusive-cond 
+  (exclusive-cond
     [(memv x '(#\space)) e1]
     [(memv x '(#\))) e2]
     [(memv x '(#\()) e3]
@@ -294,9 +296,9 @@ it also enables higher level decisions normally done by the programmer.
 Past work has used profile information to give programmer feedback when
 they make suboptimal use of algorithms and data structures provided by
 standard libraries@~citea{liu09}, but left it up to the programmer to
-change the code. Our mechanism enables automating these changes. By 
+change the code. Our mechanism enables automating these changes. By
 giving meta-programs access to profile information we can automatically
-generate optimized code. 
+generate optimized code.
 
 In this example, we provide an abstract sequence data structure that
 changes its implementation based on profile information. This simple
@@ -307,8 +309,9 @@ high-level decisions normally left to the programmer.
 
 @figure**["sequence-datatype"
           (elem "Implementation of " @racket[define-sequence-datatype])
-@#reader scribble/COMMENT-READER-T 
-(RACKETBLOCK 
+@todo{Ensure this is runnable, and in sync with {scheme,racket}/sequence-datatype.{ss,rkt}}
+@#reader scribble/COMMENT-READER-T
+(RACKETBLOCK
 (define-syntax (define-sequence-datatype x)
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
@@ -316,7 +319,7 @@ high-level decisions normally left to the programmer.
   (define list-src (make-fresh-source-obj!))
   (define vector-src (make-fresh-source-obj!))
   ;; Defines all the sequences operations, giving implementations for
-  ;; lists and vectors. 
+  ;; lists and vectors.
   (define op*
     `((make-seq ,#'list ,#'vector)
       (seq? ,#'list? ,#'vector?)
@@ -324,30 +327,30 @@ high-level decisions normally left to the programmer.
       (seq-first ,#'first ,#'(lambda (x) (vector-ref x 0)))
       ;; Wrap the operations we care about with a profile form
       (seq-rest ,#`(lambda (ls) (profile #,list-src) (rest ls))
-                ,#`(lambda (v) 
+                ,#`(lambda (v)
                      (profile #,list-src)
                      (let ([i 1]
                            [v-new (make-vector (sub1 (vector-length v)))])
-                       (vector-for-each 
-                         (lambda (x) 
+                       (vector-for-each
+                         (lambda (x)
                            (vector-set! v-new i x)
-                           (set! i (add1 i))) 
+                           (set! i (add1 i)))
                          v))))
-      (seq-cons ,#`(lambda (x ls) (profile #,list-src) (cons x ls)) 
-                ,#`(lambda (x v) 
+      (seq-cons ,#`(lambda (x ls) (profile #,list-src) (cons x ls))
+                ,#`(lambda (x v)
                      (profile #,list-src)
                      (let ([i 0]
                            [v-new (make-vector (add1 (vector-length v)))])
-                       (vector-for-each 
-                         (lambda (x) 
+                       (vector-for-each
+                         (lambda (x)
                            (vector-set! v-new i x)
-                           (set! i (add1 i))) 
+                           (set! i (add1 i)))
                          v))))
       (seq-ref ,#`(lambda (ls n) (profile #,vector-src) (list-ref ls n))
                ,#`(lambda (v n) (profile #,vector-src (vector-ref v n))))
-      (seq-set! ,#`(lambda (ls n obj) 
+      (seq-set! ,#`(lambda (ls n obj)
                      (profile #,vector-src) (set-car! (list-tail ls n) obj)
-                ,#`(lambda (v n obj) 
+                ,#`(lambda (v n obj)
                      (profile #,vector-src) (vector-set! v n obj))))))
     ;; Default to list; switch to vector when profile information
     ;; suggests we should.
