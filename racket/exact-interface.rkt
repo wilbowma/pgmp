@@ -1,19 +1,17 @@
 #lang racket/base
 
 (provide load-profile ; for users
-         save-profile) ; for profile.rkt
+         save-profile) ; for run.rkt
 
 (require
-  (only-in errortrace get-execute-counts)
   racket/list
-  racket/trace
   racket/serialize
   "private/utils.rkt")
 
 (define (serialize-conv v)
   (serialize (map (lambda (p) (cons (syntax->srcloc (car p)) (cdr p))) v)))
 
-(define (save-profile stx-or-filename)
+(define (save-profile stx-or-filename v)
   (define profile-file
     (cond [(syntax? stx-or-filename)
            (source-file->profile-file (syntax-source stx-or-filename))]
@@ -23,7 +21,7 @@
            (error "not a filename" stx-or-filename)]))
   (with-output-to-file
     profile-file
-    (lambda () (write (serialize-conv (get-execute-counts))))
+    (lambda () (write (serialize-conv v)))
     #:exists 'replace))
 
 (define (load-profile stx-or-filename)
