@@ -13,13 +13,13 @@
   ;; to the profile file directly.
   ;; Returns a function mapping syntax objects to total time and self time.
 ; TODO: timing based versions, put in another file or something
-;  (define look-up (load-profile x))
+  (define look-up-profile (load-profile x))
 ;  (define (make-clause e1 e2)
 ;          (clause e1
 ;            (let-values ([(total self) (look-up e2)])
 ;              (printf "~a: ~a\n" e1 self)
 ;              (or self 0))))
-  (define (make-clause e1 e2) (clause e1 (profile-query-weight e2)))
+  (define (make-clause e1 e2) (clause e1 (look-up-profile e2)))
 
   (define parse-clause
     (lambda (clause)

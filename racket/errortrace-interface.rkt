@@ -1,35 +1,60 @@
 #lang racket/base
 
+(provide load-profile save-profile ; for users
+         source-file->profile-file ) ; PRIVATE
+
 (require
   (only-in errortrace get-execute-counts)
-  (only-in racket/pretty pretty-write)
-  racket/trace)
+  racket/list
+  racket/trace
+  racket/serialize)
 
+(define (source-file->profile-file f)
+  (string-append (cond [(path? f)   (path->string f)]
+                       [(string? f) f]
+                       [else        (error "not a filename" f)])
+                 ".profile"))
+
+;; TODO surely this must already exist somewhere
 (define (syntax->srcloc stx)
   (srcloc (syntax-source stx)
           (syntax-line stx)
           (syntax-column stx)
           (syntax-position stx)
           (syntax-span stx)))
-(provide
-  profile-load-data
-  profile-dump-data
-  profile-query-weight)
 
-(define profile-data (make-parameter '()))
+(define (serialize-conv v)
+  (serialize (map (lambda (p) (cons (syntax->srcloc (car p)) (cdr p))) v)))
 
-(define (profile-load-data x)
-  (profile-data (with-input-from-file x read)))
+(define (save-profile stx-or-filename)
+  (define profile-file
+    (cond [(syntax? stx-or-filename)
+           (source-file->profile-file (syntax-source stx-or-filename))]
+          [(path-string? stx-or-filename)
+           stx-or-filename]
+          [else
+           (error "not a filename" stx-or-filename)]))
+  (with-output-to-file
+    profile-file
+    (lambda () (write (serialize-conv (get-execute-counts))))
+    #:exists 'replace))
 
-(define (profile-dump-data x)
-  (with-output-to-file x (lambda () (pretty-write (get-execute-counts)))
-                       #:exists 'replace))
-
-(trace-define (profile-query-weight stx-or-srcloc)
-  (cond
-    [(srcloc? stx-or-srcloc)
-     (or (assoc stx-or-srcloc (filter syntax->srcloc (get-execute-counts))) 0)]
-    [(syntax? stx-or-srcloc) (profile-query-weight (syntax->srcloc stx-or-srcloc))]
-    [else (error 'profile-query-weight "Bad things: ~a\n" stx-or-srcloc)]))
-
-
+(define (load-profile stx-or-filename)
+  (define profile-file
+    (cond [(syntax? stx-or-filename)
+           (source-file->profile-file (syntax-source stx-or-filename))]
+          [(path-string? stx-or-filename)
+           stx-or-filename]
+          [else
+           (error "not a filename" stx-or-filename)]))
+  (define snapshots
+    (with-handlers ([exn:fail:filesystem? (lambda _ '())])
+      (with-input-from-file profile-file
+        (lambda ()
+          (deserialize (read))))))
+  (lambda (stx)
+    (define srcloc (syntax->srcloc stx))
+    #;(define sexp   (syntax->datum stx)) ; for disambiguation
+    (cond
+      [(assoc srcloc snapshots) => cdr]
+      [else 0])))
