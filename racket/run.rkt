@@ -7,7 +7,7 @@
     get-execute-counts)
   (only-in errortrace/errortrace-lib
     make-errortrace-compile-handler)
-  (only-in "errortrace-interface.rkt"
+  (only-in "exact-interface.rkt"
     source-file->profile-file))
 
 (module+ main
@@ -21,7 +21,7 @@
     (displayln "EXPECTING FAILURE: ")
     (parameterize ([current-compile (make-errortrace-compile-handler)])
       ((dynamic-require main-module 'run))
-      (local-require (only-in "errortrace-interface.rkt" save-profile))
+      (local-require (only-in "exact-interface.rkt" save-profile))
       (save-profile profile-file)))
   (displayln "NO LONGER EXPECTING FAILURE: ")
   (parameterize ([execute-counts-enabled #f]

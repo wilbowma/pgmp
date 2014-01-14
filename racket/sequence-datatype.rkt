@@ -1,7 +1,7 @@
 #lang racket
 (require 
   "profile.rkt"
-  (for-syntax "macro-interface.rkt"))
+  (for-syntax "timing-interface.rkt"))
 
 (define-syntax (define-sequence-datatype x)
   ;; Create fresh source object. list-src profiles operations that are

@@ -5,7 +5,7 @@
 (require profile/sampler profile/analyzer profile/render-text
          racket/serialize
          (for-syntax racket/base syntax/parse)
-         (for-syntax "macro-interface.rkt"))
+         (for-syntax "timing-interface.rkt"))
 
 ;; This is the *exact* same code as OC's `optimization-coach-profile', funny
 ;; enough. I guess that makes that code LGPL.

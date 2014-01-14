@@ -3,7 +3,7 @@
 ;; Run like that: racket -l errortrace -t example.rkt
 
 (require "profile.rkt"
-         (for-syntax syntax/parse "macro-interface.rkt"))
+         (for-syntax syntax/parse "timing-interface.rkt"))
 
 (define-syntax (verbose-if stx)
   (syntax-parse stx

@@ -3,7 +3,7 @@
 (require
   rackunit
   "exclusive-cond.rkt"
-  "errortrace-interface.rkt"
+  "exact-interface.rkt"
  #;(only-in errortrace execute-counts-enabled get-execute-counts))
 
 (provide run)
