@@ -1,6 +1,6 @@
 #lang racket/base
 
-(provide macro-profile)
+(provide timing-profile)
 
 (require profile/sampler profile/analyzer profile/render-text
          racket/serialize

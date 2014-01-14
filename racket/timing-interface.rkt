@@ -4,22 +4,8 @@
          load-profile) ; for users
 
 (require profile/analyzer
-         racket/list racket/serialize)
-
-(define (source-file->profile-file f)
-  (string-append (cond [(path? f)   (path->string f)]
-                       [(string? f) f]
-                       [else        (error "not a filename" f)])
-                 ".profile"))
-
-;; TODO surely this must already exist somewhere
-(define (syntax->srcloc stx)
-  (srcloc (syntax-source stx)
-          (syntax-line stx)
-          (syntax-column stx)
-          (syntax-position stx)
-          (syntax-span stx)))
-
+         racket/list racket/serialize
+         "private/utils.rkt")
 
 ;; Can take a syntax object, in which case it looks up the profile file
 ;; based on its source location info, or a path string or a path pointing
