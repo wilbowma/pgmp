@@ -1,10 +1,15 @@
+#lang racket
+(require "exclusive-cond.rkt" (for-syntax rnrs/hashtables-6))
+
+(provide case)
+
 (define-syntax (case x)
   (define (helper key-expr clause* els?)
-    (define-record-type clause (fields (mutable keys) body))
-    (define (parse-clause clause)
-      (syntax-case clause ()
-        [((k ...) e1 e2 ...) (make-clause #'(k ...) #'(e1 e2 ...))]
-        [_ (syntax-error "invalid case clause" clause)]))
+    (struct clause ((keys #:mutable) body))
+    (define (parse-clause c)
+      (syntax-case c ()
+        [((k ...) e1 e2 ...) (clause #'(k ...) #'(e1 e2 ...))]
+        [_ (raise-syntax-error c "invalid case clause")]))
     (define (emit clause*)
       #`(let ([t #,key-expr])
           (exclusive-cond
@@ -13,11 +18,11 @@
                          #,@(clause-body clause)])
                     clause*)
             . #,els?)))
-    (let ([clause* (map parse-clause clause*)])
+    (let ([clause* (map parse-clause (syntax->list clause*))])
        (define ht (make-hashtable equal-hash equal?))
        (define (trim-keys! clause)
-         (clause-keys-set! clause
-            (let f ([keys (clause-keys clause)])
+         (set-clause-keys! clause
+            (let f ([keys (syntax->list (clause-keys clause))])
               (if (null? keys)
                   '()
                   (let* ([key (car keys)]

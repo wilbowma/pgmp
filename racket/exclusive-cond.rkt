@@ -1,6 +1,6 @@
 #lang racket
 #;(require (for-syntax "timing-interface.rkt"))
-(require (for-syntax "exact-interface.rkt"))
+(require (for-syntax "profiling/exact-interface.rkt"))
 
 
 (provide exclusive-cond)
@@ -35,7 +35,7 @@
           (lambda (cl1 cl2) (> (clause-count cl1) (clause-count cl2)))))
   (define (reorder-cond clause* els?)
     #`(cond #,@(map clause-syn (sort-clauses (syntax->list clause*))) . #,els?))
-    (syntax-case x (else)
+  (syntax-case x (else)
     [(_ m1 ... (else e1 e2 ...))
      (reorder-cond #'(m1 ...) #'([else e1 e2 ...]))]
     [(_ m1 ...)

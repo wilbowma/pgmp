@@ -5,7 +5,7 @@
 
 (require profile/analyzer
          racket/list racket/serialize
-         "private/utils.rkt")
+         "utils.rkt")
 
 ;; Can take a syntax object, in which case it looks up the profile file
 ;; based on its source location info, or a path string or a path pointing
