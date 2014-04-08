@@ -1,7 +1,8 @@
 #lang racket
 (require
   "profiling/profile.rkt"
-  (for-syntax "profiling/timing-interface.rkt"))
+  (for-syntax "profiling/timing-interface.rkt")
+  rackunit)
 
 (define-syntax (define-sequence-datatype x)
   ;; Create fresh source object. list-src profiles operations that are
@@ -60,3 +61,10 @@
        #`(begin (define name* def*) ...
        ;; Finally, bind the sequence.
                 (define var (#,(choose 'make-seq) init* ...))))]))
+
+(module+ test
+  (define-sequence-datatype seq0 (1 2 3 4))
+  (define ls0 '(1 2 3 4))
+  (define vec0 #(1 2 3 4))
+  (check-expect (seq-map add1 seq0) (map add1 ls0))
+  (check-expect (seq-first seq0) (first ls0)))
