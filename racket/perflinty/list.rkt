@@ -25,14 +25,21 @@
 ;; TOOD: Boy does is this in need of a meta-program
 ;; Ought to write a macro in that generates all these, call it in a
 ;; submodule, export all defined in it.
+;;
+;; maybe input:
+;;  (list? : ((> ls))) (map : (f . (> lss))
+;;  (car   : ((> ls))) (cdr : ((> ls)))
+;;  (cons  : ((> ls))) (list-ref : ((> ls) n)) (length : ((> ls)))
 (define-values
-  (current-profiled-list?
+  (current-profiled-length
+   current-profiled-list?
    current-profiled-map
    current-profiled-car
    current-profiled-cdr
    current-profiled-cons
    current-profiled-list-ref)
   (values
+    (make-parameter real:length)
     (make-parameter real:list?)
     (make-parameter real:map)
     (make-parameter real:car)
@@ -42,18 +49,14 @@
 
 ;; These are delicate; profiled list must evaluated first to set parameters.
 ;; But Racket is CBV so it's okay for now.
-(define (list? ls)
-  ((current-profiled-list?) (ls)))
+(define (list? ls) ((current-profiled-list?) (ls)))
 (define (map f . lss)
-  ((current-profiled-map) f (real:map (lambda (ls) (ls)) (lss))))
-(define (car ls)
-  ((current-profiled-car) (ls)))
-(define (cdr ls)
-  ((current-profiled-cdr) (ls)))
-(define (cons x ls)
-  ((current-profiled-cons) x (ls)))
-(define (list-ref ls n)
-  ((current-profiled-list-ref) (ls) n))
+  (apply (current-profiled-map) f (real:map (lambda (ls) (ls)) lss)))
+(define (car ls) ((current-profiled-car) (ls)))
+(define (cdr ls) ((current-profiled-cdr) (ls)))
+(define (cons x ls) ((current-profiled-cons) x (ls)))
+(define (list-ref ls n) ((current-profiled-list-ref) (ls) n))
+(define (length ls) ((current-profiled-length) (ls)))
 
 (begin-for-syntax
   (define (srcloc->list srcloc)
@@ -86,8 +89,9 @@
     (map
       (lambda (v src)
         (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
-      '(real:list? real:map real:car real:cdr real:cons real:list-ref)
-      (list #f #f #f list-src list-src vector-src)))
+      '(real:list? real:map real:car real:cdr real:cons real:list-ref
+                   real:length)
+      (list #f #f #f list-src list-src vector-src vector-src)))
   (syntax-case x ()
     [(_ init* ...)
      (unless (>= (look-up-profile list-src) (look-up-profile vector-src))
@@ -101,7 +105,8 @@
                        current-profiled-car
                        current-profiled-cdr
                        current-profiled-cons
-                       current-profiled-list-ref)])
+                       current-profiled-list-ref
+                       current-profiled-length)])
        #`(let ()
            (define name* def*) ...
            (lambda ()
