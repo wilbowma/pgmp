@@ -8,9 +8,9 @@
     get-execute-counts)
   (only-in errortrace/errortrace-lib
     make-errortrace-compile-handler)
-  (only-in "profiling/utils.rkt"
+  (only-in "../profiling/utils.rkt"
     source-file->profile-file)
-  (only-in "profiling/exact-interface.rkt" save-profile))
+  (only-in "../profiling/exact-interface.rkt" save-profile))
 
 (define-syntax-rule (mark runs main-module run)
   (let ()
@@ -44,5 +44,5 @@
 
 ;; exclusive-cond-test.rkt
 (module+ main
-         (mark 10000000 "tests/exclusive-cond-test.rkt" 'run)
-         (mark 10000000 "tests/case-test.rkt" 'run))
+         (mark 10000000 "exclusive-cond-test.rkt" 'run)
+         (mark 10000000 "case-test.rkt" 'run))

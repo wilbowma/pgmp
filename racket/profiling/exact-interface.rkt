@@ -41,8 +41,11 @@
         (lambda ()
           (debugf "Using profile info from: ~a\n" profile-file)
           (deserialize (read))))))
-  (lambda (stx)
-    (define srcloc (syntax->srcloc stx))
+  (lambda (stx-or-srcloc)
+    (define srcloc
+      (if (syntax? stx-or-srcloc)
+        (syntax->srcloc stx-or-srcloc)
+        stx-or-srcloc))
     (debugf "Looking up ~a\n" srcloc)
     #;(define sexp   (syntax->datum stx)) ; for disambiguation
     (cond
