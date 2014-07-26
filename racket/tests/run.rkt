@@ -45,4 +45,6 @@
 ;; exclusive-cond-test.rkt
 (module+ main
          (mark 10000000 "exclusive-cond-test.rkt" 'run)
-         (mark 10000000 "case-test.rkt" 'run))
+         (mark 10000000 "case-test.rkt" 'run)
+         (mark 1000000  "perflinty-list.rkt" 'run)
+         (mark 1000000  "perflinty-list-as-vector.rkt" 'run))
