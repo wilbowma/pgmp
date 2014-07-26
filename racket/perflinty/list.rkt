@@ -4,8 +4,7 @@
   (prefix-in real: racket/base)
   (for-syntax
     racket/base
-    "../profiling/exact-interface.rkt")
-  (for-syntax (prefix-in real: racket/list)))
+    "../profiling/exact-interface.rkt"))
 (provide
   list?
   map
@@ -47,9 +46,14 @@
     (make-parameter real:cons)
     (make-parameter real:list-ref)))
 
+;; TODO: Use this struct instead of implementing vectors as functions.
+(struct (list-rep finit ls))
 ;; These are delicate; profiled list must evaluated first to set parameters.
 ;; But Racket is CBV so it's okay for now.
 (define (list? ls) ((current-profiled-list?) (ls)))
+;; TODO: This may not work right... probably only one version of the
+;; parameters will get set.
+;; TODO: These versions that return lists don't work right
 (define (map f . lss)
   (apply (current-profiled-map) f (real:map (lambda (ls) (ls)) lss)))
 (define (car ls) ((current-profiled-car) (ls)))

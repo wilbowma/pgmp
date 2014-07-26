@@ -6,9 +6,6 @@
 
 (provide run)
 
-(define (random-char)
-  (integer->char (+ 65 (random (- 122 65)))))
-
 (define (run x)
   (for ([_ (in-range x)])
     (define ls (list 1 2 3 4))
