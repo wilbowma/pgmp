@@ -1,6 +1,7 @@
 #lang racket/base
 
 (provide (all-defined-out))
+
 (define (source-file->profile-file f)
   (string-append (cond [(path? f)   (path->string f)]
                        [(string? f) f]
@@ -23,3 +24,23 @@
            stx-or-filename]
           [else
            (error "not a filename" stx-or-filename)]))
+
+(define (srcloc->list srcloc)
+  (and srcloc
+       (list (srcloc-source srcloc)
+             (srcloc-line srcloc)
+             (srcloc-column srcloc)
+             (srcloc-position srcloc)
+             (srcloc-span srcloc))))
+
+(define (make-fresh-source-obj-factory! prefix)
+  (let ([n 0])
+    (lambda (syn)
+      (let ([src (make-srcloc
+                   (format "~a:~a:~a"
+                           (syntax-source syn) prefix n) (syntax-line syn)
+                   (syntax-column syn)
+                   (syntax-position syn)
+                   (syntax-span syn))])
+        (set! n (add1 n))
+        src))))

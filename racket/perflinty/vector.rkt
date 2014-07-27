@@ -5,6 +5,7 @@
   (prefix-in real: racket/base)
   (for-syntax
     racket/base
+    "../profiling/utils.rkt"
     "../profiling/exact-interface.rkt"))
 (provide
   vector?
@@ -23,16 +24,6 @@
   real:vector->list ;real:list->vector
   vector)
 
-#;(module profiled-list racket/base
-  )
-;; TOOD: Boy does is this in need of a meta-program
-;; Ought to write a macro in that generates all these, call it in a
-;; submodule, export all defined in it.
-;;
-;; maybe input:
-;;  (list? : ((> ls))) (map : (f . (> lss))
-;;  (car   : ((> ls))) (cdr : ((> ls)))
-;;  (cons  : ((> ls))) (list-ref : ((> ls) n)) (length : ((> ls)))
 (define-values
   (current-profiled-vector?
    current-profiled-vector-ref
@@ -96,24 +87,7 @@
   ((current-profiled-list->vector) (vector ls)))
 
 (begin-for-syntax
-  (define (srcloc->list srcloc)
-    (and srcloc
-         (list (srcloc-source srcloc)
-           (srcloc-line srcloc)
-           (srcloc-column srcloc)
-           (srcloc-position srcloc)
-           (srcloc-span srcloc))))
-  (define make-fresh-source-obj!
-    (let ([n 0])
-      (lambda (syn)
-        (let* ([src (make-srcloc (format "profiled-vector~s" n)
-                                 (syntax-line syn)
-                                 (syntax-column syn)
-                                 (syntax-position syn)
-                                 (syntax-span syn))])
-          (set! n (add1 n))
-          src)))))
-
+  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-vector")))
 (define-syntax (vector x)
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on

@@ -4,6 +4,7 @@
   (prefix-in real: racket/base)
   (for-syntax
     racket/base
+    "../profiling/utils.rkt"
     "../profiling/exact-interface.rkt"))
 (provide
   list?
@@ -76,24 +77,7 @@
   ((current-profiled-length) (list-rep-ls ls)))
 
 (begin-for-syntax
-  (define (srcloc->list srcloc)
-    (and srcloc
-         (list (srcloc-source srcloc)
-           (srcloc-line srcloc)
-           (srcloc-column srcloc)
-           (srcloc-position srcloc)
-           (srcloc-span srcloc))))
-  (define make-fresh-source-obj!
-    (let ([n 0])
-      (lambda (syn)
-        (let* ([src (make-srcloc (format "profiled-list~s" n)
-                                 (syntax-line syn)
-                                 (syntax-column syn)
-                                 (syntax-position syn)
-                                 (syntax-span syn))])
-          (set! n (add1 n))
-          src)))))
-
+  (define make-fresh-source-obj! (make-fresh-source-obj-factory!  "profiled-list")))
 (define-syntax (list x)
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
