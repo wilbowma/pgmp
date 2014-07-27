@@ -52,4 +52,5 @@
   (mark 1000000  "perflinty-list.rkt" 'run)
   (mark 1000000  "perflinty-list-as-vector.rkt" 'run)
   (mark 1000000  "perflinty-vector.rkt" 'run)
-  (mark 1000000  "perflinty-vector-as-list.rkt" 'run))
+  (mark 1000000  "perflinty-vector-as-list.rkt" 'run)
+  (mark 1000000  "perflinty-auto.rkt" 'run))
