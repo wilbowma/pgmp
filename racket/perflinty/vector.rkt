@@ -15,12 +15,12 @@
   vector-append
   vector-set!
   vector->list
-  list->vector
+  ;list->vector
   ;; TODO: Is there a way to avoid exporting these? They should only be
   ;; called in this module, or by things generate by this module.
   real:vector? real:vector-ref real:vector-copy real:vector-length
   real:vector-map real:vector-append real:vector-set!
-  real:vector->list real:list->vector
+  real:vector->list ;real:list->vector
   vector)
 
 #;(module profiled-list racket/base
@@ -42,7 +42,7 @@
    current-profiled-vector-append
    current-profiled-vector-set!
    current-profiled-vector->list
-   current-profiled-list->vector)
+   #;current-profiled-list->vector)
   (values
     (make-parameter real:vector?)
     (make-parameter real:vector-ref)
@@ -52,34 +52,47 @@
     (make-parameter real:vector-append)
     (make-parameter real:vector-set!)
     (make-parameter real:vector->list)
-    (make-parameter real:list->vector)))
+    #;(make-parameter real:list->vector)))
 
-;; TODO: Use this struct instead of implementing vectors as functions.
-(struct (vector-rep finit vec))
-;; These are delicate; profiled list must evaluated first to set parameters.
-;; But Racket is CBV so it's okay for now.
+(struct vector-rep (finit vec))
+
 (define (vector? vec)
-
-  ((current-profiled-vector?) (vec)))
+  ((vector-rep-finit vec))
+  ((current-profiled-vector?) (vector-rep-vec vec)))
 (define (vector-ref vec)
-  ((current-profiled-vector-ref) (vec)))
+  ((vector-rep-finit vec))
+  ((current-profiled-vector-ref) (vector-rep-vec vec)))
 (define (vector-copy vec i)
-  ((current-profiled-vector-copy) (vec) i))
+  ((vector-rep-finit vec))
+  (vector-rep (vector-rep-finit vec)
+              ((current-profiled-vector-copy) (vector-rep-vec vec) i)))
 (define (vector-length vec)
+  ((vector-rep-finit vec))
   ((current-profiled-vector-length) (vec)))
-;; TODO: These may not work right... probably only one version of the
-;; parameters will get set.
-;; TODO Functions that return vectors don't work right.
-(trace-define (vector-map f . vec)
-  (apply (current-profiled-vector-map) f (real:map (lambda (v) (v)) vec)))
-(trace-define (vector-append . vec)
-  (apply (current-profiled-vector-append) (real:map (lambda (v) (v)) vec)))
+;; TODO: Find a way to support multiple vecs as input
+(define (vector-map f vec)
+  ((vector-rep-finit vec))
+  (vector-rep (vector-rep-finit vec)
+              ((current-profiled-vector-map) f (vector-rep-vec vec))))
+;; TODO: This might need to be a macro, as it kind of needs to generate
+;; new sources
+(define (vector-append vec1 vec2)
+  ((vector-rep-finit vec2))
+  (vector-rep
+    (vector-rep-finit vec2)
+    ((current-profiled-vector-append) (vector-rep-vec vec1) (vector-rep-vec vec2))))
 (define (vector-set! vec p v)
-  ((current-profiled-vector-set!) (vec) p v))
+  ((vector-rep-finit vec))
+  (vector-rep
+    (vector-rep-finit vec)
+    ((current-profiled-vector-set!) (vector-rep-vec vec) p v)))
 (define (vector->list vec)
-  ((current-profiled-vector->list) (vec)))
+  ((vector-rep-finit vec))
+  ((current-profiled-vector->list) (vector-rep-vec vec)))
+;; TODO: This might need to be a macro, as it kind of needs to generate
+;; new sources
 ;; Expects a non-profiled list. ...
-(define (list->vector ls)
+#;(define (list->vector ls)
   ((current-profiled-list->vector) (vector ls)))
 
 (begin-for-syntax
@@ -115,13 +128,13 @@
         (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
       '(real:vector? real:vector-ref real:vector-copy real:vector-length
         real:vector-map real:vector-append real:vector-set!
-        real:vector->list real:list->vector)
+        real:vector->list #;real:list->vector)
       (list #f vector-src list-src vector-src list-src list-src
-            vector-src list-src vector-src)))
+            vector-src list-src #;vector-src)))
   (syntax-case x ()
     [(_ init* ...)
      (unless (>= (look-up-profile vector-src) (look-up-profile list-src))
-       (printf "WARNING: You should probably reimplement this vector as a list: ~a"
+       (printf "WARNING: You should probably reimplement this vector as a list: ~a\n"
                x))
      (with-syntax ([(def* ...) op*]
                    [(name* ...) (generate-temporaries op*)]
@@ -134,7 +147,7 @@
                        current-profiled-vector-append
                        current-profiled-vector-set!
                        current-profiled-vector->list
-                       current-profiled-list->vector)])
+                       #;current-profiled-list->vector)])
        #`(let ()
            (define name* def*) ...
            (vector-rep

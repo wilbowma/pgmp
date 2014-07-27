@@ -14,5 +14,5 @@
     (define (mlist-set! ls i v)
       (if (zero? i)
         (set-mcar! ls v)
-        (cons (car ls) (mlist-set! (cdr ls) (sub1 i) v))))
+        (mcons (mcar ls) (mlist-set! (mcdr ls) (sub1 i) v))))
     (mlist-set! ls2 2 2)))

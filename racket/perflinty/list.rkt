@@ -22,7 +22,7 @@
 #;(module profiled-list racket/base
   )
 ;; TOOD: Boy does is this in need of a meta-program
-;; Ought to write a macro in that generates all these, call it in a
+;; Ought to write a macro that generates all these, call it in a
 ;; submodule, export all defined in it.
 ;;
 ;; maybe input:
@@ -47,20 +47,33 @@
     (make-parameter real:list-ref)))
 
 ;; TODO: Use this struct instead of implementing vectors as functions.
-(struct (list-rep finit ls))
-;; These are delicate; profiled list must evaluated first to set parameters.
-;; But Racket is CBV so it's okay for now.
-(define (list? ls) ((current-profiled-list?) (ls)))
-;; TODO: This may not work right... probably only one version of the
-;; parameters will get set.
-;; TODO: These versions that return lists don't work right
-(define (map f . lss)
-  (apply (current-profiled-map) f (real:map (lambda (ls) (ls)) lss)))
-(define (car ls) ((current-profiled-car) (ls)))
-(define (cdr ls) ((current-profiled-cdr) (ls)))
-(define (cons x ls) ((current-profiled-cons) x (ls)))
-(define (list-ref ls n) ((current-profiled-list-ref) (ls) n))
-(define (length ls) ((current-profiled-length) (ls)))
+(struct list-rep (finit ls))
+
+(define (list? ls)
+  ((list-rep-finit))
+  ((current-profiled-list?) (list-rep-ls ls)))
+;; TODO: This might need to be a macro, as it kind of needs to generate
+;; new sources
+(define (map f ls)
+  ((list-rep-finit ls))
+  (list-rep (list-rep-finit ls) (apply (current-profiled-map) f (list-rep-ls ls))))
+(define (car ls)
+  ((list-rep-finit ls))
+  ((current-profiled-car) (list-rep-ls ls)))
+(define (cdr ls)
+  ((list-rep-finit ls))
+  ((current-profiled-cdr) (list-rep-ls ls)))
+;; TODO: This might need to be a macro, as it kind of needs to generate
+;; new sources
+(define (cons x ls)
+  ((list-rep-finit ls))
+  (list-rep (list-rep-finit ls) ((current-profiled-cons) x (list-rep-ls ls))))
+(define (list-ref ls n)
+  ((list-rep-finit ls))
+  ((current-profiled-list-ref) (list-rep-ls ls) n))
+(define (length ls)
+  ((list-rep-finit ls))
+  ((current-profiled-length) (list-rep-ls ls)))
 
 (begin-for-syntax
   (define (srcloc->list srcloc)
@@ -99,7 +112,7 @@
   (syntax-case x ()
     [(_ init* ...)
      (unless (>= (look-up-profile list-src) (look-up-profile vector-src))
-       (printf "WARNING: You should probably reimplement this list as a vector: ~a"
+       (printf "WARNING: You should probably reimplement this list as a vector: ~a\n"
                x))
      (with-syntax ([(def* ...) op*]
                    [(name* ...) (generate-temporaries op*)]
@@ -113,6 +126,5 @@
                        current-profiled-length)])
        #`(let ()
            (define name* def*) ...
-           (lambda ()
-             (params name*) ...
-             (real:list init* ...))))]))
+           (list-rep (lambda () (params name*) ...)
+                     (real:list init* ...))))]))
