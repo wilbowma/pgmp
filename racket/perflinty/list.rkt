@@ -51,7 +51,7 @@
 (struct list-rep (finit ls))
 
 (define (list? ls)
-  ((list-rep-finit))
+  ((list-rep-finit ls))
   ((current-profiled-list?) (list-rep-ls ls)))
 ;; TODO: This might need to be a macro, as it kind of needs to generate
 ;; new sources

@@ -49,5 +49,12 @@
     (debugf "Looking up ~a\n" srcloc)
     #;(define sexp   (syntax->datum stx)) ; for disambiguation
     (cond
-      [(assoc srcloc snapshots) => cdr]
+      [(assoc srcloc snapshots)
+       =>
+       ;;cdr
+       ;; somehow the generated sources end up in multiple places, so
+       ;; grab them all
+       (lambda (_)
+         (for/sum ([p (filter (lambda (v) (equal? srcloc (car v))) snapshots)])
+           (cdr p)))]
       [else 0])))
