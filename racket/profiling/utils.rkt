@@ -16,14 +16,16 @@
           (syntax-position stx)
           (syntax-span stx)))
 
-
 (define (profile-file stx-or-filename)
-  (cond [(syntax? stx-or-filename)
-           (source-file->profile-file (syntax-source stx-or-filename))]
-          [(path-string? stx-or-filename)
-           stx-or-filename]
-          [else
-           (error "not a filename" stx-or-filename)]))
+  (cond
+    [(srcloc? stx-or-filename)
+     (source-file->profile-file (srcloc-source stx-or-filename))]
+    [(syntax? stx-or-filename)
+     (source-file->profile-file (syntax-source stx-or-filename))]
+    [(path-string? stx-or-filename)
+     stx-or-filename]
+    [else
+      (error "not a filename" stx-or-filename)]))
 
 (define (srcloc->list srcloc)
   (and srcloc
