@@ -1,4 +1,6 @@
 #lang racket/base
+;; Run via:
+;; > racket run.rkt
 
 (require
   rackunit
@@ -8,10 +10,12 @@
     get-execute-counts)
   (only-in errortrace/errortrace-lib
     make-errortrace-compile-handler)
-  (only-in "profiling/utils.rkt"
+  (only-in "../profiling/utils.rkt"
     source-file->profile-file)
-  (only-in "profiling/exact-interface.rkt" save-profile))
+  (only-in "../profiling/exact-interface.rkt" save-profile))
 
+;; TODO: Capture output and check the timings are lower after second
+;; run, and the result of run is true.
 (define-syntax-rule (mark runs main-module run)
   (let ()
     (define profile-file (source-file->profile-file main-module))
@@ -42,7 +46,11 @@
              [current-namespace (make-base-namespace)])
             ((dynamic-require main-module run) runs)))))
 
-;; exclusive-cond-test.rkt
 (module+ main
-         (mark 10000000 "tests/exclusive-cond-test.rkt" 'run)
-         (mark 10000000 "tests/case-test.rkt" 'run))
+  (mark 10000000 "exclusive-cond-test.rkt" 'run)
+  (mark 10000000 "case-test.rkt" 'run)
+  (mark 1000000  "perflinty-list.rkt" 'run)
+  (mark 1000000  "perflinty-list-as-vector.rkt" 'run)
+  (mark 1000000  "perflinty-vector.rkt" 'run)
+  (mark 1000000  "perflinty-vector-as-list.rkt" 'run)
+  (mark 1000000  "perflinty-auto.rkt" 'run))

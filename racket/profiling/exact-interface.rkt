@@ -1,6 +1,6 @@
 #lang racket/base
 
-(provide 
+(provide
   load-profile-info
   load-profile ; for users
   save-profile) ; for run.rkt
@@ -50,7 +50,13 @@
     (debugf "Looking up ~a\n" srcloc)
     #;(define sexp   (syntax->datum stx)) ; for disambiguation
     (cond
-      [(assoc srcloc snapshots) => cdr]
+      [(assoc srcloc snapshots) =>
+       ;;cdr
+       ;; somehow the generated sources end up in multiple places, so
+       ;; grab them all
+       (lambda (_)
+         (for/sum ([p (filter (lambda (v) (equal? srcloc (car v))) snapshots)])
+           (cdr p)))]
       [else 0]))
   (define m (apply max (cons 0 (map (compose cdr cdr) snapshots))))
   (values
