@@ -93,7 +93,7 @@ dispatch.
   (* (field obj length) (field obj width))]
  [(class-equal? obj Circle)
   (* pi (sqr (field obj r)))]
- [else (method obj "area")])]]
+ [else (method obj area)])]]
 
 By profiling the branches of the @racket[cond], we can sort the clauses
 in order of most likely to succeed. However, @racket[cond] is order

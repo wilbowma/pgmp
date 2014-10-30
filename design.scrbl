@@ -3,11 +3,10 @@
 @(require "bib.rkt")
 @title[#:tag "design" "Design"]
 @(require scribble/manual)
-This section presents the essential points of our system. We first
-discuss how source points are identified and manufactured. We then
-discuss what profile information we use and how we handle multiple data
-sets. We delay giving implementation details until
-@secref{implementation}.
+This section presents the essential points of our system as implemented in Chez
+Scheme. We first discuss how source points are identified and manufactured. We
+then discuss what profile information we use and how we handle multiple data
+sets. We delay giving implementation details until @secref{implementation}.
 
 In a typical meta-programming situation, a meta-program takes as input
 a @emph{source program} in a high-level domain-specific language (DSL)

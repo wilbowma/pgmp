@@ -1,7 +1,9 @@
 #lang racket/base
 
-(provide load-profile ; for users
-         save-profile) ; for run.rkt
+(provide 
+  load-profile-info
+  load-profile ; for users
+  save-profile) ; for run.rkt
 
 (require
   racket/list
@@ -26,7 +28,9 @@
     (lambda () (write (serialize-conv v)))
     #:exists 'replace))
 
-(define (load-profile stx-or-filename)
+;; Returns two functions, a lookup function returning exact counts, and
+;; function that returns relative weight (i.e. profile-query-weight)
+(define (load-profile-info stx-or-filename)
   (define profile-file
     (cond
       [(syntax? stx-or-filename)
@@ -41,10 +45,18 @@
         (lambda ()
           (debugf "Using profile info from: ~a\n" profile-file)
           (deserialize (read))))))
-  (lambda (stx)
+  (define (lookup stx)
     (define srcloc (syntax->srcloc stx))
     (debugf "Looking up ~a\n" srcloc)
     #;(define sexp   (syntax->datum stx)) ; for disambiguation
     (cond
       [(assoc srcloc snapshots) => cdr]
-      [else 0])))
+      [else 0]))
+  (define m (apply max (cons 0 (map (compose cdr cdr) snapshots))))
+  (values
+    lookup
+    (lambda (stx) (/ (lookup stx) (max m 1)))))
+
+(define (load-profile stx-or-filename)
+  (let-values ([(look-up _) (load-profile-info stx-or-filename)])
+    look-up))

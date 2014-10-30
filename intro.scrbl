@@ -4,7 +4,7 @@
 @(require "bib.rkt")
 @title[#:tag "intro" "Introduction"]
 @; Introduce meta-programming
-Meta-programs, or programs that write other programs, are often
+Meta-programs, or programs that operate on programs, are often
 used to implement high-level abstractions ranging from simple
 syntactic abstractions, to compiler generators, to domain-specific
 languages (DSLs).
@@ -38,11 +38,11 @@ generated with static optimization heuristics.
 Compilers that support PGO include .NET, GCC, and LLVM@~cite[lattner02 gcc .net]
 The profile information used by these compilers,
 such as execution counts of basic blocks or control flow graph nodes, is
-low-level compared to the source-language operated on by meta-programs.
-So the optimizations that use the profile information are also performed
+low-level compared to the source-language operated on by meta-programs,
+so the optimizations that use the profile information are also performed
 on low-level constructs. Common optimizations include reordering basic
 blocks, inlining decisions, conditional branch optimization, and
-function layout decisions@~cite[gupta02]. 
+function layout decisions@~cite[gupta02].
 
 Profile information can have an even greater impact on meta-program
 optimizations.
@@ -62,12 +62,12 @@ up to the programmer to take corrective action@~citea{liu09}. Hawkins et.
 al. implement a compiler for a language that generates C++
 implementations of data structures based on high-level
 specifications@~citea["hawkins11" "hawkins12"]. These works implement
-highly specific meta-programming or profiling systems to provide 
+highly specific meta-programming or profiling systems to provide
 advanced optimizations.  Yet no general-purpose mechanism has been
 proposed to date that makes profile information available to
 meta-programing systems for arbitrary optimizations.
 
-This paper describes such a general-purpose mechanism. 
+This paper describes such a general-purpose mechanism.
 Our mechanism makes profile information available at the granularity
 of arbitrary source points identified by the
 meta-program.
@@ -81,25 +81,34 @@ executable one or more times on representative data to gather
 profile data, and running the meta-program and compiler a second time
 to generate the optimized code.
 During the second run of the meta-program, the meta-program retrieves
-the profile information associated with source points.
+the profile information associated with source points, and can use this
+information to inform transformations and optimizations.
 The profile information is also available to the target-language compiler to
-support the optimizations it performs.
+support the further optimizations at the target-language level.
 
-Our mechanism uses standard and efficient block-level profiling
-techniques and is potentially suitable for dynamic optimization of
-a running program in systems that support dynamic
-recompilation@~cite[burger98]. It enables using data sets from multiple
-executions of the instrumented program, and does not interfere with
-traditional (``low-level'') PGO.  We implement this mechanism as part of
-a high performance Scheme system, with profile information made
+Our implementation of this mechanism in Chez Scheme uses standard and
+efficient block-level profiling techniques and is potentially suitable
+for dynamic optimization of a running program in systems that support
+dynamic recompilation@~cite[burger98]. It enables using data sets from
+multiple executions of the instrumented program, and does not interfere
+with traditional (``low-level'') PGO.  We implement this mechanism as
+part of a high performance Scheme system, with profile information made
 available via an API accessible from the high-level syntactic
 abstraction facility through which Scheme supports meta-programming, and
 even accessible at run-time. It should be straightforward to adapt to
 most meta-programming systems with compilers that already support
 profiling.
 
+We also reimplement this mechanism, and all our examples, in the Racket
+programming langauge@~cite[plt-tr1]. While the meta-programming facilities
+provided in Racket are similar to those of Chez Scheme, the language
+implementation and profiling systems are entirely different. We're able to
+reimplement our work by reusing the existing Racket profiling and
+meta-programming infrastructure without making any changes to the language
+implementation.
+
 The remainder of the paper is organized as follows. @Secref{design}
-presents the design of our system at a high level. 
+presents the design of our system at a high level.
 @Secref{examples} demonstrates how to use our mechanism to implement several
 optimizations as meta-programs. These examples demonstrate how our
 work can be used to implement and build on past work in a single,

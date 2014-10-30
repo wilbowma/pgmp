@@ -5,7 +5,7 @@
          racket/date)
 (provide (all-defined-out))
 
-(define-cite ~cite citet generate-bibliography #:style number-style)
+(define-cite ~cite citet generate-bibliography #:style author+date-style)
 (define-bibtex-cite* "bib.bib" ~cite citet ~citea citeta)
 
 (define conte96
@@ -14,25 +14,25 @@
     #:author (authors "Thomas M Conte" "Kishore N Menezes" "Mary Ann
                       Hirsch")
     #:date 1996
-    #:location (proceedings-location 
+    #:location (proceedings-location
                  "Annual ACM/IEEE international symposium on Microarchitecture"
                  #:series 29
                  #:pages '(36 45))
     #:url "http://pdf.aminer.org/000/244/348/commercializing_profile_driven_optimization.pdf"))
 
 (define chen10
-  (make-bib 
+  (make-bib
     #:title "Taming Hardware Event Samples for FDO Compilation"
-    #:author (authors "Deheo Chen" 
-                      "Neil Vachharajani" 
-                      "Robert Hundt" 
+    #:author (authors "Deheo Chen"
+                      "Neil Vachharajani"
+                      "Robert Hundt"
                       "Shih-wei Liao"
                       "Vinodha Ramasamy"
-                      "Paul Yuan" 
-                      "Wenguang Chen" 
+                      "Paul Yuan"
+                      "Wenguang Chen"
                       "Weimin Zheng")
     #:date 2010
-    #:location (proceedings-location 
+    #:location (proceedings-location
                  "Annual IEEE/ACM international symposium on Code
                  generation and optimization"
                  #:series 8
@@ -43,7 +43,7 @@
   (make-bib
     #:title "LLVM: An infrastructure for multi-stage optimization"
     #:author "Chris Authors Lattner"
-    #:location (dissertation-location 
+    #:location (dissertation-location
                  #:institution "University of Illinois"
                  #:degree "Master")
     #:date 2002))
@@ -55,7 +55,7 @@
                       "Tillmann Rendel"
                       "Christian Kästner"
                       "Klaus Ostermann")
-    #:location (proceedings-location 
+    #:location (proceedings-location
                  "of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)"
                  #:pages '(391 406))
     #:url "http://www.informatik.uni-marburg.de/~seba/publications/sugarj.pdf"
@@ -63,7 +63,7 @@
     ;; to " " and "~"
     #:date 2011))
 
-(define taha00 
+(define taha00
   (make-bib
     #:title "MetaML and multi-stage programming with explicit annotations "
     #:author (authors "Walid Taha" "Time Sheard")
@@ -82,7 +82,7 @@
                       "John T O'Donnell"
                       "Jörg Striegntiz"
                       "Walid Taha")
-    #:location (proceedings-location 
+    #:location (proceedings-location
                  "Domain-Specific Program Generation"
                  #:pages '(51 72)
                  #:volume "Springer Berlin Heidelberg.")
@@ -105,7 +105,7 @@
     #:author (authors "R. Kent Dybvig"
                        "Robert Hieb"
                        "Carl Bruggeman")
-    #:location (journal-location 
+    #:location (journal-location
                  "Lisp and symbolic computation"
                  #:pages '(295 326)
                  #:number 4
@@ -113,7 +113,7 @@
     #:date 1993
     #:url "http://pdf.aminer.org/001/006/789/syntactic_abstraction_in_scheme.pdf"))
 
-(define felleisen04 
+(define felleisen04
   (make-bib
     #:title "Building little languages with macros."
     #:author (authors "Matthias Felleisen" "R. Findler" "Matthew Flatt"
@@ -130,7 +130,7 @@
     #:title "Languages as Libraries"
     #:author (authors "Sam Tobin-Hochstadt" "Vincent St-Amour" "Ryan
                        Culpepper" "Matthew Flatt" "Matthias Felleisen")
-    #:location (proceedings-location 
+    #:location (proceedings-location
                  "of Conference on Programming Language
                  Design and Implementation (PLDI)"
                  #:pages '(132 141))
@@ -146,21 +146,21 @@
                  #:pages '(240 249))
     #:date 1998
     #:url "http://pdf.aminer.org/000/289/483/an_infrastructure_for_profile_driven_dynamic_recompilation.pdf"))
- 
+
 (define gcc
-  (make-bib 
+  (make-bib
     #:title "Optimize Options - Using the GNU Compiler Collection"
     #:date (seconds->date (find-seconds 0 0 0 20 08 2013))
     #:url "http://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Optimize-Options.html#index-fprofile_002duse-867"))
 
 (define .net
-  (make-bib 
+  (make-bib
     #:title "Profile-Guided Optimizations"
     #:date (seconds->date (find-seconds 0 0 0 20 08 2013))
     #:url "http://msdn.microsoft.com/en-us/library/e7k32f4k(v=vs.90).aspx"))
 
 (define boost
-  (make-bib 
+  (make-bib
     #:title "Boost C++ Libraries"
     #:author (authors "B. Dawes" "D. Abrahams")
     #:date 2009
@@ -192,7 +192,7 @@
 ;    #:date 2002))
 ;(define gupta02 (in-bib srikant2007compiler " Chapter 4"))
 ;; Awful hack
-(define gupta02 
+(define gupta02
   (make-bib
     #:title (elem "Profile Guided Code Optimization. In " (editor (authors "YN Srikant" "Priti Shankar")))
     #:author (authors "R. Gupta" "E. Mehofer" "Y. Zhang")
@@ -200,4 +200,10 @@
                  "The compiler design handbook: optimizations and machine code generation")
     #:date 2002))
 
-  
+(define plt-tr1
+  (make-bib #:title    "Reference: Racket"
+            #:author   (authors "Matthew Flatt" "PLT")
+            #:date     "2010"
+            #:location (techrpt-location #:institution "PLT Design Inc."
+                                         #:number "PLT-TR-2010-1")
+            #:url      "http://racket-lang.org/tr1/"))

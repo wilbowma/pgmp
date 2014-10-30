@@ -17,8 +17,8 @@ It makes profile information available at the granularity of arbitrary
 source points identified by the meta-program, while
 making use of standard and efficient block-level profile-instrumentation
 techniques.
-We have implemented the mechanism as part of Chez Scheme, with
+We have implemented the mechanism as part of Chez Scheme and Racket, with
 profile information made available via the syntactic abstraction
-facility through which Scheme supports meta-programming.
+facility through which each languages supports meta-programming.
 Our mechanism can be adapted to most meta-programming systems with
 compilers that support profiling.
