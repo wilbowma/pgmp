@@ -21,7 +21,6 @@ on profile information.
 @section{Scheme macro example}
 Our mechanism and examples are implemented in Scheme, so we give below
 a simple example to introduce Scheme meta-programming and its syntax.
-
 @figure-here["sample-macro" "Sample macro"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK
@@ -40,12 +39,12 @@ a simple example to introduce Scheme meta-programming and its syntax.
         ;; Runs at compile time then
         ;; splices the result into the
         ;; generated code
-        #,@(let loop [(i (syntax->datum n))]
+        #,@(let l [(i (syntax->datum n))]
              ;; Loops from n to 0
              (if (zero? i)
                  '()
                  ;; Create a list #'body
-                 (cons #'body (loop (sub1 i))))))]))
+                 (cons #'body (l (sub1 i))))))]))
 )]
 
 The meta-program in @figure-ref{sample-macro} expects a number
@@ -59,137 +58,15 @@ we run a loop at compile-time that generates a list with @racket[n]
 copies of the syntax @racket[body], and then splice
 (@racketmetafont["#,@"]) the copies into the generated program.
 
-@section[#:tag "eg-virtual-call"]{Profile-guided receiver class prediction}
-In this example we demonstrate how to implement profile-guided receiver
-class prediction@~citea{grove95} for a hypothetical object-oriented DSL
-with virtual methods, similar to C++. We perform this optimization
-through a general meta-program called @racket[exclusive-cond], a
-branching construct that can automatically reorder its clauses based on
-which is most likely to be executed.
+@section[#:tag "eg-case"]{Profile-guided conditional branch optimization}
+The .NET compiler feature value probes, which enable profile-guided
+reordering of @code{switch} statements @~cite[.net]. As our first example, we
+demonstrate that our mechanism can be used to easily implement this
+optimization without the specialized support of value probes. We will
+optimize Scheme's @racket[case] construct, which is similar to
+@code{switch}.
 
-@racket[cond] is a Scheme branching construct analogous to a series of
-if/else if statements. The clauses of
-@racket[cond] are executed in order until the left-hand side of a clause
-is true. If there is an @racket[else] clause, the right-hand side of the
-@racket[else] clause is taken only if no other clause's left-hand side
-is true.
-
-@Figure-ref{cond-example} shows an example of a @racket[cond] generated
-by our hypothetical OO DSL. We assume the DSL compiler simply expands
-every virtual method call into a conditional branch for known instances
-of objects and relies on another meta-program to reorder branches and
-throw out uncommon cases.
-
-We borrow the following example from Grove et. al.@~citea{grove95}.
-Consider a class @racket[Shape] with a virtual method @racket[area].
-@racket[Square] and @racket[Circle] inherit @racket[Shape]
-and implement the virtual @racket[area]. We will use
-@racket[exclusive-cond] to reorder inlined virtual method calls to
-optimize the common case, and fall back to dynamic virtual method
-dispatch.
-
-@;@racketblock[#,(port->string (open-input-file "cond-all.ss"))]
-@figure-here["cond-example" (elem "An example of " @racket[cond])
-@racketblock[
-(cond
- [(class-equal? obj Square)
-  (* (field obj length) (field obj width))]
- [(class-equal? obj Circle)
-  (* pi (sqr (field obj r)))]
- [else (method obj area)])]]
-
-By profiling the branches of the @racket[cond], we can sort the clauses
-in order of most likely to succeed. However, @racket[cond] is order
-dependent. While the programmer can see the clauses are mutually
-exclusive, the compiler cannot prove this in general and cannot reorder
-the clauses.
-
-Instead of cursing Rice's theorem, we use meta-programming
-to encode and take advantage of this high-level knowledge. We define
-@racket[exclusive-cond], @figure-ref{exclusive-cond}, with the same
-syntax and semantics of @racket[cond] @note{Schemers: we omit the
-alternative cond syntaxes for brevity.}, but without the specific order
-of execution. We then use profile information to reorder the clauses.
-
-@figure**["exclusive-cond"
-        (elem "Implementation of " @racket[exclusive-cond])
-@todo{Ensure this is runnable}
-@#reader scribble/comment-reader
-(RACKETBLOCK
-(define-syntax (exclusive-cond x)
-  (define-record-type clause (fields syn weight))
-  (define (parse-clause clause)
-    (syntax-case clause ()
-      [(e0 e1 e2 ...) (make-clause clause (or (profile-query-weight #'e1) 0))]
-      [_ (syntax-error clause "invalid clause")]))
-  (define (sort-clauses clause*)
-    (sort (lambda (cl1 cl2)
-            (> (clause-weight cl1) (clause-weight cl2)))
-     (map parse-clause clause*)))
-  (define (reorder-cond clause* els?)
-    #`(cond
-        #,@(map clause-syn (sort-clauses clause*)) . #,els?))
-  (syntax-case x (else)
-    [(_ m1 ... (else e1 e2 ...)) (reorder-cond #'(m1 ...) #'([else e1 e2 ...]))]
-    [(_ m1 ...) (reorder-cond #'(m1 ...) #'())]))
-)]
-
-@; How does exclusive-cond use profile information to implement cond
-The @racket[exclusive-cond] macro rearranges clauses based on
-the profiling information of the right-hand sides. Since the left-hand
-sides are executed depending on the order of the clauses, profiling
-information from the left-hand side is not enough to determine which
-clause is executed most often. The @racket[clause] structure stores the
-original syntax for @racket[exclusive-cond] clause and the weighted
-profile count for that clause.  Since a valid @racket[exclusive-cond]
-clause is also a valid @racket[cond] clause, we copy the syntax
-and generate a new @racket[cond] with the clauses sorted according to
-profile weights. Of course we do not include the @racket[else] clause
-when reordering other clauses; it is always last.
-
-We use the function @racket[profile-query-weight] to access the profile
-information. Given a source object or source expression, it returns the
-associated profile weight.
-
-@figure-here["exclusive-cond-expansion"
-        (elem "An example of " @racket[exclusive-cond] " and its expansion")
-@#reader scribble/comment-reader
-(racketblock
-(exclusive-cond
- [(class-equal? obj Square)
-  ;; executed 2 times
-  (* (field obj length) (field obj width))]
- [(class-equal? obj Circle)
-  ;; executed 5 times
-  (* pi (sqr (field obj r)))]
- [else (method obj "area")]))
-
-@#reader scribble/comment-reader
-(racketblock
-(cond
- [(class-equal? obj Circle)
-  ;; executed 5 times
-  (* pi (sqr (field obj r)))]
- [(class-equal? obj Square)
-  ;; executed 2 times
-  (* (field obj length) (field obj width))]
- [else (method obj "area")])
-)]
-
-@Figure-ref{exclusive-cond-expansion} shows how our receiver
-class prediction example is optimized through
-@racket[exclusive-cond]. The generated @racket[cond] will test for
-@racket[Circle] (the common case) first.
-
-@section[#:tag "eg-case"]{Fast Path Tokenizer}
-In this example we demonstrate how to use the general meta-program,
-@racket[exclusive-cond], presented in the previous example to optimize a
-tokenizer. A tokenizer in Scheme can be written naturally
-using @racket[cond] or @racket[case], a pattern matching construct
-similar to C's @racket[switch]. Such a tokenizercan be easily
-optimized by using the @racket[exclusive-cond] macro we saw earlier.
-
-@racket[case] takes an expression @racket[key-expr] and an arbitrary
+The @racket[case] construct takes an expression @racket[key-expr] and an arbitrary
 number of clauses, followed by an optional @racket[else] clause. The
 left-hand side of each clause is a list of constants. @racket[case]
 executes the right-hand side of the first clause in which
@@ -197,25 +74,25 @@ executes the right-hand side of the first clause in which
 @racket[key-expr] is not @racket[eqv?] to any element of any left-hand
 side and an @racket[else] clause exists then the right-hand side of the
 @racket[else] clause is executed.
-
 @figure-here["case-example"
-        (elem "An example tokenizer using " @racket[case])
+        (elem "An example using " @racket[case])
 @racketblock[
-  (case (read-token)
-        [(#\space) e1]
-        [(#\)) e2]
+  (case (read-char)
+        [(#\space #\tab) e1]
+        [(#\() e2]
         [(#\( #\)) e3]
         ...
         [else e-else])
 ]]
 
 @Figure-ref{case-example} shows an example @racket[case] expression. If
-the token is a space, @racket[e1] is executed. If the token is a right
-paren then @racket[e2] is executed. If the token is a left paren then
-@racket[e3] is executed. If no other clauses match, then @racket[e-else]
-is executed. Note that the third clause has an extra right paren
-character that can never be reached, since it would first match the
-second clause.
+the token is a space or tab, @racket[e1] is executed. If the token is a
+left parenthesis then @racket[e2] is executed. If the token is a right
+paren then @racket[e3] is executed. If no other clauses match, then
+@racket[e-else] is executed. Note that the third clause has an extra
+left paren character that can never be reached, since it would first
+match the second clause. We do this to demonstrate that our meta-program
+preserves order dependence.
 
 @; How are clauses parsed
 @Figure-ref{case-impl} shows the full implementation of case. The
@@ -226,9 +103,8 @@ branch to take, we must remove overlapping elements before reordering
 clauses. We parse each clause into the set of left-hand side
 keys and right-hand side bodies. We remove overlapping keys
 by keeping only the first instance of each key when processing the
-clauses in the original order.  After removing overlapping keys, we
-generate an @racket[exclusive-cond].
-
+clauses in the original order. After removing overlapping keys, we
+generate an @racket[exclusive-cond] expression.
 @figure**["case-impl" (elem "Implementation of " @racket[case] " using "
 @racket[exclusive-cond])
 @todo{Ensure this is runnable}
@@ -266,27 +142,175 @@ generate an @racket[exclusive-cond].
                 (for-each trim-keys! clause*)
                 (emit clause*)))
     (syntax-case x (else)
-      [(_ e clause ... [else e1 e2 ...])
-       (helper #'e #'(clause ...) #'([else e1 e2 ...]))]
-      [(_ e clause ...)
-       (helper #'e #'(clause ...) #'())]))
+      [(_ e clause ... [else e1 e2 ...]) (helper #'e #'(clause ...) #'([else e1 e2 ...]))]
+      [(_ e clause ...) (helper #'e #'(clause ...) #'())]))
 )]
+
+The Scheme @racket[cond] construct is analogous to a series of if/else
+if statements. The clauses of @racket[cond] are executed in order until
+the left-hand side of a clause is true. If there is an @racket[else]
+clause, the right-hand side of the @racket[else] clause is taken only
+if no other clause's left-hand side is true.
+
+We introduce the @racket[exclusive-cond] construct,
+@figure-ref{exclusive-cond}, as a similar conditioanl branching
+construct, but one that expects all branches to be mutually exclusive.
+When the branches are mutually exclusive we can safely reorder the
+clauses to execute the most likely conditional first. While the compiler
+cannot prove such a property in general, meta-programming allows us to
+provide programmers a way to encode this knowledge in their program and
+take advantage of optimizations that would have otherwise been
+impossible.
+
+@; How does exclusive-cond use profile information to implement cond
+The @racket[exclusive-cond] macro rearranges clauses based on
+the profiling information of the right-hand sides. Since the left-hand
+sides are executed depending on the order of the clauses, profiling
+information from the left-hand side is not enough to determine which
+clause is executed most often. The @racket[clause] structure stores the
+original syntax for @racket[exclusive-cond] clause and the weighted
+profile count for that clause.  Since a valid @racket[exclusive-cond]
+clause is also a valid @racket[cond] clause, we copy the syntax
+and generate a new @racket[cond] with the clauses sorted according to
+profile weights. Of course we do not include the @racket[else] clause
+when reordering other clauses; it is always last.
+
+We use the function @racket[profile-query-weight] to access the profile
+information. Given a source object or source expression, it returns the
+associated profile weight.
+
+@figure**["exclusive-cond"
+        (elem "Implementation of " @racket[exclusive-cond])
+@todo{Ensure this is runnable}
+@#reader scribble/comment-reader
+(RACKETBLOCK
+(define-syntax (exclusive-cond x)
+  (define-record-type clause (fields syn weight))
+  (define (parse-clause clause)
+    (syntax-case clause ()
+      [(e0 e1 e2 ...) (make-clause clause (or (profile-query-weight #'e1) 0))]
+      [_ (syntax-error clause "invalid clause")]))
+  (define (sort-clauses clause*)
+    (sort (lambda (cl1 cl2)
+            (> (clause-weight cl1) (clause-weight cl2)))
+     (map parse-clause clause*)))
+  (define (reorder-cond clause* els?)
+    #`(cond
+        #,@(map clause-syn (sort-clauses clause*)) . #,els?))
+  (syntax-case x (else)
+    [(_ m1 ... (else e1 e2 ...)) (reorder-cond #'(m1 ...) #'([else e1 e2 ...]))]
+    [(_ m1 ...) (reorder-cond #'(m1 ...) #'())]))
+)]
+
+@Figure-ref{case-expansion} shows how the example @racket[case]
+expression from @figure-ref{case-example} expands into
+@racket[exclusive-cond]. Note the duplicate parenthesis in the third
+clause is dropped to preserve ordering constraints from @racket[case].
+
 @figure-here["case-expansion"
         (elem "The expansion of " @figure-ref{case-example})
 @racketblock[
 (let ([x (read-token)])
   (exclusive-cond
-    [(memv x '(#\space)) e1]
-    [(memv x '(#\))) e2]
-    [(memv x '(#\()) e3]
+    [(memv x '(#\space #\tab)) e1]
+    [(memv x '(#\()) e2]
+    [(memv x '(#\))) e3]
     ...
     [else e-else]))
 ]]
 
-@Figure-ref{case-expansion} shows how the example @racket[case]
-expression from @figure-ref{case-example} expands into
-@racket[exclusive-cond]. Note the duplicate right paren in the third
-clause is dropped to preserve ordering constraints from @racket[case].
+@section[#:tag "eg-virtual-call"]{Profile-guided receiver class prediction}
+In this example we demonstrate how to implement profile-guided receiver
+class prediction@~citea{grove95} for an object-oriented DSL implemented
+in Scheme. We perform this optimization by taking advantage of the
+@racket[exclusive-cond] construct we developed in the last section.
+
+@;@racketblock[#,(port->string (open-input-file "cond-all.ss"))]
+@figure-here["cond-example" (elem "An example of " @racket[cond])
+@racketblock[
+(cond
+ [(class-equal? obj Square)
+  (* (field obj length) (field obj width))]
+ [(class-equal? obj Circle)
+  (* pi (sqr (field obj r)))]
+ [else (method obj area)])]]
+
+@Figure-ref{cond-example} shows an example of a @racket[cond] generated
+by our DSL. We borrow the following example from Grove et.
+al.@~citea{grove95}. The classes @racket[Square] and @racket[Circle]
+implement the method @racket[area].  The naïve DSL compiler simply
+expands every method call into a conditional branch for known instances
+of objects. We would like to inline the common cases, but if there are
+many known classes the conditional tests may be too expensive to make
+this worthwhile. Furthermore, we would like to perform the tests in
+order according to which is most likely to succeed.
+
+@figure**["method-inline"
+        (elem "The implementation of method inlining.")
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
+(RACKETBLOCK
+;; inline likely classes in most likely order
+;; Programmer calls to obj.m(val* ...) expand to (method-inline obj m val* ...)
+(define-syntax (method-inline syn)
+ (syntax-case syn ()
+  [(_ obj m val* ...)
+  (with-syntax ([(this-val* ...) #'(obj val* ...)])
+   #`(exclusive-cond
+       #,@(filter values
+            (map (lambda (class)
+                   (let* ([method-ht (cdr (hashtable-ref classes class &undefined))]
+                          [method-info (hashtable-ref method-ht (syntax->datum #'m) &undefined)])
+                    (with-syntax
+                      ([(arg* ...) (cadr method-info)]
+                       [(body body* ...) (cddr method-info)])
+                      ;; Inline only the methods that take up more than 20% of the computation.
+                      (if (> (profile-query-weight #'body) .2)
+                          #`[(class-equal? obj #,(datum->syntax #'obj class))
+                             (let ([arg* this-val*] ...) body body* ...)]
+                          #f))))
+            (vector->list (hashtable-keys classes))))
+       [else (method obj m val* ...)]))]))
+)]
+
+As we saw in the previous section, @racket[exclusive-cond] provides a
+way to encode our high level knowledge of the program. In particular, we
+know class equality tests are mutually exclusive and safe to reorder. We
+can simply reimplement method calls using @racket[exclusive-cond]
+instead of @racket[cond] to get profile-guided receiver class
+prediction. To eliminate uncommon cases altogether and more quickly fall
+back to dynamic dispath, we can even use the profile information to stop
+inlining after a certain threshold.  This implementation is shown in
+@figure-ref{method-inline}.
+
+@figure-here["exclusive-cond-expansion"
+        (elem "An example of " @racket[exclusive-cond] " and its expansion")
+@#reader scribble/comment-reader
+(racketblock
+(exclusive-cond
+ [(class-equal? obj Square)
+  ;; executed 2 times
+  (* (field obj length) (field obj width))]
+ [(class-equal? obj Circle)
+  ;; executed 5 times
+  (* pi (sqr (field obj r)))]
+ [else (method obj "area")]))
+
+@#reader scribble/comment-reader
+(racketblock
+(cond
+ [(class-equal? obj Circle)
+  ;; executed 5 times
+  (* pi (sqr (field obj r)))]
+ [(class-equal? obj Square)
+  ;; executed 2 times
+  (* (field obj length) (field obj width))]
+ [else (method obj "area")])
+)]
+
+@Figure-ref{exclusive-cond-expansion} shows how our receiver
+class prediction example is optimized through
+@racket[exclusive-cond]. The generated @racket[cond] will test for
+@racket[Circle] (the common case) first.
 
 @section[#:tag "eg-datatype"]{Data Structure Specialization}
 @; Motivate an example that normal compilers just can't do
