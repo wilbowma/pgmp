@@ -7,21 +7,24 @@
 @(require racket/port)
 @title[#:tag "examples"]{Examples}
 This section demonstrates how to use our mechanism, and how it
-generalizes and advances past work on profile-guided meta-programs.  The
-first example demonstrates profile-guided receiver class
-prediction@~citea{grove95} for an object-oriented DSL based on profile
-information. We then reuse part of that meta-program to optimize a
-tokenizer. The final example demonstrates specializing a data
-structure based on profile information.
+generalizes and advances past work on profile-guided meta-programs. We
+first demonstrate optimizing Scheme's @racket[case] construct, a
+multi-way branching constract similar to C's @code{switch}. Then
+we then demonstrates profile-guided receiver class
+prediction@~citea{grove95} for an object-oriented DSL. Finally
+we demonstrate how our mechanism is powerful enough to reimplment
+Perflint@~citea{liu09}. We provide list and vector libraries that warn
+programmers when they may be using a less than optimal data structure,
+and even provide a version that makes the choice automatically, based
+on profile information.
 
 @section{Scheme macro example}
-Our system and examples are implemented in Scheme, so we give below
-a simple example to briefly introduce Scheme meta-programming and
-its syntax.
+Our mechanism and examples are implemented in Scheme, so we give below
+a simple example to introduce Scheme meta-programming and its syntax.
 
 @figure-here["sample-macro" "Sample macro"
-@#reader scribble/COMMENT-READER-T
-@(RACKETBLOCK
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
+(RACKETBLOCK
 ;; Defines a macro (meta-program) `do-n-times'
 ;; Example:
 ;; (do-n-times 3 (display “*”)) expands into
@@ -34,15 +37,15 @@ its syntax.
     [(do-n-times n body)
      ;; Start generating code
      #`(begin
-         ;; Runs at compile time then
-         ;; splices the result into the
-         ;; generated code
-         #,@(let loop [(i (syntax->datum n))]
-              ;; Loops from n to 0
-              (if (zero? i)
-                  '()
-                   ;; Create a list #'body
-                   (cons #'body (loop (sub1 i))))))]))
+        ;; Runs at compile time then
+        ;; splices the result into the
+        ;; generated code
+        #,@(let loop [(i (syntax->datum n))]
+             ;; Loops from n to 0
+             (if (zero? i)
+                 '()
+                 ;; Create a list #'body
+                 (cons #'body (loop (sub1 i))))))]))
 )]
 
 The meta-program in @figure-ref{sample-macro} expects a number
@@ -229,7 +232,7 @@ generate an @racket[exclusive-cond].
 @figure**["case-impl" (elem "Implementation of " @racket[case] " using "
 @racket[exclusive-cond])
 @todo{Ensure this is runnable}
-@#reader scribble/COMMENT-READER-T
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK
 (define-syntax (case x)
   (define (helper key-expr clause* els?)
@@ -310,7 +313,7 @@ high-level decisions normally left to the programmer.
 @figure**["sequence-datatype"
           (elem "Implementation of " @racket[define-sequence-datatype])
 @todo{Ensure this is runnable, and in sync with {scheme,racket}/sequence-datatype.{ss,rkt}}
-@#reader scribble/COMMENT-READER-T
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK
 (define-syntax (define-sequence-datatype x)
   ;; Create fresh source object. list-src profiles operations that are

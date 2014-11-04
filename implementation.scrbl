@@ -35,7 +35,7 @@ profile list and vector operations. In our implementation, these might
 be created as seen in @figure-ref{really-make-source}.
 
 @figure["really-make-source" "Creating custom source objects"
-@#reader scribble/COMMENT-READER-T
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
 @(RACKETBLOCK
 (define make-fresh-source-obj!
   (let ([x 0])
