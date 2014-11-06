@@ -77,7 +77,10 @@
   ((current-profiled-length) (list-rep-ls ls)))
 
 (begin-for-syntax
-  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list")))
+  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list"))
+  (define param* #'(current-profiled-list?  current-profiled-map
+    current-profiled-car current-profiled-cdr current-profiled-cons
+    current-profiled-list-ref current-profiled-length)))
 (define-syntax (list x)
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
@@ -90,8 +93,7 @@
     (map
       (lambda (v src)
         (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
-      '(real:list? real:map real:car real:cdr real:cons real:list-ref
-                   real:length)
+      '(real:list? real:map real:car real:cdr real:cons real:list-ref real:length)
       (list #f #f #f list-src list-src vector-src vector-src)))
   (syntax-case x ()
     [(_ init* ...)
@@ -100,15 +102,8 @@
                x))
      (with-syntax ([(def* ...) op*]
                    [(name* ...) (generate-temporaries op*)]
-                   [(params ...)
-                    #'(current-profiled-list?
-                       current-profiled-map
-                       current-profiled-car
-                       current-profiled-cdr
-                       current-profiled-cons
-                       current-profiled-list-ref
-                       current-profiled-length)])
+                   [(param* ...) param*])
        #`(let ()
            (define name* def*) ...
-           (list-rep (lambda () (params name*) ...)
+           (list-rep (lambda () (param* name*) ...)
                      (real:list init* ...))))]))

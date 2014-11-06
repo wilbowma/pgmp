@@ -87,7 +87,13 @@
   ((current-profiled-list->vector) (vector ls)))
 
 (begin-for-syntax
-  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-vector")))
+  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-vector"))
+  (define param* #'(current-profiled-vector?
+    current-profiled-vector-ref current-profiled-vector-copy
+    current-profiled-vector-length current-profiled-vector-map
+    current-profiled-vector-append current-profiled-vector-set!
+    current-profiled-vector->list))
+  )
 (define-syntax (vector x)
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
@@ -112,18 +118,8 @@
                x))
      (with-syntax ([(def* ...) op*]
                    [(name* ...) (generate-temporaries op*)]
-                   [(params ...)
-                    #'(current-profiled-vector?
-                       current-profiled-vector-ref
-                       current-profiled-vector-copy
-                       current-profiled-vector-length
-                       current-profiled-vector-map
-                       current-profiled-vector-append
-                       current-profiled-vector-set!
-                       current-profiled-vector->list
-                       #;current-profiled-list->vector)])
+                   [(param* ...) param*])
        #`(let ()
            (define name* def*) ...
-           (vector-rep
-             (lambda () (params name*) ...)
+           (vector-rep (lambda () (param* name*) ...)
              (real:vector init* ...))))]))
