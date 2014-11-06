@@ -18,9 +18,9 @@ we demonstrate how our mechanism is powerful enough to reimplment
 Perflint@~citea{liu09}. We provide list and vector libraries that warn
 programmers when they may be using a less than optimal data structure,
 and even provide a version that makes the choice automatically, based
-on profile information. Complete versions of all examples in both Chez
-Scheme and Racket implementations are freely available at
-@~cite[code-repo].
+on profile information. Complete versions of all examples are freely
+available at @~cite[code-repo]. Racket implementations exist for all
+examples for those without access to Chez Scheme.
 
 @section{Scheme macro example}
 Our mechanism and examples are implemented in Scheme, so we give below
@@ -257,8 +257,9 @@ can simply reimplement method calls using @racket[exclusive-cond]
 instead of @racket[cond] to get profile-guided receiver class
 prediction. To eliminate uncommon cases altogether and more quickly fall
 back to dynamic dispath, we can even use the profile information to stop
-inlining after a certain threshold.  This implementation is shown in
-@figure-ref{method-inline}.
+inlining after a certain threshold. This implementation is shown in
+@figure-ref{method-inline}. In this example, we arbitrarily choose to
+inline only methods that take up more than 20% of the computation.
 @figure**["method-inline" "The implementation of method inlining."
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
@@ -276,7 +277,7 @@ inlining after a certain threshold.  This implementation is shown in
                           [method-info (hashtable-ref method-ht (syntax->datum #'m) &undefined)])
                     (with-syntax
                       ([(arg* ...) (cadr method-info)] [(body body* ...) (cddr method-info)])
-                      ;; Inline only the methods that take up more than 20% of the computation.
+                      ;; Inline only methods that use more than 20% of the computation.
                       (if (> (profile-query-weight #'body) .2)
                           #`[(class-equal? obj #,(datum->syntax #'obj class))
                              (let ([arg* this-val*] ...) body body* ...)]
@@ -340,73 +341,48 @@ to a list or vector based on profiling information. Complete versions of
 both Chez Scheme and Racket implementations of this code are freely
 available at @~cite[code-repo].
 
-@figure**["sequence-datatype"
-          (elem "Implementation of " @racket[define-sequence-datatype])
-@todo{Ensure this is runnable, and in sync with {scheme,racket}/sequence-datatype.{ss,rkt}}
+@figure**["profile-list" "Implementation of profile list"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK
-(define-syntax (define-sequence-datatype x)
-  ;; Create fresh source object. list-src profiles operations that are
+;; A definition at the meta-level, not at run-time
+(meta (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list")))
+(define-syntax (list x)
+  ;; Create `fresh' source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
-  ;; vectors.
-  (define list-src (make-fresh-source-obj!))
-  (define vector-src (make-fresh-source-obj!))
-  ;; Defines all the sequences operations, giving implementations for
-  ;; lists and vectors.
+  ;; vectors. 
+  (define look-up-profile (load-profile x))
+  (define list-src (make-fresh-source-obj! x))
+  (define vector-src (make-fresh-source-obj! x))
+  ;; Defines new wrapped list operations.
   (define op*
-    `((make-seq ,#'list ,#'vector)
-      (seq? ,#'list? ,#'vector?)
-      (seq-map ,#'map ,#'vector-map)
-      (seq-first ,#'first ,#'(lambda (x) (vector-ref x 0)))
-      ;; Wrap the operations we care about with a profile form
-      (seq-rest ,#`(lambda (ls) (profile #,list-src) (rest ls))
-                ,#`(lambda (v)
-                     (profile #,list-src)
-                     (let ([i 1]
-                           [v-new (make-vector (sub1 (vector-length v)))])
-                       (vector-for-each
-                         (lambda (x)
-                           (vector-set! v-new i x)
-                           (set! i (add1 i)))
-                         v))))
-      (seq-cons ,#`(lambda (x ls) (profile #,list-src) (cons x ls))
-                ,#`(lambda (x v)
-                     (profile #,list-src)
-                     (let ([i 0]
-                           [v-new (make-vector (add1 (vector-length v)))])
-                       (vector-for-each
-                         (lambda (x)
-                           (vector-set! v-new i x)
-                           (set! i (add1 i)))
-                         v))))
-      (seq-ref ,#`(lambda (ls n) (profile #,vector-src) (list-ref ls n))
-               ,#`(lambda (v n) (profile #,vector-src (vector-ref v n))))
-      (seq-set! ,#`(lambda (ls n obj)
-                     (profile #,vector-src) (set-car! (list-tail ls n) obj)
-                ,#`(lambda (v n obj)
-                     (profile #,vector-src) (vector-set! v n obj))))))
-    ;; Default to list; switch to vector when profile information
-    ;; suggests we should.
-    (define (choose-op name)
-      ((if (> (profile-query-weight vector-src)
-              (profile-query-weight list-src))
-          third
-          second)
-       (assq name op*)))
+    (map
+      (lambda (v src)
+        (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
+      '(real:list? real:map real:car real:cdr real:cons real:list-ref
+                   real:length)
+      (list #f #f #f list-src list-src vector-src vector-src)))
   (syntax-case x ()
-    [(_ var (init* ...))
-     ;; Create lists of syntax for operation names and definitions
-     (with-syntax ([(name* ...) (map first op*)]
-                   [(def* ...) (map choose (map first op*))])
-       ;; and generate them
-       #`(begin (define name* def*) ...
-       ;; Finally, bind the sequence.
-                (define var (#,(choose 'make-seq) init* ...))))]))
+    [(_ init* ...)
+     ;;
+     (unless (>= (look-up-profile list-src) (look-up-profile vector-src))
+       (printf "WARNING: You should probably reimplement this list as a vector: ~a\n"
+               x))
+     (with-syntax ([(def* ...) op*]
+                   [(name* ...) (generate-temporaries op*)]
+                   [(params ...)
+                    #'(current-profiled-list?
+                       current-profiled-map
+                       current-profiled-car
+                       current-profiled-cdr
+                       current-profiled-cons
+                       current-profiled-list-ref
+                       current-profiled-length)])
+       #`(let ()
+           (define name* def*) ...
+           (list-rep (lambda () (params name*) ...)
+                     (real:list init* ...))))])))]
 
-;; Define an abstract sequence
-(define-sequence-datatype seq1 (0 3 2 5))
-)]
-
+@todo{Probably everything after this get deleted}
 @; Introduce example
 The example in @figure-ref{sequence-datatype} chooses between a list and
 a vector using profile information. If the program uses @racket[seq-set!] and

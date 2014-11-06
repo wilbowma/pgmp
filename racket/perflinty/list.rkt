@@ -77,7 +77,7 @@
   ((current-profiled-length) (list-rep-ls ls)))
 
 (begin-for-syntax
-  (define make-fresh-source-obj! (make-fresh-source-obj-factory!  "profiled-list")))
+  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list")))
 (define-syntax (list x)
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on

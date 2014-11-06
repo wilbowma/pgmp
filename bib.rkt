@@ -8,6 +8,11 @@
 (define-cite ~cite citet generate-bibliography #:style author+date-style)
 (define-bibtex-cite* "bib.bib" ~cite citet ~citea citeta)
 
+(define code-repo
+  (make-bib
+    #:title "Code repository"
+    #:author (authors "???")))
+
 (define conte96
   (make-bib
     #:title "Accurate and practical profile-driven compilation using the profile buffer"
