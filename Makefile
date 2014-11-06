@@ -1,8 +1,8 @@
 # Need my custom hacked version now.
-SCRIBBLE=. ~/workspace/racket-dev-goodies/plt-alias.bash; ~/workspace/racket-dev-goodies/plt-bin scribble
+SCRIBBLE=`which scribble`
 
 all: main.pdf
 
-main.pdf: abstract.scrbl design.scrbl conclusion.scrbl examples.scrbl implementation.scrbl intro.scrbl main.scrbl related.scrbl defs.rkt bib.rkt results.scrbl bib.bib
+main.pdf: smaller.tex abstract.scrbl design.scrbl conclusion.scrbl examples.scrbl implementation.scrbl intro.scrbl main.scrbl related.scrbl defs.rkt bib.rkt results.scrbl bib.bib
 	$(SCRIBBLE) ++style smaller.tex --pdf main.scrbl
 
