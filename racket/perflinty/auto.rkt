@@ -1,8 +1,7 @@
 #lang racket/base
 (require
-  (prefix-in real: racket/list)
-  (prefix-in real: racket/vector)
-  (prefix-in real: racket/base)
+  racket/list
+  racket/vector
   (for-syntax
     racket/base
     "../profiling/utils.rkt"
@@ -19,22 +18,12 @@
   seq-set!
   seq
   seq-length
-  ;; TODO: Is there a way to avoid exporting these? They should only be
-  ;; called in this module, or by things generate by this module.
-  real:length real:list real:list? real:map real:cons real:list-ref
-  real:first real:rest real:append
-  (prefix-out real:
-    (combine-out
-      list-copy
-      list-set!))
 
-  real:vector? real:vector-ref real:vector-copy real:vector-length
-  real:vector-map real:vector-append real:vector-set!
-  (prefix-out real:
-    (combine-out
-      vector-first
-      vector-rest
-      vector-cons))
+  list-copy
+  list-set!
+  vector-first
+  vector-rest
+  vector-cons
 
   (prefix-out test:
     (combine-out
@@ -49,10 +38,10 @@
         (cons v (cdr ls))
         (cons (car ls) (loop (sub1 i) (cdr ls)))))))
 
-(define (vector-first v) (real:vector-ref v 1))
-(define (vector-rest v) (real:vector-drop v 1))
+(define (vector-first v) (vector-ref v 1))
+(define (vector-rest v) (vector-drop v 1))
 (define (vector-cons v vec)
-  (real:vector-append (real:vector v) vec))
+  (vector-append (vector v) vec))
 
 (struct seq-rep (op-table s))
 
@@ -106,11 +95,11 @@
       (lambda (v src)
         (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
       (if list>=vector
-        '(real:list? real:map real:first real:rest real:cons real:append
-          real:list-copy real:list-ref real:list-set! real:length)
-        '(real:vector? real:vector-map real:vector-first real:vector-rest
-          real:vector-cons real:vector-append real:vector-copy
-          real:vector-ref real:vector-set! real:vector-length))
+        '(list? map first rest cons append list-copy list-ref list-set!
+          length)
+        '(vector? vector-map vector-first vector-rest vector-cons
+          vector-append vector-copy vector-ref vector-set!
+          vector-length))
       (list #f #f #f list-src list-src list-src #f vector-src vector-src
             vector-src)))
   (syntax-case x ()
@@ -118,6 +107,5 @@
      (with-syntax ([(op* ...) op*] [(op-name* ...) op-name*])
        #`(let ()
            (seq-rep
-             (make-immutable-hasheq
-               (real:list (real:cons 'op-name* op*) ...))
-             (#,(if list>=vector #'real:list #'real:vector) init* ...))))]))
+             (make-immutable-hasheq (list (cons 'op-name* op*) ...))
+             (#,(if list>=vector #'list #'vector) init* ...))))]))
