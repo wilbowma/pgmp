@@ -84,8 +84,8 @@
   (define profile-query-weight (load-profile-query-weight x))
   (define list-src (make-fresh-source-obj! x))
   (define vector-src (make-fresh-source-obj! x))
-  (define previous-list-usage (profile-query-weight list-src))
-  (define previous-vector-usage (profile-query-weight vector-src))
+  (define previous-list-usage (or (profile-query-weight list-src) 0))
+  (define previous-vector-usage (or (profile-query-weight vector-src) 0))
   (define list>=vector (>= previous-list-usage previous-vector-usage))
   ;; Defines all the sequences operations, giving profiled implementations
   (define op-name* '(seq? seq-map seq-first seq-rest seq-cons seq-append

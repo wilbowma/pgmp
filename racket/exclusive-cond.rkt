@@ -7,19 +7,8 @@
 
 (define-syntax (exclusive-cond x)
   (struct clause (syn count))
-  ;; load-profile
-  ;; Can take a syntax object, in which case it looks up the profile file
-  ;; based on its source location info, or a path string or a path pointing
-  ;; to the profile file directly.
-  ;; Returns a function mapping syntax objects to total time and self time.
-  ; TODO: timing based versions, put in another file or something
   (define profile-query-weight (load-profile-query-weight x))
-;  (define (make-clause e1 e2)
-;          (clause e1
-;            (let-values ([(total self) (look-up e2)])
-;              (printf "~a: ~a\n" e1 self)
-;              (or self 0))))
-  (define (make-clause e1 e2) (clause e1 (profile-query-weight e2)))
+  (define (make-clause e1 e2) (clause e1 (or (profile-query-weight e2) 0)))
 
   (define parse-clause
     (lambda (clause)

@@ -24,7 +24,7 @@
    (except (chezscheme)
      vector vector?  vector-ref vector-copy vector-length vector-map
      vector-set!  vector->list)
-   (rename (utils) (dummy-profile-query-weight profile-query-weight)))
+   (utils))
 
   ;; NB This representation has some overhead. Need to find a way
   ;; NB to make more of this happen at compile time.

@@ -18,13 +18,13 @@
                                                 (set! unroll-count (- unroll-count 1))
                                                 (display "unrolled") (newline)
                                                 #'((lambda (x ...) b1 b2 ...) enew (... ...))))])))))
-                              
+
                           b1 b2 ...)])
             tmp)
           e ...)])))
 
 (define (test)
   (named-let fact ([n 5])
-    (case n 
+    (case n
       [0 1]
       [else (* n (fact (sub1 n)))])))

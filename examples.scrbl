@@ -277,12 +277,12 @@ inline only methods that take up more than 20% of the computation.
    #`(exclusive-cond
        #,@(filter values
             (map (lambda (class)
-                   (let* ([method-ht (cdr (hashtable-ref classes class &undefined))]
-                          [method-info (hashtable-ref method-ht (syntax->datum #'m) &undefined)])
+                   (let* ([method-ht (cdr (hashtable-ref classes class #f))]
+                          [method-info (hashtable-ref method-ht (syntax->datum #'m) #f)])
                     (with-syntax
                       ([(arg* ...) (cadr method-info)] [(body body* ...) (cddr method-info)])
                       ;; Inline only methods that use more than 20% of the computation.
-                      (if (> (profile-query-weight #'body) .2)
+                      (if (> (or (profile-query-weight #'body) 0) .2)
                           #`[(class-equal? obj #,(datum->syntax #'obj class))
                              (let ([arg* this-val*] ...) body body* ...)]
                           #f))))
@@ -363,7 +363,8 @@ available at @~cite[code-repo].
         (real:list #f #f #f list-src list-src vector-src vector-src)))
     (syntax-case x ()
       [(_ init* ...)
-       (unless (>= (profile-query-weight list-src) (profile-query-weight vector-src))
+       (unless (>= (or (profile-query-weight list-src) 0)
+                   (or (profile-query-weight vector-src) 0))
          (printf "WARNING: You should probably reimplement this list as a vector: ~a\n" x))
         #`(let ()
             (make-list-rep
@@ -417,8 +418,8 @@ information.
 (define-syntax (seq x)
    (define list-src (make-fresh-source-obj! x))
    (define vector-src (make-fresh-source-obj! x))
-   (define previous-list-usage (profile-query-weight list-src))
-   (define previous-vector-usage (profile-query-weight vector-src))
+   (define previous-list-usage (or (profile-query-weight list-src) 0))
+   (define previous-vector-usage (or (profile-query-weight vector-src) 0))
    (define list>=vector (>= previous-list-usage previous-vector-usage))
    (define op-name* '(seq? seq-map seq-first seq-rest seq-cons seq-append
      seq-copy seq-ref seq-set! seq-length))

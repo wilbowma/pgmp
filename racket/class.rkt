@@ -66,7 +66,6 @@
                   (vector->list (hashtable-keys methods)))
              ht))])))
 
-
 ; --
 
 (define-syntax class-equal?
@@ -128,7 +127,7 @@
                               [(body body* ...) (cddr method-info)])
                              ;; Inline only the classes that take up
                              ;; more than 20% of the computation.
-                             (if (> (profile-query-weight #'body) .2)
+                             (if (> (or (profile-query-weight #'body) 0) .2)
                                  #`[(class-equal? obj #,(datum->syntax #'obj class))
                                     (let ([arg* this-val*] ...) body body* ...)]
                                  #f))))

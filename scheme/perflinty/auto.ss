@@ -13,7 +13,7 @@
    seq-length)
  (import
    (chezscheme)
-   (rename (utils) (dummy-profile-query-weight profile-query-weight)))
+   (utils))
 
  (define first car)
  (define rest cdr)

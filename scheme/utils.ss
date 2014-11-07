@@ -1,7 +1,7 @@
 (library (utils)
   (export datum->annotated-syntax
           make-fresh-source-obj-factory!
-          dummy-profile-query-weight)
+          (rename (dummy-profile-query-weight profile-query-weight)))
   (import (chezscheme))
 
   (define (datum->annotated-syntax syn datum src)
@@ -28,6 +28,6 @@
   (define-syntax (dummy-profile-query-weight syn)
     (syntax-case syn ()
       [(_ arg* ...)
-       (if (top-level-bound 'profile-query-weight)
+       (if (top-level-bound? 'profile-query-weight)
            #'(profile-query-weight arg* ...)
            #'(random 1))])))

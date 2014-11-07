@@ -1,0 +1,3 @@
+All examples, except let-loop.ss, run under Petite Chez Scheme 8.4. They
+will be unable to take advantage of profile driven optimizations,
+however, without Chez Scheme's new profiling API.

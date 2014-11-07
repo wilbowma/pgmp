@@ -19,7 +19,7 @@
      real:)
     (except (chezscheme)
       length list list? map car cdr cons list-ref)
-    (rename (utils) (dummy-profile-query-weight profile-query-weight)))
+    (utils))
 
   (define-record list-rep (op-table ls))
 
