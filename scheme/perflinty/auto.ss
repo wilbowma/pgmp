@@ -10,25 +10,10 @@
    seq-ref
    seq-set!
    seq
-   seq-length
-   ;; TODO: Is there a way to avoid exporting these? They should only be
-   ;; called in this module, or by things generate by this module.
-   ;real:length real:list real:list? real:map real:cons real:list-ref
-   ;real:first real:rest real:append
-
-   ;real:list-copy real:list-set!
-
-   ;real:vector? real:vector-ref real:vector-copy real:vector-length
-   ;real:vector-map real:vector-append real:vector-set!
-
-   ;real:vector-first real:vector-rest real:vector-cons
-
-   seq-rep? seq-rep-s)
+   seq-length)
  (import
    (chezscheme)
-   ;(utils)
-    ;; Use the dummy profile-query-weight function when running petite.
-    (rename (utils) (dummy-profile-query-weight profile-query-weight)))
+   (rename (utils) (dummy-profile-query-weight profile-query-weight)))
 
  (define first car)
  (define rest cdr)

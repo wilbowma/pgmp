@@ -19,8 +19,6 @@
      real:)
     (except (chezscheme)
       length list list? map car cdr cons list-ref)
-    ;(utils)
-    ;; Use the dummy profile-query-weight function when running petite.
     (rename (utils) (dummy-profile-query-weight profile-query-weight)))
 
   (define-record list-rep (op-table ls))

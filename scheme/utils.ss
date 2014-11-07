@@ -18,4 +18,9 @@
           (set! n (sub1 n))
           src))))
 
-  (define (dummy-profile-query-weight . args) (random 1)))
+  (define-syntax (dummy-profile-query-weight syn)
+    (syntax-case syn ()
+      [(_ arg* ...)
+       (if (top-level-bound 'profile-query-weight)
+           #'(profile-query-weight arg* ...)
+           #'(random 1))])))

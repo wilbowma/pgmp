@@ -24,8 +24,6 @@
    (except (chezscheme)
      vector vector?  vector-ref vector-copy vector-length vector-map
      vector-set!  vector->list)
-   ;(utils)
-   ;; Use the dummy profile-query-weight function when running petite.
    (rename (utils) (dummy-profile-query-weight profile-query-weight)))
 
   ;; NB This representation has some overhead. Need to find a way
@@ -59,9 +57,9 @@
   (define-vector-rep-op vector-append vec2 ([rep vec1] [rep vec2]))
   (define-vector-rep-op vector-set! vec ([rep vec] p v))
   (define-vector-rep-op vector->list vec ([rep vec]))
-  
+
   (meta define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-vector"))
-  
+
   (define-syntax (vector x)
     ;; Create fresh source object. list-src profiles operations that are
     ;; fast on lists, and vector-src profiles operations that are fast on
