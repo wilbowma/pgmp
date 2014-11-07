@@ -11,10 +11,10 @@
 This section demonstrates how to use our mechanism, and how it
 generalizes and advances past work on profile-guided meta-programs. We
 first demonstrate optimizing Scheme's @racket[case] construct, a
-multi-way branching constract similar to C's @code{switch}. Then
+multi-way branching construct similar to C's @code{switch}. Then
 we then demonstrates profile-guided receiver class
 prediction@~citea{grove95} for an object-oriented DSL. Finally
-we demonstrate how our mechanism is powerful enough to reimplment
+we demonstrate how our mechanism is powerful enough to reimplement
 Perflint@~citea{liu09}. We provide list and vector libraries that warn
 programmers when they may be using a less than optimal data structure,
 and even provide a version that makes the choice automatically, based
@@ -64,11 +64,13 @@ copies of the syntax @racket[body], and then splice
 @section[#:tag "eg-case"]{Profile-guided conditional branch optimization}
 The .NET compiler feature value probes, which enable profile-guided
 reordering of if/else and @code{switch} statements @~cite[.net]. As our
-first example, we demonstrate that our mechanism can be used to easily
-implement this optimization without the specialized support of value
-probes. We will optimize Scheme's @racket[cond] and @racket[case]
+first example, we optimize Scheme's @racket[cond] and @racket[case]
 constructs, which are similar to if/else and @code{switch} in other
-languages.
+languages. This example demonstrates that our mechanism can be used to
+easily implement this optimization without the specialized support of
+value probes. It also demonstrates that our mechanism allows
+programmers to encode their knowledge of the program, enabling
+optimizations that may have been otherwise impossible.
 
 The Scheme @racket[cond] construct is analogous to a series of if/else
 if statements. The clauses of @racket[cond] are executed in order until
@@ -162,7 +164,6 @@ key when processing the clauses in the original order. After removing
 overlapping keys, we generate an @racket[exclusive-cond] expression.
 @figure**["case-impl" (elem "Implementation of " @racket[case] " using "
     @racket[exclusive-cond])
-@todo{Ensure this is runnable}
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
 (define-syntax (case x)
@@ -226,12 +227,15 @@ In the final generated program, the most common case is checked first.
    [else (* n (fact (sub1 n)))]))))]
 
 @section[#:tag "eg-virtual-call"]{Profile-guided receiver class prediction}
-In this example we demonstrate how to implement profile-guided receiver
-class prediction@~citea{grove95} for an object-oriented DSL implemented
-in Scheme. We perform this optimization by taking advantage of the
-@racket[exclusive-cond] construct we developed in the last section.
+In this example implement profile-guided receiver class
+prediction@~citea{grove95} for an object-oriented DSL implemented in
+Scheme. We perform this optimization by taking advantage of the
+@racket[exclusive-cond] construct we developed in the last section. This
+example demonstrates that our mechanism is both general enough to implement
+well-known profile-guided optimizations, and powerful enough to provide
+DSL writers optimizations traditionally left to compiler writers.
 
-We borrow the following example from Grove et.  al.@~citea{grove95}. The
+We borrow the following example from Grove et. al.@~citea{grove95}. The
 classes @racket[Square] and @racket[Circle] implement the method
 @racket[area].  The naïve DSL compiler simply expands every method call
 into a conditional checks for known instances of classes and inlines the
@@ -256,7 +260,7 @@ know class equality tests are mutually exclusive and safe to reorder. We
 can simply reimplement method calls using @racket[exclusive-cond]
 instead of @racket[cond] to get profile-guided receiver class
 prediction. To eliminate uncommon cases altogether and more quickly fall
-back to dynamic dispath, we can even use the profile information to stop
+back to dynamic dispatch, we can even use the profile information to stop
 inlining after a certain threshold. This implementation is shown in
 @figure-ref{method-inline}. In this example, we arbitrarily choose to
 inline only methods that take up more than 20% of the computation.
@@ -315,21 +319,14 @@ Again, the generated @racket[cond] will test for the common case first.
 
 @section[#:tag "eg-datatype"]{Data Structure Specialization}
 @; Motivate an example that normal compilers just can't do
-The examples in @secref{eg-case} and @secref{eg-virtual-call} shows that
-we can easily bring well-known optimizations up to the meta-level.
-This enables the DSL writer to take advantage of traditional profile-guided
-optimizations, and language writers to give programmer new tools to
-encode their knowledge. While profile-guided meta-programming
-enables such traditional optimizations, it also enables higher level
-decisions normally done by the programmer.
-
-Past work has used profile information to give programmer feedback when
-they make suboptimal use of algorithms and data structures provided by
-standard libraries@~citea{liu09}, but left it up to the programmer to
-change the code. In this section we show our mechanism can not only
-reimplement this work, but also automate the proposed changes. By giving
-meta-programs access to profile information, the programmer can choose
-to automatically generate optimized code by simply importing a library.
+While profile-guided optimizations can provide important speeds up by
+optimizing code paths, programmers can us profile information to
+identify much higher level performance issues. For instance, profile
+information can be used to figure out that a different algorithms or
+data structures might be cause an asymptotic speed up.@~citea{liu09}
+In this example we should our mechanism is general enough to implement
+this kind of profiling tool, and even go beyond it by automating the
+recommendations.
 
 In this example, we provide implementations of lists and vectors (array)
 that warn the programmer when they may be using a less optimal data
@@ -340,77 +337,116 @@ implementation of a sequence datatype that will automatically specialize
 to a list or vector based on profiling information. Complete versions of
 both Chez Scheme and Racket implementations of this code are freely
 available at @~cite[code-repo].
-
-@figure**["profile-list" "Implementation of profile list"
+@figure**["profile-list" "Implementation of profiled list"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK
+(define-record list-rep (op-table ls))
+(define (car ls)
+  (make-list-rep (list-rep-op-table ls)
+    ((hashtable-ref (list-rep-op-table ls) 'car #f)
+     (list-rep-ls ls))))
+...
 (meta define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list"))
-(meta define param* #'(current-profiled-list?  current-profiled-map
-  current-profiled-car current-profiled-cdr current-profiled-cons
-  current-profiled-list-ref current-profiled-length))
 (define-syntax (list x)
-  ;; Create fresh source object. list-src profiles operations that are
-  ;; fast on lists, and vector-src profiles operations that are fast on
-  ;; vectors.
-  (define list-src (make-fresh-source-obj! x))
-  (define vector-src (make-fresh-source-obj! x))
-  ;; Defines all the list operations, giving profiled implementations
-  (define op*
-    (real:map
-      (lambda (v src)
-        (datum->annotated-syntax x `(lambda args (apply ,v args)) src))
-      '(real:list? real:map real:car real:cdr real:cons real:list-ref real:length)
-      (real:list #f #f #f list-src list-src vector-src vector-src)))
-  (syntax-case x ()
-    [(_ init* ...)
-     (unless (>= (profile-query-weight list-src) (profile-query-weight vector-src))
-       (printf "WARNING: You should probably reimplement this list as a vector: ~a\n"
-               x))
-     (with-syntax ([(def* ...) op*]
-                   [(name* ...) (generate-temporaries op*)]
-                   [(param* ...) param*])
-       #`(let ()
-           (define name* def*) ...
-           (make-list-rep (lambda () (param* name*) ...)
-             (real:list init* ...))))])))]
+    ;; Create fresh source object. list-src profiles operations that are
+    ;; fast on lists, and vector-src profiles operations that are fast on
+    ;; vectors.
+    (define list-src (make-fresh-source-obj! x))
+    (define vector-src (make-fresh-source-obj! x))
+    ;; Defines all the sequences operations, giving profiled implementations
+    (define op-name* '(list? map car cdr cons list-ref length))
+    (define op*
+      (real:map
+        (lambda (v src)
+          (datum->annotated-syntax x `(lambda args (apply ,v args)) src))
+        '(real:list? real:map real:car real:cdr real:cons real:list-ref real:length)
+        (real:list #f #f #f list-src list-src vector-src vector-src)))
+    (syntax-case x ()
+      [(_ init* ...)
+       (unless (>= (profile-query-weight list-src) (profile-query-weight vector-src))
+         (printf "WARNING: You should probably reimplement this list as a vector: ~a\n" x))
+        #`(let ()
+            (make-list-rep
+              (let ([ht (make-eq-hashtable)])
+                #,@(real:map (lambda (op op-name) #`(hashtable-set! ht #,op-name #,op))
+                     (syntax->list op*) (syntax->list op-name*))
+                ht)
+              (real:list init* ...)))])))]
 
 @Figure-ref{profile-list} shows the implementation of the profiled list
-constructor. This meta program has the same interface as the standard
-Scheme list constructor; it takes an arbitrary number of elements and
-returns a representation of a linked list. We repesent a list as a pair
-of the underlying linked list and a function that the current swaps list
-operations to the profiled version we just generated. That is, a call to
-@racket[list?] on our list representation will first 
+constructor. This constructor has the same interface as the standard
+Scheme list constructor---it takes an arbitrary number of elements and
+returns a representation of a linked list. We represent a list as a pair
+of the underlying linked list and a hash table of profiled list
+operations. We generate these profiled operations by simply wrapping
+calls to underlying, `real', list operations with freshly generated
+source objects. We generate two source objects for each list.  One is
+used to profile operations that are fast for lists and the other is used
+to profile operations that are fast for vectors. Finally, we export new
+versions of all the list operations that work on our new list
+representation. For instance, @racket[car] takes our profiled list
+representations, and calls the profiled version of @racket[car] from
+the hash table of the profiled list on the underlying list. When
+profiling information already exists, for instance, after a profiled
+run, this list constructor emits a warning (at compile time) if the list
+fast vector operations are more common than fast list operations.
 
-In our meta-program, however,
-we do not simply build a linked list. Instead we first build new source
-fresh source objects. We then generate wrappers around all the list
-operations using the source objects so that uses of this list get
-profiled using the newly generated source objects. Operations that are
-fast on vectors get a different source object than operations that are
-fast on lists. Before emitting the code for the list, and the wrapped
-list operations, we check for profile information from a previous run
-and warn the user if profiling information suggests they should be using
-a vector. Note that this requires that source objects are generated
-deterministically across runs. Finally, we output the wrapped operations
-as the representation of the. 
-@todo{Probably everything after this get deleted}
-@; Introduce example
-The example in @figure-ref{sequence-datatype} chooses between a list and
-a vector using profile information. If the program uses @racket[seq-set!] and
-@racket[seq-ref] operations more often than @racket[seq-rest]
-and @racket[seq-cons], then the sequence is implemented using a
-@racket[vector], otherwise using a @racket[list].
+We also provide an analogous implementation of vectors. While we
+implement only two data structures here, this technique should scale to
+the many other data structures analyzed by Perflint. However, we can do
+one step better. Since our meta programs are integrated into the
+language, rather than existing as a separate tool in front of the
+compiler, we can provide libraries to the programmer that automatically
+follow these recommendations rather than asking the programmer to change
+their code. To demonstrate this, we implement a profiled sequence data
+type that will automatically specialize to a list or vector, at compile
+time, based on profile information.
 
-The last line of @figure-ref{sequence-datatype} demonstrates the usage
-of the @racket[define-sequence-datatype] macro. In this example, a
-sequence named @racket[seq1] is defined and initialized to contain
-elements @racket[0], @racket[3], @racket[2], and @racket[5].
+@Figure-ref{profile-seq} shows the implementation of the profiled
+sequence constructor. The code follows exactly the same pattern as the
+profiled list. The key difference is we conditionally generate wrapped
+versions of the list @emph{or} vector operations, and represent the
+underlying data using a list @emph{or} vector, depending on the profile
+information.
+@figure**["profile-seq" "Implementation of profiled sequence"
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
+(RACKETBLOCK
+(define-record seq-rep (op-table s))
+...
+(meta define make-fresh-source-obj! (make-fresh-source-obj-factory!  "profiled-seq"))
+(define-syntax (seq x)
+   (define list-src (make-fresh-source-obj! x))
+   (define vector-src (make-fresh-source-obj! x))
+   (define previous-list-usage (profile-query-weight list-src))
+   (define previous-vector-usage (profile-query-weight vector-src))
+   (define list>=vector (>= previous-list-usage previous-vector-usage))
+   (define op-name* '(seq? seq-map seq-first seq-rest seq-cons seq-append
+     seq-copy seq-ref seq-set! seq-length))
+   (define op*
+     (map
+       (lambda (v src)
+         (datum->annotated-syntax x `(lambda args (apply ,v args)) src))
+       (if list>=vector
+           '(list? map first rest cons append list-copy list-ref
+             list-set! length)
+           '(vector? vector-map vector-first vector-rest vector-cons
+             vector-append vector-copy vector-ref vector-set!
+             vector-length))
+       (list #f #f #f list-src list-src list-src #f vector-src vector-src
+             vector-src)))
+   (syntax-case x ()
+     [(_ init* ...)
+      #`(let ()
+          (make-seq-rep
+            (let ([ht (make-eq-hashtable)])
+                #,@(map (lambda (op op-name) #`(hashtable-set! ht #,op-name #,op))
+                     (syntax->list op*) (syntax->list op-name*))
+                ht)
+            (#,(if list>=vector #'list #'vector) init* ...)))])))]
 
-The macro defines new profiled version of the sequence operations and
-defines a new instance of sequence. The profiled operations are
-redefined for @emph{each} new sequence, creating fresh source objects,
-for each seperate sequence. This ensures each instance of a sequence is
-profiled and specialized seperately. Here we assume we can create fresh
-source objects via the function @racket[make-fresh-source-obj!]. We
-discuss its implementation in @secref{implementation}.
+This implementation of an automatically specializing data structure is
+not ideal. The extra indirects through a hashtable and wrapped
+operations introduce constant overhead to constructing a sequence, and
+to every operation on the sequence. This example does, however,
+demonstrate that our mechanism is general and powerful enough to
+implement novel profile directed optimizations.
