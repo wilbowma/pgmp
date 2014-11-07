@@ -7,103 +7,73 @@
     "../profiling/utils.rkt"
     "../profiling/exact-interface.rkt"))
 (provide
+  list
   list?
   map
   car
   cdr
   cons
   list-ref
-  list
   length
   ;; TODO: Is there a way to avoid exporting these? They should only be
   ;; called in this module, or by things generate by this module.
-  real:length real:list real:list? real:map real:car real:cdr real:cons real:list-ref
-  )
+  real:length real:list real:list? real:map real:car real:cdr real:cons
+  real:list-ref)
 
-#;(module profiled-list racket/base
-  )
-;; TOOD: Boy does is this in need of a meta-program
-;; Ought to write a macro that generates all these, call it in a
-;; submodule, export all defined in it.
-;;
-;; maybe input:
-;;  (list? : ((> ls))) (map : (f . (> lss))
-;;  (car   : ((> ls))) (cdr : ((> ls)))
-;;  (cons  : ((> ls))) (list-ref : ((> ls) n)) (length : ((> ls)))
-(define-values
-  (current-profiled-length
-   current-profiled-list?
-   current-profiled-map
-   current-profiled-car
-   current-profiled-cdr
-   current-profiled-cons
-   current-profiled-list-ref)
-  (values
-    (make-parameter real:length)
-    (make-parameter real:list?)
-    (make-parameter real:map)
-    (make-parameter real:car)
-    (make-parameter real:cdr)
-    (make-parameter real:cons)
-    (make-parameter real:list-ref)))
+(struct list-rep (op-table ls))
 
-;; TODO: Use this struct instead of implementing vectors as functions.
-(struct list-rep (finit ls))
+(define-syntax (define-list-rep-op syn)
+  (syntax-case syn ()
+    ;; ls must appear in args ...
+    [(_ name ls-rep (arg* ...))
+     #`(define (name #,@(map (λ (arg)
+                                (syntax-case arg (rep)
+                                  [(rep a) #'a]
+                                  [_ arg]))
+                             (syntax->list #'(arg* ...))))
+         (struct-copy list-rep ls-rep
+           [ls ((hash-ref (list-rep-op-table ls-rep) 'name)
+                #,@(map (λ (arg)
+                           (syntax-case arg (rep)
+                             [(rep a) #'(list-rep-ls a)]
+                             [_ arg]))
+                    (syntax->list #'(arg* ...))))]))]))
 
-(define (list? ls)
-  ((list-rep-finit ls))
-  ((current-profiled-list?) (list-rep-ls ls)))
+(define-list-rep-op list? ls ([rep ls]))
 ;; TODO: This might need to be a macro, as it kind of needs to generate
 ;; new sources
-(define (map f ls)
-  ((list-rep-finit ls))
-  (list-rep (list-rep-finit ls) (apply (current-profiled-map) f (list-rep-ls ls))))
-(define (car ls)
-  ((list-rep-finit ls))
-  ((current-profiled-car) (list-rep-ls ls)))
-(define (cdr ls)
-  ((list-rep-finit ls))
-  ((current-profiled-cdr) (list-rep-ls ls)))
+(define-list-rep-op map ls (f [rep ls]))
+(define-list-rep-op car ls ([rep ls]))
+(define-list-rep-op cdr ls ([rep ls]))
 ;; TODO: This might need to be a macro, as it kind of needs to generate
 ;; new sources
-(define (cons x ls)
-  ((list-rep-finit ls))
-  (list-rep (list-rep-finit ls) ((current-profiled-cons) x (list-rep-ls ls))))
-(define (list-ref ls n)
-  ((list-rep-finit ls))
-  ((current-profiled-list-ref) (list-rep-ls ls) n))
-(define (length ls)
-  ((list-rep-finit ls))
-  ((current-profiled-length) (list-rep-ls ls)))
+(define-list-rep-op cons ls (x [rep ls]))
+(define-list-rep-op list-ref ls ([rep ls] n))
+(define-list-rep-op length ls ([rep ls]))
 
 (begin-for-syntax
-  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list"))
-  (define param* #'(current-profiled-list?  current-profiled-map
-    current-profiled-car current-profiled-cdr current-profiled-cons
-    current-profiled-list-ref current-profiled-length)))
+  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list")))
 (define-syntax (list x)
-  ;; Create fresh source object. list-src profiles operations that are
-  ;; fast on lists, and vector-src profiles operations that are fast on
+  ;; Create fresh source object. lsrc profiles operations that are
+  ;; fast on lists, and vsrc profiles operations that are fast on
   ;; vectors.
-  (define look-up-profile (load-profile x))
-  (define list-src (make-fresh-source-obj! x))
-  (define vector-src (make-fresh-source-obj! x))
+  (define profile-query-weight (load-profile-query-weight x))
+  (define lsrc (make-fresh-source-obj! x))
+  (define vsrc (make-fresh-source-obj! x))
   ;; Defines all the sequences operations, giving profiled implementations
+  (define op-name* '(list? map car cdr cons list-ref length))
   (define op*
     (map
       (lambda (v src)
         (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
       '(real:list? real:map real:car real:cdr real:cons real:list-ref real:length)
-      (list #f #f #f list-src list-src vector-src vector-src)))
+      `(,#f        ,#f      ,#f      ,lsrc    ,lsrc     ,vsrc         ,vsrc)))
   (syntax-case x ()
     [(_ init* ...)
-     (unless (>= (look-up-profile list-src) (look-up-profile vector-src))
-       (printf "WARNING: You should probably reimplement this list as a vector: ~a\n"
-               x))
-     (with-syntax ([(def* ...) op*]
-                   [(name* ...) (generate-temporaries op*)]
-                   [(param* ...) param*])
+     (unless (>= (profile-query-weight lsrc) (profile-query-weight vsrc))
+       (printf "WARNING: You should probably reimplement this list as a vector: ~a\n" x))
+     (with-syntax ([(op* ...) op*] [(op-name* ...) op-name*])
        #`(let ()
-           (define name* def*) ...
-           (list-rep (lambda () (param* name*) ...)
-                     (real:list init* ...))))]))
+           (list-rep
+             (make-immutable-hasheq (real:list (real:cons 'op-name* op*) ...))
+             (real:list init* ...))))]))

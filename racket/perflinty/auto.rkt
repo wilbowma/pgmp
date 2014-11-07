@@ -53,100 +53,54 @@
 (define (vector-rest v) (real:vector-drop v 1))
 (define (vector-cons v vec)
   (real:vector-append (real:vector v) vec))
-;; TODO: These should actually be undefined, or cause an error.
-(define-values
-  (current-profiled-seq?
-   current-profiled-seq-map
-   current-profiled-seq-first
-   current-profiled-seq-rest
-   current-profiled-seq-cons
-   current-profiled-seq-append
-   current-profiled-seq-copy
-   current-profiled-seq-ref
-   current-profiled-seq-set!
-   current-profiled-seq
-   current-profiled-seq-length)
-  (values
-    (make-parameter real:list?)
-    (make-parameter real:map)
-    (make-parameter real:first)
-    (make-parameter real:rest)
-    (make-parameter real:cons)
-    (make-parameter real:append)
-    (make-parameter list-copy)
-    (make-parameter real:list-ref)
-    (make-parameter list-set!)
-    (make-parameter real:list)
-    (make-parameter real:length)))
 
-(struct seq-rep (finit s))
+(struct seq-rep (op-table s))
 
-(define (seq? s)
-  ((seq-rep-finit s))
-  ((current-profiled-seq?) (seq-rep-s s)))
+(define-syntax (define-seq-rep-op syn)
+  (syntax-case syn ()
+    ;; s must appear in args ...
+    [(_ name seq (arg* ...))
+     #`(define (name #,@(map (λ (arg)
+                                (syntax-case arg (rep)
+                                  [(rep a) #'a]
+                                  [_ arg]))
+                             (syntax->list #'(arg* ...))))
+         (struct-copy seq-rep seq
+           [s ((hash-ref (seq-rep-op-table seq) 'name)
+                #,@(map (λ (arg)
+                           (syntax-case arg (rep)
+                             [(rep a) #'(seq-rep-s a)]
+                             [_ arg]))
+                    (syntax->list #'(arg* ...))))]))]))
 
-(define (seq-map f s)
-  ((seq-rep-finit s))
-  (seq-rep
-    (seq-rep-finit s)
-    ((current-profiled-seq-map) f (seq-rep-s s))))
-
-(define (seq-first s)
-  ((seq-rep-finit s))
-  ((current-profiled-seq-first) (seq-rep-s s)))
-
-(define (seq-rest s)
-  ((seq-rep-finit s))
-  (seq-rep
-    (seq-rep-finit s)
-    ((current-profiled-seq-rest) (seq-rep-s s))))
-
-(define (seq-cons v s)
-  ((seq-rep-finit s))
-  (seq-rep
-    (seq-rep-finit s)
-    ((current-profiled-seq-cons) v (seq-rep-s s))))
-
+(define-seq-rep-op seq? s ([rep s]))
+(define-seq-rep-op seq-map s (f [rep s]))
+(define-seq-rep-op seq-first s ([rep s]))
+(define-seq-rep-op seq-rest s ([rep s]))
+(define-seq-rep-op seq-cons s (v [rep s]))
 ;; TODO: This might need to be a macro, as it kind of needs to generate
 ;; new sources
-(define (seq-append s1 s2)
-  ((seq-rep-finit s2))
-  (seq-rep
-    (seq-rep-finit s2)
-    ((current-profiled-seq-append) (seq-rep-s s1) (seq-rep-s s2))))
-
-(define (seq-copy s)
-  ((seq-rep-finit s))
-  (seq-rep
-    (seq-rep-finit s)
-    ((current-profiled-seq-copy) (seq-rep-s s))))
-
-(define (seq-ref s p)
-  ((seq-rep-finit s))
-  ((current-profiled-seq-ref) (seq-rep-s s) p))
-
-(define (seq-set! s p v)
-  ((seq-rep-finit s))
-  ((current-profiled-seq-set!) (seq-rep-s s) p v))
-
-(define (seq-length s)
-  ((seq-rep-finit s))
-  ((current-profiled-seq-length) (seq-rep-s s)))
+(define-seq-rep-op seq-append s2 ([rep s1] [rep s2]))
+(define-seq-rep-op seq-copy s ([rep s]))
+(define-seq-rep-op seq-ref s ([rep s] p))
+(define-seq-rep-op seq-set! s ([rep s] p v))
+(define-seq-rep-op seq-length s ([rep s]))
 
 (begin-for-syntax
   (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-sequence")))
 (define-syntax (seq x)
-  (define look-up-profile (load-profile x))
+  ;; Create fresh source object. list-src profiles operations that are
+  ;; fast on lists, and vector-src profiles operations that are fast on
+  ;; vectors.
+  (define profile-query-weight (load-profile-query-weight x))
   (define list-src (make-fresh-source-obj! x))
   (define vector-src (make-fresh-source-obj! x))
-  (define previous-list-usage (look-up-profile list-src))
-  (define previous-vector-usage (look-up-profile vector-src))
-  #;(displayln list-src)
-  #;(displayln vector-src)
-  #;(displayln previous-list-usage)
-  #;(displayln previous-vector-usage)
+  (define previous-list-usage (profile-query-weight list-src))
+  (define previous-vector-usage (profile-query-weight vector-src))
   (define list>=vector (>= previous-list-usage previous-vector-usage))
   ;; Defines all the sequences operations, giving profiled implementations
+  (define op-name* '(seq? seq-map seq-first seq-rest seq-cons seq-append
+    seq-copy seq-ref seq-set! seq-length))
   (define op*
     (map
       (lambda (v src)
@@ -161,23 +115,9 @@
             vector-src)))
   (syntax-case x ()
     [(_ init* ...)
-     (with-syntax ([(def* ...) op*]
-                   [(name* ...) (generate-temporaries op*)]
-                   [(params ...)
-                    #'(current-profiled-seq?
-                       current-profiled-seq-map
-                       current-profiled-seq-first
-                       current-profiled-seq-rest
-                       current-profiled-seq-cons
-                       current-profiled-seq-append
-                       current-profiled-seq-copy
-                       current-profiled-seq-ref
-                       current-profiled-seq-set!
-                       current-profiled-seq-length)])
+     (with-syntax ([(op* ...) op*] [(op-name* ...) op-name*])
        #`(let ()
-           (define name* def*) ...
-           (seq-rep (lambda ()
-                      (params name*) ...)
-                    (#,(if list>=vector
-                         #'real:list
-                         #'real:vector) init* ...))))]))
+           (seq-rep
+             (make-immutable-hasheq
+               (real:list (real:cons 'op-name* op*) ...))
+             (#,(if list>=vector #'real:list #'real:vector) init* ...))))]))

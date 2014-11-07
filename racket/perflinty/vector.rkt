@@ -8,6 +8,7 @@
     "../profiling/utils.rkt"
     "../profiling/exact-interface.rkt"))
 (provide
+  vector
   vector?
   vector-ref
   vector-copy
@@ -21,105 +22,66 @@
   ;; called in this module, or by things generate by this module.
   real:vector? real:vector-ref real:vector-copy real:vector-length
   real:vector-map real:vector-append real:vector-set!
-  real:vector->list ;real:list->vector
-  vector)
+  real:vector->list)
 
-(define-values
-  (current-profiled-vector?
-   current-profiled-vector-ref
-   current-profiled-vector-copy
-   current-profiled-vector-length
-   current-profiled-vector-map
-   current-profiled-vector-append
-   current-profiled-vector-set!
-   current-profiled-vector->list
-   #;current-profiled-list->vector)
-  (values
-    (make-parameter real:vector?)
-    (make-parameter real:vector-ref)
-    (make-parameter real:vector-copy)
-    (make-parameter real:vector-length)
-    (make-parameter real:vector-map)
-    (make-parameter real:vector-append)
-    (make-parameter real:vector-set!)
-    (make-parameter real:vector->list)
-    #;(make-parameter real:list->vector)))
+(struct vector-rep (op-table vec))
 
-(struct vector-rep (finit vec))
+(define-syntax (define-vector-rep-op syn)
+  (syntax-case syn ()
+    ;; v must appear in args ...
+    [(_ name v (arg* ...))
+     #`(define (name #,@(map (λ (arg)
+                                (syntax-case arg (rep)
+                                  [(rep vec) #'vec]
+                                  [_ arg]))
+                             (syntax->list #'(arg* ...))))
+         (struct-copy vector-rep v
+           [vec ((hash-ref (vector-rep-op-table v) 'name)
+                #,@(map (λ (arg)
+                           (syntax-case arg (rep)
+                             [(rep vec) #'(vector-rep-vec vec)]
+                             [_ arg]))
+                    (syntax->list #'(arg* ...))))]))]))
 
-(define (vector? vec)
-  ((vector-rep-finit vec))
-  ((current-profiled-vector?) (vector-rep-vec vec)))
-(define (vector-ref vec)
-  ((vector-rep-finit vec))
-  ((current-profiled-vector-ref) (vector-rep-vec vec)))
-(define (vector-copy vec i)
-  ((vector-rep-finit vec))
-  (vector-rep (vector-rep-finit vec)
-              ((current-profiled-vector-copy) (vector-rep-vec vec) i)))
-(define (vector-length vec)
-  ((vector-rep-finit vec))
-  ((current-profiled-vector-length) (vec)))
+(define-vector-rep-op vector? vec ([rep vec]))
+(define-vector-rep-op vector-ref vec ([rep vec] pos))
+(define-vector-rep-op vector-copy vec ([rep vec] i))
+(define-vector-rep-op vector-length vec ([rep vec]))
 ;; TODO: Find a way to support multiple vecs as input
-(define (vector-map f vec)
-  ((vector-rep-finit vec))
-  (vector-rep (vector-rep-finit vec)
-              ((current-profiled-vector-map) f (vector-rep-vec vec))))
+(define-vector-rep-op vector-map vec (f [rep vec]))
 ;; TODO: This might need to be a macro, as it kind of needs to generate
 ;; new sources
-(define (vector-append vec1 vec2)
-  ((vector-rep-finit vec2))
-  (vector-rep
-    (vector-rep-finit vec2)
-    ((current-profiled-vector-append) (vector-rep-vec vec1) (vector-rep-vec vec2))))
-(define (vector-set! vec p v)
-  ((vector-rep-finit vec))
-  (vector-rep
-    (vector-rep-finit vec)
-    ((current-profiled-vector-set!) (vector-rep-vec vec) p v)))
-(define (vector->list vec)
-  ((vector-rep-finit vec))
-  ((current-profiled-vector->list) (vector-rep-vec vec)))
-;; TODO: This might need to be a macro, as it kind of needs to generate
-;; new sources
-;; Expects a non-profiled list. ...
-#;(define (list->vector ls)
-  ((current-profiled-list->vector) (vector ls)))
+(define-vector-rep-op vector-append vec2 ([rep vec1] [rep vec2]))
+(define-vector-rep-op vector-set! vec ([rep vec] p v))
+(define-vector-rep-op vector->list vec ([rep vec]))
 
 (begin-for-syntax
-  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-vector"))
-  (define param* #'(current-profiled-vector?
-    current-profiled-vector-ref current-profiled-vector-copy
-    current-profiled-vector-length current-profiled-vector-map
-    current-profiled-vector-append current-profiled-vector-set!
-    current-profiled-vector->list))
-  )
+  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-vector")))
 (define-syntax (vector x)
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
   ;; vectors.
-  (define look-up-profile (load-profile x))
+  (define profile-query-weight (load-profile-query-weight x))
   (define list-src (make-fresh-source-obj! x))
   (define vector-src (make-fresh-source-obj! x))
   ;; Defines all the sequences operations, giving profiled implementations
+  (define op-name* '(vector? vector-ref vector-copy vector-length
+    vector-map vector-append vector-set! vector->list))
   (define op*
     (map
       (lambda (v src)
         (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
       '(real:vector? real:vector-ref real:vector-copy real:vector-length
         real:vector-map real:vector-append real:vector-set!
-        real:vector->list #;real:list->vector)
+        real:vector->list)
       (list #f vector-src list-src vector-src list-src list-src
-            vector-src list-src #;vector-src)))
+            vector-src list-src)))
   (syntax-case x ()
     [(_ init* ...)
-     (unless (>= (look-up-profile vector-src) (look-up-profile list-src))
-       (printf "WARNING: You should probably reimplement this vector as a list: ~a\n"
-               x))
-     (with-syntax ([(def* ...) op*]
-                   [(name* ...) (generate-temporaries op*)]
-                   [(param* ...) param*])
+     (unless (>= (profile-query-weight vector-src) (profile-query-weight list-src))
+       (printf "WARNING: You should probably reimplement this vector as a list: ~a\n" x))
+     (with-syntax ([(op* ...) op*] [(op-name* ...) op-name*])
        #`(let ()
-           (define name* def*) ...
-           (vector-rep (lambda () (param* name*) ...)
+           (vector-rep
+             (make-immutable-hasheq (real:list (real:cons 'op-name* op*) ...))
              (real:vector init* ...))))]))
