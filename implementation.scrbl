@@ -5,67 +5,105 @@
 @(require scriblib/footnote)
 @(require scriblib/figure)
 @title[#:tag "implementation" "Implementation"]
-This section describes the details of how we represent profile
-information, how we instrument code, and how we ensure source-level and
-block-level profile-guided optimizations work together in our system. 
-@;First we present how we represent source objects
-@;and profile information. Next we describe how code is instrumented to
-@;collect profile information. Then we present how profile information is
-@;stored and accessed. Finally we present how we use both source-level and
-@;block-level profile directed optimizations in the same system. 
+This section describes the details of our mechanism in Chez Scheme and
+in Racket. We discuss representations of source objects and profile
+weights, how we instrument code, and how we ensure source-level and
+block-level profile-guided optimizations work together in our system.
 
-@section{Source objects}
+@section[#:tag "impl-source-obj"]{Source objects}
 In the previous sections we assumed that source objects can be created
 arbitrarily, attached to source points in the surface syntax and be used
-as keys. In Chez Scheme, a source object usually contains a filename and
+as keys. Here we describe the Chez and Racket implementations of source
+objects.
+
+In Chez Scheme, a source object usually contains a file name and
 starting and ending character positions. The Chez Scheme reader
 automatically creates and attaches these to each piece of syntax read
 from a file.
 Chez Scheme also provides an API to programmatically
 manipulate source objects@~cite[csug-ch11].
 This is useful when using Chez Scheme as
-a target language for a DSL with a different surface syntax. Custom 
+a target language for a DSL with a different surface syntax. Custom
 source objects can be attached to target syntax as well to support
 profile-guided meta-programming.
 
 To create custom source objects for fresh profile counters, we can
-use arbitrary filenames and positions. For
+use arbitrary file names and positions. For
 instance, in @secref{eg-datatype} we create custom source objects to
-profile list and vector operations. In our implementation, these might
-be created as seen in @figure-ref{really-make-source}.
-
-@figure["really-make-source" "Creating custom source objects"
+profile list and vector operations. We use the Chez API to attach these
+to generated syntax objects. In our Chez implementation, these are
+created using the function in @figure-ref{make-source-obj-chez}. This
+function takes a string prefix and uses a counter to generate a fake
+file names and character positions. The generated file name is partly
+based on the input syntax in case they show up in error messages.
+@figure["make-source-obj-chez" "Chez implementation for generating source objects"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
-@(RACKETBLOCK
-(define make-fresh-source-obj!
-  (let ([x 0])
-    (lambda ()
-      (let ([src (make-source-object 
-                   "sequence-src" x x)])
-        (set! x (add1 x))
-        src))))
-...
-(define list-src (make-fresh-source-obj!))
-(define vector-src (make-fresh-source-obj!))
-...)]
+@(RACKETBLOCK0
+(define (make-fresh-source-obj-factory! prefix)
+    (let ([n 0])
+      (lambda (syn)
+        (let* ([sfd (make-source-file-descriptor
+                      (format "~a:~a:~a" (syntax->filename syn) prefix n) #f)]
+               [src (make-source-object n n sfd)])
+          (set! n (add1 n))
+          src)))))]
 
-@section{Profile weights}
-We represent profile information as a set of floating point numbers 
-between 0 and 1. We store @racket[#f] (false) when there is no profile
-information, and 0 when the counter was never executed. As mentioned in
-@secref{design}, profile information is not stored as exact counts, but
-as a weighted relative count. We considered using Scheme fixnums
-(integers) for additional speed, but fixnums quickly loose precision,
-particularly when working with multiple data sets.
+Racket does not attach separate source objects to syntax.
+Instead, the file name, line number, column number, position, and span
+are all attached directly to the syntax object. We provide wrappers to
+extract these into separate source objects to implement the profile
+database, and to attach our source objects to Racket syntax objects.
+@Figure-ref{make-source-obj-racket} shows the Racket implementation
+of the previous function. Again we generate a fake file names, but simply
+copies the other information from the input syntax object.
+@figure["make-source-obj-racket" "Racket implementation for generating source objects"
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
+@(RACKETBLOCK0
+(define (make-fresh-source-obj-factory! prefix)
+  (let ([n 0])
+    (lambda (syn)
+      (let ([src (struct-copy srcloc (syntax->srcloc syn)
+                   [source (format "~a:~a:~a" (syntax-source syn) prefix n)])])
+        (set! n (add1 n))
+        src)))))]
 
-We store profile weights by creating a hash table from source filenames to
-hash tables. Each second level hash table maps the starting character
-position to a profile weight. These tables are not updated in real time,
-only when a new data set is manually loaded via
-@racket[profile-load-data].
+@section[#:tag "impl-profile-weights"]{Profile weights}
+We represent a profile weight as a set of floating point numbers between
+0 and 1. We store @racket[#f] (false) when there is no profile
+information, and 0 when the counter was never executed. Our examples all
+ignore this distinction and assume @racket[profile-query-weight] always
+returns a number. As mentioned in @secref{design-profile-weights}, while
+the profiler counters track the exact number of times a source point is
+reached, the profile information is converted to weights when being
+stored in the database. We considered using Scheme fixnums (integers) for
+additional speed, but fixnums quickly loose precision, particularly when
+working with multiple data sets.
 
-@section{Instrumenting code}
-The naive method for instrumenting code to collect source profile
+In Chez, we store profile weights by creating a hash table from source
+file names to hash tables. Each second level hash table maps the starting
+character position to a profile weight. These tables are not updated in
+real time, only when a new data set is manually loaded by an API call in
+a program or meta-program.
+
+In Racket, we use one of the pre-existing profiling systems. The
+@racket[errortrace] library provides exact profile counters, like the
+Chez Scheme profiler. We implement several wrappers to provide an API
+similar to the API provided by Chez Scheme. All these wrappers are
+implemented simply as Racket functions that can be called at compile
+time, requiring no change to either the Racket language implementation
+or the @racket[errortrace] library.
+
+The Racket implementation does not maintain a database in the way the
+Chez Scheme implementation does. Profile information is stored as an
+association list mapping source objects to profile counts. Profile
+weights are computed on each call to @racket[profile-query-weight].
+
+@section[#:tag "impl-instrumenting"]{Instrumenting code}
+In this section we discuss how we instrument code to collect profiling
+information efficiently. As we use a preexisting profiling library for
+Racket, we only discuss how we instrument Chez Scheme.
+
+The naïve method for instrumenting code to collect source profile
 information would be to add a counter for each source expression.
 However this method can easily distort the profile counts. As expressions are
 duplicated or thrown out during optimizations, the source information is
@@ -81,15 +119,15 @@ side-effect of allowing profile information to be used for checking
 code-coverage of test suites. While the separate profile form has
 benefits, it can interfere with optimizations based on pattern-matching
 on the structure of expressions, such as those implemented in a nanopass
-framework@~citea{keep2013nanopass}. 
+framework@~citea{keep2013nanopass}.
 
 We keep profile forms until generating basic blocks. While
 generating basic blocks, the source objects from the profile forms are
 gathered up and attached to the basic block in which they appear. When a
 basic block is entered, every instruction in that block will be
-executed. For every instruction in the block, the profile counter 
+executed. For every instruction in the block, the profile counter
 must be incremented. So it is safe to increment the counters for all
-the instructions in the block at the top of the block. 
+the instructions in the block at the top of the block.
 
 In our implementation, we minimize the number of counters
 incremented at runtime. After generating basic blocks and attaching the
@@ -106,7 +144,7 @@ by creating fake source objects. Before compiling a file, we reset
 global initial block number to 0, and create a fake source file
 based on the filename. We give each block a source object using the
 fake filename and using the blocks number as the starting and ending
-file position. 
+file position.
 
 @;@section{Storing and Loading profile data}
 @;We store profile data by creating a hash table from source file names to
@@ -114,18 +152,18 @@ file position.
 @;of the expression to the weighted count of the expression. This lookup
 @;table is only populated after loading profile data from a file and not
 @;from a current profiled run.  After loading profile data, it is
-@;accessible through @racket[profile-query-weight]. 
+@;accessible through @racket[profile-query-weight].
 @;
 @;Profile data is not immediately loaded into the lookup table after a
 @;profiled run of a program. Profile data must first be dumped via
 @;@racket[profile-dump-data] and then loaded via
-@;@racket[profile-load-data]. 
+@;@racket[profile-load-data].
 @;
 @;To dump profile data, the run time gathers up all profile counters.
 @;Recall that some counters are computed indirectly in terms of other
 @;counters. The values for these indirect counters are computed. These
 @;values with their associated source objects are then written to a file.
-@;@todo{I'm not 100% sure about how this works and I need to be. Some of
+@;todo{I'm not 100% sure about how this works and I need to be. Some of
 @;the racket peoples were asking.}
 @;
 @;To support loading multiple data sets, we do not load execution counts
@@ -138,10 +176,14 @@ file position.
 @;the current weight in the lookup table, incrementing the weight by one
 @;with each new data set.
 
-@section{Source and block PGO}
+@section[#:tag "impl-source-block"]{Source and block PGO}
+In this section we discuss how we use source and block-level PGO in our
+mechanism. Again this section is only relevant to our Chez Scheme
+implementation.
+
 When designing our source level profiling system, we wanted to continue
 using prior work on low level profile-guided optimizations
-@~citea["hwu89" "pettis90"#;"gupta02"]@todo{Fix auto-bib}. However, optimizations based on
+@~citea["hwu89" "pettis90" "gupta02"]. However, optimizations based on
 source-level profile information may result in a different set of
 blocks, so the block-level profile information will be stale. Therefore
 optimization using source profile information and those using block

@@ -42,7 +42,7 @@ low-level compared to the source-language operated on by meta-programs,
 so the optimizations that use the profile information are also performed
 on low-level constructs. Common optimizations include reordering basic
 blocks, inlining decisions, conditional branch optimization, and
-function layout decisions@~cite[gupta02].
+function layout decisions@~citea{gupta02}.
 
 Profile information can have an even greater impact on meta-program
 optimizations.

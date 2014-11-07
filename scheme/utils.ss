@@ -10,12 +10,19 @@
         (cond [(syntax->annotation nsyn) => annotation-stripped]
               [else nsyn]))))
 
+  (define (syntax->filename syn)
+    (cond
+      [(syntax->annotation syn) =>
+       (lambda (a) (source-file-descriptor-path (source-object-sfd (annotation-source a))))]
+      [else ""]))
+
   (define (make-fresh-source-obj-factory! prefix)
-    (let ([n -1])
+    (let ([n 0])
       (lambda (syn)
-        (let* ([sfd (make-source-file-descriptor (format "~a:~a:~a" prefix n n) #f)]
+        (let* ([sfd (make-source-file-descriptor
+                      (format "~a:~a:~a" (syntax->filename syn) prefix n) #f)]
                [src (make-source-object n n sfd)])
-          (set! n (sub1 n))
+          (set! n (add1 n))
           src))))
 
   (define-syntax (dummy-profile-query-weight syn)

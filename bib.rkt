@@ -197,7 +197,7 @@
 ;    #:date 2002))
 ;(define gupta02 (in-bib srikant2007compiler " Chapter 4"))
 ;; Awful hack
-(define gupta02
+#;(define gupta02
   (make-bib
     #:title (elem "Profile Guided Code Optimization. In " (editor (authors "YN Srikant" "Priti Shankar")))
     #:author (authors "R. Gupta" "E. Mehofer" "Y. Zhang")

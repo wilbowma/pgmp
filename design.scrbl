@@ -21,7 +21,7 @@ points, and maintains a database associating source objects with profile
 information, whenever profile information from earlier program runs has
 been supplied.
 
-@section{Source objects}
+@section[#:tag "design-source-obj"]{Source objects}
 Source objects are typically introduced by the lexer and parser for a
 source language and maintained throughout the compiler to correlate
 source with intermediate or object code, enabling both compile-time
@@ -43,7 +43,7 @@ new profile counters. For instance, in @secref{eg-datatype}, we use
 this to generate new profile counters for each instance of a data
 structure.
 
-@section{Profile weight}
+@section[#:tag "design-profile-weights"]{Profile weights}
 Instead of using exact counts in the profile database, we use
 @emph{weights}.
 The profile weight of a source point in a given data set is the ratio of

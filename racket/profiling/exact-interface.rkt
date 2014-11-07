@@ -48,6 +48,8 @@
        (lambda (_)
          (for/sum ([p (filter (lambda (v) (equal? srcloc (car v))) snapshots)])
            (cdr p)))]
+      ;; TODO Does this mean the profile information doesn't exist or
+      ;; the counter was never reached?
       [else 0]))
   (define m (apply max (cons 0 (map cdr snapshots))))
   (values

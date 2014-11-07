@@ -38,11 +38,7 @@
 (define (make-fresh-source-obj-factory! prefix)
   (let ([n 0])
     (lambda (syn)
-      (let ([src (make-srcloc
-                   (format "~a:~a:~a"
-                           (syntax-source syn) prefix n) (syntax-line syn)
-                   (syntax-column syn)
-                   (syntax-position syn)
-                   (syntax-span syn))])
+      (let ([src (struct-copy srcloc (syntax->srcloc syn)
+                   [source (format "~a:~a:~a" (syntax-source syn) prefix n)])])
         (set! n (add1 n))
         src))))
