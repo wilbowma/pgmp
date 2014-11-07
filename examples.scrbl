@@ -344,44 +344,56 @@ available at @~cite[code-repo].
 @figure**["profile-list" "Implementation of profile list"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK
-;; A definition at the meta-level, not at run-time
-(meta (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list")))
+(meta define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list"))
+(meta define param* #'(current-profiled-list?  current-profiled-map
+  current-profiled-car current-profiled-cdr current-profiled-cons
+  current-profiled-list-ref current-profiled-length))
 (define-syntax (list x)
-  ;; Create `fresh' source object. list-src profiles operations that are
+  ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
-  ;; vectors. 
-  (define look-up-profile (load-profile x))
+  ;; vectors.
   (define list-src (make-fresh-source-obj! x))
   (define vector-src (make-fresh-source-obj! x))
-  ;; Defines new wrapped list operations.
+  ;; Defines all the list operations, giving profiled implementations
   (define op*
-    (map
+    (real:map
       (lambda (v src)
-        (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
-      '(real:list? real:map real:car real:cdr real:cons real:list-ref
-                   real:length)
-      (list #f #f #f list-src list-src vector-src vector-src)))
+        (datum->annotated-syntax x `(lambda args (apply ,v args)) src))
+      '(real:list? real:map real:car real:cdr real:cons real:list-ref real:length)
+      (real:list #f #f #f list-src list-src vector-src vector-src)))
   (syntax-case x ()
     [(_ init* ...)
-     ;;
-     (unless (>= (look-up-profile list-src) (look-up-profile vector-src))
+     (unless (>= (profile-query-weight list-src) (profile-query-weight vector-src))
        (printf "WARNING: You should probably reimplement this list as a vector: ~a\n"
                x))
      (with-syntax ([(def* ...) op*]
                    [(name* ...) (generate-temporaries op*)]
-                   [(params ...)
-                    #'(current-profiled-list?
-                       current-profiled-map
-                       current-profiled-car
-                       current-profiled-cdr
-                       current-profiled-cons
-                       current-profiled-list-ref
-                       current-profiled-length)])
+                   [(param* ...) param*])
        #`(let ()
            (define name* def*) ...
-           (list-rep (lambda () (params name*) ...)
-                     (real:list init* ...))))])))]
+           (make-list-rep (lambda () (param* name*) ...)
+             (real:list init* ...))))])))]
 
+@Figure-ref{profile-list} shows the implementation of the profiled list
+constructor. This meta program has the same interface as the standard
+Scheme list constructor; it takes an arbitrary number of elements and
+returns a representation of a linked list. We repesent a list as a pair
+of the underlying linked list and a function that the current swaps list
+operations to the profiled version we just generated. That is, a call to
+@racket[list?] on our list representation will first 
+
+In our meta-program, however,
+we do not simply build a linked list. Instead we first build new source
+fresh source objects. We then generate wrappers around all the list
+operations using the source objects so that uses of this list get
+profiled using the newly generated source objects. Operations that are
+fast on vectors get a different source object than operations that are
+fast on lists. Before emitting the code for the list, and the wrapped
+list operations, we check for profile information from a previous run
+and warn the user if profiling information suggests they should be using
+a vector. Note that this requires that source objects are generated
+deterministically across runs. Finally, we output the wrapped operations
+as the representation of the. 
 @todo{Probably everything after this get deleted}
 @; Introduce example
 The example in @figure-ref{sequence-datatype} chooses between a list and
