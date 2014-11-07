@@ -1,5 +1,5 @@
 # Need my custom hacked version now.
-SCRIBBLE=`which scribble`
+SCRIBBLE=scribble
 
 all: main.pdf
 

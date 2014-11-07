@@ -27,7 +27,7 @@ Our mechanism and examples are implemented in Scheme, so we give below
 a simple example to introduce Scheme meta-programming and its syntax.
 @figure-here["sample-macro" "Sample macro"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
-(RACKETBLOCK
+(RACKETBLOCK0
 ;; Defines a macro (meta-program) `do-n-times'
 ;; Example:
 ;; (do-n-times 3 (display “*”)) expands into
