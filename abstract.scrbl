@@ -1,24 +1,23 @@
-#lang scribble/base 
+#lang scribble/base
 @(require "defs.rkt")
-Many contemporary compilers allow the use of profile information
-to guide various low-level optimizations.
-This is not the case for contemporary meta-programming systems,
-although profile information can have an even greater impact on the
-high-level optimizations performed by meta-programs.
-For example, a meta-program sometimes has control over the data
-structures and algorithms used by the generated code, and use of
-profiling information to select appropriate data structures and
-algorithms can potentially lead even to asymptotic improvements in
-performance.
+Using profiling information to guide low-level
+optimizations has proven beneficial. Compilers such as
+GCC, .NET, and LLVM incorporate profile-guided optimizations (PGOs) on
+low-level intermediate code and basic blocks.
+Recent work has shown
+profile information is also useful for optimizing source programs via
+meta-programming, i.e., writing programs that perform source-to-source
+transformations. For example, using profiling information to inform
+decisions about data structures and algorithms can potentially lead to
+asymptotic improvements in performance. Unfortunately, no
+general-purpose meta-programming system makes profile information
+available to the meta-programmer. Each existing profile-guided
+meta-program comes with its own toolkit, creating barriers to adopting
+and development.
 
-This paper describes a general-purpose mechanism for supporting
-arbitrary profile-guided meta-program optimization.
-It makes profile information available at the granularity of arbitrary
-source points identified by the meta-program, while
-making use of standard and efficient block-level profile-instrumentation
+We propose a general-purpose approach for supporting
+multiple profile-guided meta-program optimizations in a single system.
+Our approach uses fine-grained profile information, while making
+use of standard and efficient basic block-level profile-instrumentation
 techniques.
-We have implemented the mechanism as part of Chez Scheme and Racket, with
-profile information made available via the syntactic abstraction
-facility through which each languages supports meta-programming.
-Our mechanism can be adapted to most meta-programming systems with
-compilers that support profiling.
+We have implemented our approach in Chez Scheme and Racket.

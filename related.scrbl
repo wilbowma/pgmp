@@ -52,12 +52,18 @@ runtime. It may also increase overhead, since we compute profile
 weights and many counters when loading new profile data.
 
 @section{Meta-program optimizations}
+@todo{Rewrite}
 Meta-programming has proven successful at providing higher levels of
 abstraction while still producing efficient code. Meta-programming has
 been used to implement abstract libraries@~cite[boost]@todo{STL?},
 domain specific languages@~citea["sujeeth13" "flatt09"], and even whole
 general purpose languages@~citea["rafkind12" "tobin-hochstadt11"
-"tobin-hochstadt08" "barzilay05"]. These meta-programs can lose or
+"tobin-hochstadt08" "barzilay05"]. 
+The HERMIT toolkit
+provides an API for performing program transformations on Haskell
+intermediate code before compiling, even allowing interactive
+experimentation@~citea["farmer2012hermit"].
+These meta-programs can lose or
 obscure information during the translation into target-language code.
 
 We're not the first to realize this. Many meta-program optimizations
