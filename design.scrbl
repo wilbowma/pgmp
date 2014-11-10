@@ -7,14 +7,17 @@
   scriblib/figure)
 
 @title[#:tag "design/implementation" "Design and Implementation"]
+@todo{essential pieces sounds weird. "the design requirements of our approach?" "design of our approach?"
+...}
 This section presents the essential pieces of our approach, design
 decisions, and implementation details.
 We first discuss what profile information we use and how we handle
-multiple data sets.  We then discuss source objects, which are used to
-identify and expressions and track profile information. We discuss how
-we efficiently instrument code, and finally we discuss how we ensure
-source-level and block-level profile-guided optimizations work together
-in our approach.
+multiple data sets.
+We then discuss source objects, which are used to identify and
+expressions and track profile information.
+We discuss how we efficiently instrument code, and finally we discuss
+how we ensure source-level and block-level profile-guided optimizations
+work together in our approach.
 
 @;In a typical meta-programming situation, a meta-program takes as input
 @;a @emph{source program} in a high-level domain-specific language (DSL)
@@ -24,26 +27,26 @@ in our approach.
 @;information for arbitrary points in the source program, arbitrary points
 @;in the target program, or both.
 
-
 @section[#:tag "design-profile-weights"]{Profile Information}
-In our implementations, we use counter-based profiling. We associate
-unique counters with each profile point identified by the meta-program.
+In our implementations, we use counter-based profiling.
+We associate unique counters with each profile point identified by the
+meta-program.
 Our approach is not specific to counter-based profiling and should work
 just the same with, e.g., timing-based profiling.
 
 While we track exact counts, exact counts are not comparable across
-different data sets. This complicates merging multiple data sets, and
-judging the relative important of an expression. Instead, our API
-provides profile @emph{weights}. The profile weight of a source point
-in a given data set is the ratio of the exact count for the source point
-to the maximum count for any source point, represented as a
-number in the range [0,1].
-That is, the profile weight
-for a given source object is profile count for that source object
-divided by the the profile count for the most frequently executed
-source object in the database.  This provides a single value
-identifying the relative importance of an expression and simplifies the
-combination of multiple profile data sets.
+different data sets.
+Multiple data sets are important to ensure PGOs can optimize for
+multiple classes of inputs expected in production.
+Instead, our API provides profile @emph{weights}.
+The profile weight of a source point in a given data set is the ratio of
+the exact count for the source point to the maximum count for any source
+point, represented as a number in the range [0,1].
+That is, the profile weight for a given source object is profile count
+for that source object divided by the the profile count for the most
+frequently executed source object in the database.
+This provides a single value identifying the relative importance of an
+expression and simplifies the combination of multiple profile data sets.
 
 @;We also considered using ratios of individual counts to total or
 @;average counts.
@@ -57,20 +60,23 @@ combination of multiple profile data sets.
 @;points with similar importance.
 
 To understand how we compute profile weights, consider our running
-example from @figure-ref{if-r-eg}. Suppose @racket[1] is executed 5
-times and @racket[(* n (f (sub1 n)))] is executed 10 times.
-We compute the profile weights
-@racket[1]@tt{ → 5/10 = 0.5} and
-@racket[(* n (f (sub1 n)))]@tt{ → 10/10 = 1}. To support multiple data
-sets, we simply compute the average of these weights. For instance, if
-in a second data set @racket[1] is executed 100 times and @racket[(* n (f (sub1 n)))]
-is
-executed 10 times, then @racket[1]@tt{ → ((5/10) +
-(100/100))/2 = 0.75} and @racket[(* n (f (sub1 n)))]@tt{ → ((10/10) +
-(10/100))/2 = 0.55}.
-@todo{Diagram} Multiple data sets are important to ensure
-PGOs can optimize for multiple classes of inputs expected in
-production.
+example from @figure-ref{if-r-eg}. Suppose in our first benchmark,
+@racket[(flag email 'important)] is executed 5 times and @racket[(flag
+email 'spam)] is executed 10 times. In a second benchmark, @racket[(flag
+email 'important)] is executed 100 times and @racket[(flag email 'spam)]
+is executed 10 times. @Figure-ref{profile-weight-comps} shows the
+profile weights computed after each benchmark.
+@figure-here["profile-weight-comps" "Sample profile weight computations"
+@#reader scribble/comment-reader
+@codeblock0|{
+;; After loading data from benchmark 1
+(flag email 'important)→ 5/10             ;; 0.5
+(flag email 'spam)     → 10/10            ;; 1
+
+;; After loading data from benchmarks 1 and 2
+(flag email 'important)→ (.5 + 100/100)/2 ;; 0.75
+(flag email 'spam)     → (1 + 10/100)/2   ;; 0.55
+}|]
 
 @section[#:tag "design-source-obj"]{Source objects}
 We use @emph{source objects}@~cite[dybvig93] to uniquely identify
@@ -95,8 +101,12 @@ profile generated expressions separately from any other expression in
 the source language.
 
 In the case of our running example, the lexer and parser introduce
-source objects for @racket[#'(zero? n)], @racket[#'zero?], @racket[#'n],
-@racket[1], @racket[(* n (f (sub1 n)))], @racket[*], and so on.
+source objects for each expression (and subexpression). That is,
+separate source objects are created for @racket[#'(if ...)],
+@racket[#'(subject-contains-ci "PLDI")], @racket[#'subject-contains-ci],
+@racket[#'"PLDI"], @racket[#'(flag email 'spam)], and so on. Note that
+@racket[#'flag] and @racket[#'email] appear twice, and will have a
+unique source object for each occurance.
 
 @subsection{Chez Scheme Source Objects}
 
@@ -198,10 +208,18 @@ weights and store them in a two-level hash table.  The first level hash
 table maps source file names to hash tables. Each second level hash
 table maps the starting character position to a profile weight. These
 tables are not updated in real time, only when a new data set is
-manually loaded by an API call in a program or meta-program. We make a
-distinction between an expression being executed 0 times and have no
-profle data. In the former case we store 0, while in the latter case we
-store @racket[#f] (the Scheme value for false).
+manually loaded by an API call in a program or meta-program.
+
+After the hash tables are populated, the information can be accessed via
+the function @racket[profile-query-weight].
+The function @racket[profile-query-weight] takes a source object or
+syntax object.
+When given a syntax object, it extract the source object first.
+The result of @racket[profile-query-weight] is either the profile weight
+associated with the given source object, or @racket[#f] (the Scheme
+value for false) if no profile information exists.
+In our running example, we called this @racket[profile-query], and
+ignored the possibility of get @racket[#f], to simply the example.
 
 @subsection{Racket Instrumentation}
 
@@ -251,28 +269,52 @@ weights are computed on each call to @racket[profile-query-weight].
 @;with each new data set.
 
 @section[#:tag "impl-source-block"]{Source and block PGO}
-In this section we discuss how we use source and block-level PGO in our
-mechanism. Again this section is only relevant to our Chez Scheme
-implementation.
+In this section we describe how our approach works with both source and
+block-level PGO.
+This section is only relevant to our Chez Scheme implementation.
+While the Chez Scheme compiler produces machine code and offers
+block-level PGOs, Racket uses a JIT compiler and does not take profile
+information as input.
+@todo{Have a Racketeer double check that last sentence. And may rephrase
+it}
 
 When designing our source level profiling system, we wanted to continue
 using prior work on low level profile-guided optimizations
-@~citea["hwu89" "pettis90" "gupta02"]. However, optimizations based on
-source-level profile information may result in a different set of
-blocks, so the block-level profile information will be stale. Therefore
-optimization using source profile information and those using block
-profile information cannot be done after a single profiled run of a
-program. We need a new workflow.
+@~citea["hwu89" "pettis90" "gupta02"].
+However, optimizations based on source-level profile information may
+result in a different set of blocks.
+If we use the same profile information gathered when profiling the
+source, the block-level profile information will be stale.
+Therefore optimization using source profile information and those using
+block profile information cannot be done after a single profiled run of
+a program.
+We need a new workflow.
 
 To use both source and block-level PGO, first we compile
-and instrument a program to collect source-level information. We run
-this program and collect only source-level information. Next we
-recompile and optimize the program using the source-level information
-only, and instrument the program to collect block-level information.
+and instrument a program to collect source-level information.
+We run this program and collect only source-level information.
+Next we recompile and optimize the program using the source-level
+information only, and instrument the program to collect block-level
+information.
 From this point on, source-level optimizations should run
-and the blocks should remain stable.  We run this program and collect
-only the block-level information.  Finally, we recompile the program
-with both source-level and block-level information. Since the source
-information has not changed, the meta-programs generate the same source
-code, and thus the compiler generates the same blocks. The blocks are
-then optimized with the correct profile information.
+and the blocks should remain stable.
+We run this program and collect only the block-level information.
+Finally, we recompile the program
+with both source-level and block-level information.
+Since the source information has not changed, the meta-programs generate
+the same source code, and thus the compiler generates the same blocks.
+The blocks are then optimized with the correct profile information.
+
+For example, to get both source-level and block-level optimizations on
+our running example, we would first instrument the program in
+@figure-ref{if-r-eg} for source profiling.
+After running it on representative inputs, we get the profile weights
+such as in @figure-ref{profile-weight-comps}.
+Next we recompile using that source profile information, and instrument
+block profiling.
+The resulting source program is the code from @figure-ref{if-r-expand}.
+Since we will continue to use the same source profile information,
+@racket[if-r] continues to expand to the same source code, regardless of
+the block profile information, so the blocks remain stable.
+Now we pass the optimized source program and block profile information to
+the compiler to perform block-level optimizations.

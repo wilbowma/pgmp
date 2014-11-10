@@ -8,26 +8,27 @@
 @; What is profile-guided optimization?
 Profile-guided optimization (PGO) is a compiler technique in which
 profile information, e.g., execution counts, gathered from test runs on
-representative sets of inputs is provided to the compiler to allow
-it to generate more efficient code.
-The resulting code usually
-exhibits improved performance, at least on the represented class
-of inputs, than code
-generated with static optimization heuristics.
-Compilers that support PGO include .NET, GCC, and LLVM@~cite[lattner02]
-The profile information used by these compilers,
-such as execution counts of basic blocks or control flow graph nodes, is
-low-level compared to the source-language,
-so the optimizations that use the profile information are also performed
-on low-level constructs. The profile information is used to inform
-decisions about, e.g., reordering basic blocks, inlining, reordering
-conditional branches, and function layout@~citea{gupta02}.
+representative sets of inputs is provided to the compiler to allow it to
+generate more efficient code.
+The resulting code usually exhibits improved performance, at least on
+the represented class of inputs, than code generated with static
+optimization heuristics.
+Compilers that support PGO include .NET, GCC, and LLVM@~cite[lattner02].
+The profile information used by these compilers, such as execution
+counts of basic blocks or control flow graph nodes, is low-level
+compared to the source-language, so the optimizations that use the
+profile information are also performed on low-level constructs.
+The profile information is used to inform low-level optimization decisions about, e.g.,
+reordering basic blocks, inlining, reordering conditional branches, and
+function layout@~citea{gupta02}.
 
 @; Introduce meta-programming
 Meta-programs, i.e., programs that operate on programs, are
-used to implement high-level abstractions such as 
+used to implement high-level abstractions such as
 abstract libraries@~cite[boost],
 compiler generators@~citea["keep2013nanopass"],
+@todo{Should add some references to Delite, Scala work. Maybe in the
+related work}
 domain specific languages@~citea["sujeeth13" "flatt09"], and even whole
 general purpose languages@~citea["rafkind12" "tobin-hochstadt11"
 "tobin-hochstadt08" "barzilay05"].
@@ -37,57 +38,61 @@ erdweg11 czarnecki04 sheard02 plt-tr1 dybvig93 burmako2013scala].
 
 @; Profile-directed meta-programming!
 Profile information has proven useful to implement optimizing
-meta-programs. Chen et.  al. implement a profile-guided meta-program for performing
+meta-programs.
+Chen et.  al. implement a profile-guided meta-program for performing
 process placement for SMP clusters@~citea{chen06}.
-Liu and Rus provide a tools that uses
-profile information to identify suboptimial usage of the C++ STL
-@~citea{liu09}. Hawkins et.
-al. implement a compiler for a language that generates C++
+Liu and Rus provide a tools that uses profile information to identify
+suboptimial usage of the C++ STL @~citea{liu09}.
+Hawkins et.  al. implement a compiler for a language that generates C++
 implementations of data structures based on high-level
 specifications@~citea["hawkins11" "hawkins12"].
 
-Existing meta-programming systems do not provide profile information
-about the source programs on which the meta-program is operating.
-Therefore, existing profile-guided meta-programs introduce
-new special-purpose toolkits
-to enable their optimizations. Each of these new toolkits introduces a
-barrier to adoption, and produces unnecessary work for developers of
-new optimizations. Instead, we need an approach that gives
-existing general-purpose meta-programming systems access to profile information.
-Developers could then implement many profile-guided meta-programs in a
-single system, reusing the meta-programming and profiling tools of that
-system. Programmers could then take advantage of all the optimizations
+Existing general-purpose meta-programming systems do not provide profile
+information about the input programs on which the meta-program is operating.
+Therefore, existing profile-guided meta-programs introduce new
+special-purpose toolkits for profiling and meta-programing.
+Each of these new toolkits introduces a barrier to adoption, and
+produces additional work for developers of new optimizations.
+Instead, we need an approach that gives existing general-purpose
+meta-programming systems access to profile information.
+Meta-programmers could then implement many profile-guided meta-programs
+in a single system, reusing the meta-programming and profiling tools of
+that system.
+Programmers could then take advantage of all the optimizations
 implemented in that system.
 
-We propose a general-purpose approach for supporting
-multiple profile-guided meta-program optimizations in a single system.
-Our approach uses fine-grained profile information, e.g., exact execution counts
-for each source point identified by the meta-program. This approach
-does not interfere with traditional, i.e., ``low-level'' PGOs. We implement
-this approach in both Chez Scheme and Racket, with profile information made
-available via an API accessible from the high-level syntactic
-abstraction facility through which Scheme supports meta-programming.
+We propose an approach for supporting multiple profile-guided
+meta-program optimizations in a single general-purpose system.
+Our approach uses fine-grained profile information, e.g., exact
+execution counts for each source point identified by the meta-program.
+This approach does not interfere with traditional, i.e., ``low-level''
+PGOs.
+We implement this approach in both Chez Scheme and Racket, with profile
+information made available via an API accessible from the high-level
+syntactic abstraction facility through which Scheme supports
+meta-programming.
+@todo{Say something about profiling information being available for
+run-time decisions, in later sections}
 
 Our implementation in Chez Scheme uses standard and efficient
 block-level profiling techniques and is potentially suitable for dynamic
 optimization of a running program in systems that support dynamic
-recompilation@~cite[burger98].  We also implement this approach in
-Racket@~cite[plt-tr1]. While the meta-programming facilities provided in
-Racket are similar to those of Chez Scheme, the language implementation
-and profiling systems are entirely different. We're able to reimplement
-our work purely as a library in Racket, reusing the existing Racket
-profiling and meta-programming infrastructure.
+recompilation@~cite[burger98].
+We also implement this approach in Racket@~cite[plt-tr1] purely as a
+library, using preexisting meta-programming facilities and profiling
+libraries.
 
-The remainder of the paper is organized as follows. In @secref{example}
-we present a running example and introduce
+The remainder of the paper is organized as follows.
+In @secref{example} we present a running example and introduce
 meta-programming in Scheme.
 In @secref{design/implementation} we present the design of our system at a high
 level, and the implementation details for both Chez Scheme and Racket.
 In @secref{case-studies} we demonstrates that our approach is general
 enough to easily implement and improve upon existing profile-guided
-optimizations and profile-guided meta-programs. In @secref{related} we
-give a more detailed discussion of existing work on PGOs and
-profile-guided meta-programming, and how our approach supports this work.
+optimizations and profile-guided meta-programs.
+In @secref{related} we give a more detailed discussion of existing work
+on PGOs and profile-guided meta-programming, and how our approach
+supports this work.
 We conclude in @secref{conclusion} a discussion of how our approach could
 be implemented in other meta-programming systems.
 
