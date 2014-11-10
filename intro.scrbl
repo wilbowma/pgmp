@@ -48,9 +48,10 @@ specifications@~citea["hawkins11" "hawkins12"].
 
 Existing meta-programming systems do not provide profile information
 about the source programs on which the meta-program is operating.
-Therefore, existing profile-guided meta-programs introduce new toolkits
+Therefore, existing profile-guided meta-programs introduce
+new special-purpose toolkits
 to enable their optimizations. Each of these new toolkits introduces a
-barrier to adoption, and requires unnecessary work to the developers of
+barrier to adoption, and produces unnecessary work for developers of
 new optimizations. Instead, we need an approach that gives
 existing general-purpose meta-programming systems access to profile information.
 Developers could then implement many profile-guided meta-programs in a
@@ -61,7 +62,7 @@ implemented in that system.
 We propose a general-purpose approach for supporting
 multiple profile-guided meta-program optimizations in a single system.
 Our approach uses fine-grained profile information, e.g., exact execution counts
-for each source location identified by the meta-program. This approach
+for each source point identified by the meta-program. This approach
 does not interfere with traditional, i.e., ``low-level'' PGOs. We implement
 this approach in both Chez Scheme and Racket, with profile information made
 available via an API accessible from the high-level syntactic
@@ -77,34 +78,34 @@ and profiling systems are entirely different. We're able to reimplement
 our work purely as a library in Racket, reusing the existing Racket
 profiling and meta-programming infrastructure.
 
-@;The remainder of the paper is organized as follows. In @secref{example}
-@;we present a running example, which serves to introduce
-@;meta-programming in Scheme and the API we use to implement our approach.
-@;@;In @secref{design/implementation} we the design of our system at a high
-@;level, and the implementation details for both Chez Scheme and Racket.
-@;In @secref{case-studies} we demonstrates that our approach is general
-@;enough to easily implement and improve upon existing profile-guided
-@;optimizations and profile-guided meta-programs. In @secref{related} we
-@;give a more detailed discussion of existing work on PGOs and
-@;profile-guided meta-programming, and how our approach supports this work.
-@;We conclude in @secref{conclusion} a discussion of how our approach could
-@;be implemented in other meta-programming systems.
-
-The remainder of the paper is organized as follows. @Secref{design}
-presents the design of our system at a high level.
-@Secref{examples} demonstrates how to use our mechanism to implement several
-optimizations as meta-programs. These examples demonstrate how our
-work can be used to implement and build on past work in a single,
-general system. In particular, we show how our work could be used to
-automate the recommendataions produced by Liu and Rus by
-automatically specialize an abstract sequence datatype@~citea{liu09}. We also
-demonstrate how to implement profile-guided receiver class@~citea{grove95}
-prediction using our mechanism. @Secref{implementation}
-discusses our implementation and how it works with traditional PGOs.
-@Secref{related} discusses PGO and meta-programming in more detail. We
-conclude in @secref{conclusion} with a comparison to existing
-profile-guided meta-programs and a discussion of how our work could
+The remainder of the paper is organized as follows. In @secref{example}
+we present a running example and introduce
+meta-programming in Scheme.
+In @secref{design/implementation} we present the design of our system at a high
+level, and the implementation details for both Chez Scheme and Racket.
+In @secref{case-studies} we demonstrates that our approach is general
+enough to easily implement and improve upon existing profile-guided
+optimizations and profile-guided meta-programs. In @secref{related} we
+give a more detailed discussion of existing work on PGOs and
+profile-guided meta-programming, and how our approach supports this work.
+We conclude in @secref{conclusion} a discussion of how our approach could
 be implemented in other meta-programming systems.
+
+@;The remainder of the paper is organized as follows. @Secref{design}
+@;presents the design of our system at a high level.
+@;@Secref{examples} demonstrates how to use our mechanism to implement several
+@;optimizations as meta-programs. These examples demonstrate how our
+@;work can be used to implement and build on past work in a single,
+@;general system. In particular, we show how our work could be used to
+@;automate the recommendataions produced by Liu and Rus by
+@;automatically specialize an abstract sequence datatype@~citea{liu09}. We also
+@;demonstrate how to implement profile-guided receiver class@~citea{grove95}
+@;prediction using our mechanism. @Secref{implementation}
+@;discusses our implementation and how it works with traditional PGOs.
+@;@Secref{related} discusses PGO and meta-programming in more detail. We
+@;conclude in @secref{conclusion} with a comparison to existing
+@;profile-guided meta-programs and a discussion of how our work could
+@;be implemented in other meta-programming systems.
 
 The main contributions of our work are: @itemlist[
   @item{A proposed approach for general-purpose profile-guided

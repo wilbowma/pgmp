@@ -7,66 +7,27 @@
    scriblib/figure
    racket/port)
 
-@title[#:tag "examples"]{Examples}
-This section demonstrates how to use our mechanism, and how it
-generalizes and advances past work on profile-guided meta-programs. We
+@title[#:tag "case-studies"]{Case Studies}
+In this section we evaluate our approach. We show it is general enough to
+implement and improve upon existing profile-guided meta-programs. We
 first demonstrate optimizing Scheme's @racket[case] construct, a
 multi-way branching construct similar to C's @code{switch}. Then
 we then demonstrates profile-guided receiver class
 prediction@~citea{grove95} for an object-oriented DSL. Finally
 we demonstrate how our mechanism is powerful enough to reimplement
-Perflint@~citea{liu09}. We provide list and vector libraries that warn
+Perflint@~citea{liu09} by providing a list and vector libraries that warn
 programmers when they may be using a less than optimal data structure,
 and even provide a version that makes the choice automatically, based
-on profile information. Complete versions of all examples are freely
+on profile information. Complete versions of all case studies are freely
 available at @~cite[code-repo]. Racket implementations exist for all
-examples for those without access to Chez Scheme.
+case studies for those without access to Chez Scheme.
 
-@section{Scheme macro example}
-Our mechanism and examples are implemented in Scheme, so we give below
-a simple example to introduce Scheme meta-programming and its syntax.
-@figure-here["sample-macro" "Sample macro"
-@#reader scribble/comment-reader #:escape-id UNSYNTAX
-(RACKETBLOCK0
-;; Defines a macro (meta-program) `do-n-times'
-;; Example:
-;; (do-n-times 3 (display “*”)) expands into
-;; (begin (display "*")
-;;        (display "*")
-;;        (display "*"))
-(define-syntax (do-n-times stx)
-  ;; pattern matches on the inputs syntax
-  (syntax-case stx ()
-    [(do-n-times n body)
-     ;; Start generating code
-     #`(begin
-        ;; Runs at compile time then
-        ;; splices the result into the
-        ;; generated code
-        #,@(let l [(i (syntax->datum n))]
-             ;; Loops from n to 0
-             (if (zero? i)
-                 '()
-                 ;; Create a list #'body
-                 (cons #'body (l (sub1 i))))))])))]
-
-The meta-program in @figure-ref{sample-macro} expects a number
-@racket[n] and an expression @racket[body] and duplicates the expression
-@racket[n] times. Each meta-program, created by @racket[define-syntax],
-takes a single piece of syntax as its argument. We use @racket[syntax-case]
-to access the subforms of the syntax via pattern matching. @racketmetafont{#'},
-@racketmetafont{#`}, and @racketmetafont{#,} implement Lisp's quote,
-quasiquote, and unquote but on syntax instead of lists. In the example,
-we run a loop at compile-time that generates a list with @racket[n]
-copies of the syntax @racket[body], and then splice
-(@racketmetafont|{#,@}|) the copies into the generated program.
-
-@section[#:tag "eg-case"]{Profile-guided conditional branch optimization}
+@section[#:tag "study-case"]{Profile-guided conditional branch optimization}
 The .NET compiler feature value probes, which enable profile-guided
-reordering of if/else and @code{switch} statements @~cite[.net]. As our
-first example, we optimize Scheme's @racket[cond] and @racket[case]
+reordering of if/else and @code{switch} statements. As our
+first case study, we optimize Scheme's @racket[cond] and @racket[case]
 constructs, which are similar to if/else and @code{switch} in other
-languages. This example demonstrates that our mechanism can be used to
+languages. This demonstrates that our mechanism can be used to
 easily implement this optimization without the specialized support of
 value probes. It also demonstrates that our mechanism allows
 programmers to encode their knowledge of the program, enabling
@@ -77,7 +38,7 @@ if statements. The clauses of @racket[cond] are executed in order until
 the left-hand side of a clause is true. If there is an @racket[else]
 clause, the right-hand side of the @racket[else] clause is taken only
 if no other clause's left-hand side is true. @Figure-ref{cond-example}
-shows and example program using @racket[cond].
+shows an example program using @racket[cond].
 @figure-here["cond-example" (elem "An example using " @racket[cond])
 @#reader scribble/comment-reader
 (racketblock0
@@ -226,16 +187,16 @@ In the final generated program, the most common case is checked first.
    [(memv x '(0)) 1]
    [else (* n (fact (sub1 n)))]))))]
 
-@section[#:tag "eg-virtual-call"]{Profile-guided receiver class prediction}
+@section[#:tag "study-virtual-call"]{Profile-guided receiver class prediction}
 In this example implement profile-guided receiver class
 prediction@~citea{grove95} for an object-oriented DSL implemented in
 Scheme. We perform this optimization by taking advantage of the
 @racket[exclusive-cond] construct we developed in the last section. This
-example demonstrates that our mechanism is both general enough to implement
+case study demonstrates that our mechanism is both general enough to implement
 well-known profile-guided optimizations, and powerful enough to provide
-DSL writers optimizations traditionally left to compiler writers.
+DSL writers with standard PGOs.
 
-We borrow the following example from Grove et. al.@~citea{grove95}. The
+We borrow the following case study from Grove et. al.@~citea{grove95}. The
 classes @racket[Square] and @racket[Circle] implement the method
 @racket[area].  The naïve DSL compiler simply expands every method call
 into a conditional checks for known instances of classes and inlines the
@@ -317,18 +278,18 @@ inline only methods that take up more than 20% of the computation.
 class prediction example is optimized through @racket[exclusive-cond].
 Again, the generated @racket[cond] will test for the common case first.
 
-@section[#:tag "eg-datatype"]{Data Structure Specialization}
+@section[#:tag "study-datatype"]{Data Structure Specialization}
 @; Motivate an example that normal compilers just can't do
 While profile-guided optimizations can provide important speeds up by
 optimizing code paths, programmers can us profile information to
 identify much higher level performance issues. For instance, profile
 information can be used to figure out that a different algorithms or
 data structures might be cause an asymptotic speed up.@~citea{liu09}
-In this example we should our mechanism is general enough to implement
+In this case study we show our mechanism is general enough to implement
 this kind of profiling tool, and even go beyond it by automating the
 recommendations.
 
-In this example, we provide implementations of lists and vectors (array)
+We provide implementations of lists and vectors (array)
 that warn the programmer when they may be using a less optimal data
 structure. The implementations provide wrappers around the standard list
 and vector functions that introduce new source objects to profile the
@@ -448,6 +409,6 @@ information.
 This implementation of an automatically specializing data structure is
 not ideal. The extra indirects through a hashtable and wrapped
 operations introduce constant overhead to constructing a sequence, and
-to every operation on the sequence. This example does, however,
+to every operation on the sequence. This case study does, however,
 demonstrate that our mechanism is general and powerful enough to
 implement novel profile directed optimizations.

@@ -18,7 +18,7 @@ addition to the common optimizations noted previously, .NET extends
 their profiling system to probe values in @racketkeywordfont{switch}
 statements. They can use this value information to optimize
 @racketkeywordfont{switch} branches, similar to the implementation of
-@racket[case] we presented in @secref{eg-case}.
+@racket[case] we presented in @secref{study-case}.
 
 Our system supports all these optimizations and has several advantages.
 While .NET extends their profiling system to get additional

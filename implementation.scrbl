@@ -5,11 +5,6 @@
 @(require scriblib/footnote)
 @(require scriblib/figure)
 @title[#:tag "implementation" "Implementation"]
-This section describes the details of our mechanism in Chez Scheme and
-in Racket. We discuss representations of source objects and profile
-weights, how we instrument code, and how we ensure source-level and
-block-level profile-guided optimizations work together in our system.
-
 @section[#:tag "impl-source-obj"]{Source objects}
 In the previous sections we assumed that source objects can be created
 arbitrarily, attached to source points in the surface syntax and be used
