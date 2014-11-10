@@ -13,8 +13,8 @@ This section presents the essential pieces of our approach, design
 decisions, and implementation details.
 We first discuss what profile information we use and how we handle
 multiple data sets.
-We then discuss source objects, which are used to identify and
-expressions and track profile information.
+We then discuss source objects, which are used to identify expressions
+and track profile information.
 We discuss how we efficiently instrument code, and finally we discuss
 how we ensure source-level and block-level profile-guided optimizations
 work together in our approach.
@@ -32,7 +32,7 @@ In our implementations, we use counter-based profiling.
 We associate unique counters with each profile point identified by the
 meta-program.
 Our approach is not specific to counter-based profiling and should work
-just the same with, e.g., timing-based profiling.
+with other profiling techniques, such as timing-based profiling.
 
 While we track exact counts, exact counts are not comparable across
 different data sets.

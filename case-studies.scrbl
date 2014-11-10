@@ -8,72 +8,81 @@
    racket/port)
 
 @title[#:tag "case-studies"]{Case Studies}
-In this section we evaluate our approach. We show it is general enough to
-implement and improve upon existing profile-guided meta-programs. We
-first demonstrate optimizing Scheme's @racket[case] construct, a
-multi-way branching construct similar to C's @code{switch}. Then
-we then demonstrates profile-guided receiver class
-prediction@~citea{grove95} for an object-oriented DSL. Finally
-we demonstrate how our mechanism is powerful enough to reimplement
-Perflint@~citea{liu09} by providing a list and vector libraries that warn
-programmers when they may be using a less than optimal data structure,
-and even provide a version that makes the choice automatically, based
-on profile information. Complete versions of all case studies are freely
-available at @~cite[code-repo]. Racket implementations exist for all
-case studies for those without access to Chez Scheme.
+In this section we evaluate our approach.
+We show it is general enough to implement and improve upon existing
+profile-guided meta-programs.
+We first demonstrate optimizing Scheme's @racket[case] construct, a
+multi-way branching construct similar to C's @code{switch}.
+Then we then demonstrates profile-guided receiver class
+prediction@~citea{grove95} for an object-oriented DSL.
+Finally we demonstrate that our approach is powerful enough to
+reimplement and improve upon Perflint@~citea{liu09} by providing a list
+and vector libraries that warn programmers when they may be using a less
+than optimal data structure, based on profile information.
+We provide implementations of all case studies in both Chez Scheme and
+Racket.
 
 @section[#:tag "study-case"]{Profile-guided conditional branch optimization}
-The .NET compiler feature value probes, which enable profile-guided
-reordering of if/else and @code{switch} statements. As our
-first case study, we optimize Scheme's @racket[cond] and @racket[case]
-constructs, which are similar to if/else and @code{switch} in other
-languages. This demonstrates that our mechanism can be used to
-easily implement this optimization without the specialized support of
-value probes. It also demonstrates that our mechanism allows
-programmers to encode their knowledge of the program, enabling
+The .NET compiler features value probes, which enable profile-guided
+reordering of if/else and @code{switch} statements.
+As our first case study, we optimize Scheme's @racket[cond] and
+@racket[case] constructs, which are similar to if/else and @code{switch}
+in other languages.
+This demonstrates that our approach can be used to easily implement
+this optimization without the specialized support of value probes.
+It also demonstrates that our approach allows programmers to use
+meta-programming to encode their knowledge of the program, enabling
 optimizations that may have been otherwise impossible.
 
-The Scheme @racket[cond] construct is analogous to a series of if/else
-if statements. The clauses of @racket[cond] are executed in order until
-the left-hand side of a clause is true. If there is an @racket[else]
-clause, the right-hand side of the @racket[else] clause is taken only
-if no other clause's left-hand side is true. @Figure-ref{cond-example}
-shows an example program using @racket[cond].
+The Scheme @racket[cond] construct is analogous to a series of
+if/else-if statements.
+To execute a @racket[cond], we run the left-hand side of each clause
+until some left-hand side evaluates to true.
+When we find the first true clause, we run the right-hand side of that
+clause, and ignore further clauses.
+If there is an @racket[else] clause, we run the right-hand side of the
+@racket[else] clause only if no other clause's left-hand side is true.
+@Figure-ref{cond-example} shows an example program using @racket[cond].
 @figure-here["cond-example" (elem "An example using " @racket[cond])
 @#reader scribble/comment-reader
 (racketblock0
-(define (fact n)
+(define (lex char)
  (cond
-  [(zero? n) 1]
-  [(eq? n 5) 120] ; A very common case
+  [(is-whitespace? char) e1]
+  [(is-open-parn? char) e1]
   [else (* n (fact (sub1 n)))])))]
 
 We introduce the @racket[exclusive-cond] construct,
-@figure-ref{exclusive-cond}, as a similar conditional branching
-construct, but one that expects all branches to be mutually exclusive.
+@figure-ref{exclusive-cond}, as a condition branch construct similar to
+@racket[cond], but one that expects all branches to be mutually
+exclusive.
 When the branches are mutually exclusive we can safely reorder the
-clauses to execute the most likely clauses first. While the compiler
-cannot prove such a property in general, meta-programming allows the
-programmer to encode this knowledge in their program and take advantage
-of optimizations that would have otherwise been impossible.
+clauses to execute the most likely clauses first.
+While the compiler cannot prove such a property in general,
+meta-programming allows the programmer to encode this knowledge in their
+program and take advantage of optimizations that would have otherwise
+been impossible.
 
 @; How does exclusive-cond use profile information to implement cond
 The @racket[exclusive-cond] macro rearranges clauses based on
-the profiling information of the right-hand sides. Since the left-hand
-sides are executed depending on the order, profiling information from
-the left-hand side is not enough to determine which clause is executed
-most often. The @racket[clause] structure stores the original syntax for
+the profiling information of the right-hand sides.
+Since the left-hand sides are executed depending on the order, profiling
+information from the left-hand side cannot be used to determine which
+clause is executed most often.
+The @racket[clause] structure stores the original syntax for
 @racket[exclusive-cond] clause and the weighted profile count for that
-clause.  Since a valid @racket[exclusive-cond] clause is also a valid
+clause.
+Recall that @racket[profile-query-weight] may return @racket[#f]. We
+do not care to distinguish between 0 and @racket[#f], so we use 0
+when if we there is no profile information.
+Since a valid @racket[exclusive-cond] clause is also a valid
 @racket[cond] clause, we copy the syntax and generate a new
 @racket[cond] in which the clauses are sorted according to profile
-weights. Of course the @racket[else] clause it is always last and is not
-included when sorting the other clauses.
-
-We use the function @racket[profile-query-weight] to access the profile
-information. Given a source object or piece of syntax, it returns the
-associated profile weight.
-@todo{Ensure this is runnable}
+weights.
+The @racketmetafont|{#,@}| splices a list of syntax objects into a
+syntax object.
+Of course the @racket[else] clause is always last and is not included
+when sorting the other clauses.
 @figure**["exclusive-cond" (elem "Implementation of " @racket[exclusive-cond])
 @#reader scribble/comment-reader
 (RACKETBLOCK0
@@ -189,7 +198,7 @@ In the final generated program, the most common case is checked first.
 
 @section[#:tag "study-virtual-call"]{Profile-guided receiver class prediction}
 In this example implement profile-guided receiver class
-prediction@~citea{grove95} for an object-oriented DSL implemented in
+prediction@~citea["holzle1994optimizing" "grove95"] for an object-oriented DSL implemented in
 Scheme. We perform this optimization by taking advantage of the
 @racket[exclusive-cond] construct we developed in the last section. This
 case study demonstrates that our mechanism is both general enough to implement

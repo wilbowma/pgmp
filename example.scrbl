@@ -7,7 +7,7 @@
 
 @title[#:tag "example"]{A running example}
 We first introduce a Scheme macro which we will use as a running example
-and to familiarize readers with Scheme's meta-programming system. this
+and to familiarize readers with Scheme's meta-programming system. This
 example is not to be taken as a useful optimization.
 @figure-here["sample-macro" "Sample macro"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
@@ -24,16 +24,15 @@ example is not to be taken as a useful optimization.
 In @figure-ref{sample-macro}, we create a new macro with
 @racket[define-syntax]. A macro takes a single piece of syntax as its
 argument. For example, the function in
-@figure-ref{if-r-eg} uses the new macro @racket[if-r]. he
+@figure-ref{if-r-eg} uses the new macro @racket[if-r]. The
 implementation of macro @racket[if-r] will receive the argument
 @racket[#'(if-r (subject-contains-ci email "PLDI") (flag email 'important) (flag email 'spam))], which is a data
 representation of syntax called a syntax object. The forms @racketmetafont{#'},
 @racketmetafont{#`}, and @racketmetafont{#,} implement Lisp's quote,
 quasiquote, and unquote but on syntax instead of lists. The form
-@racket[syntax-case] perform pattern matching on syntax objects.
+@racket[syntax-case] performs pattern matching on syntax objects.
 @figure-here["if-r-eg" (elem "Using " @racket[if-r])
-@#reader scribble/comment-reader #:escape-id UNSYNTAX
-(RACKETBLOCK0
+(racketblock0
 (define (classify email)
   (if-r (subject-contains-ci email "PLDI")
         (flag email 'important)
@@ -47,8 +46,7 @@ the resulting @racket[if] will be run at run-time.
 @Figure-ref{if-r-expand} shows the resulting code after @racket[if-r] is
 run.
 @figure-here["if-r-expand" (elem "Result of " @racket[if-r] " meta-program")
-@#reader scribble/comment-reader #:escape-id UNSYNTAX
-(RACKETBLOCK0
+(racketblock0
 (define (classify email)
   (if (not (subject-contains-ci email "PLDI"))
       (flag email 'spam)
