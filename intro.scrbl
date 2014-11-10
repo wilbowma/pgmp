@@ -42,7 +42,7 @@ meta-programs.
 Chen et.  al. implement a profile-guided meta-program for performing
 process placement for SMP clusters@~citea{chen06}.
 Liu and Rus provide a tools that uses profile information to identify
-suboptimial usage of the C++ STL @~citea{liu09}.
+suboptimal usage of the C++ STL @~citea{liu09}.
 Hawkins et.  al. implement a compiler for a language that generates C++
 implementations of data structures based on high-level
 specifications@~citea["hawkins11" "hawkins12"].
@@ -50,7 +50,7 @@ specifications@~citea["hawkins11" "hawkins12"].
 Existing general-purpose meta-programming systems do not provide profile
 information about the input programs on which the meta-program is operating.
 Therefore, existing profile-guided meta-programs introduce new
-special-purpose toolkits for profiling and meta-programing.
+special-purpose toolkits for profiling and meta-programming.
 Each of these new toolkits introduces a barrier to adoption, and
 produces additional work for developers of new optimizations.
 Instead, we need an approach that gives existing general-purpose
@@ -102,7 +102,7 @@ be implemented in other meta-programming systems.
 @;optimizations as meta-programs. These examples demonstrate how our
 @;work can be used to implement and build on past work in a single,
 @;general system. In particular, we show how our work could be used to
-@;automate the recommendataions produced by Liu and Rus by
+@;automate the recommendations produced by Liu and Rus by
 @;automatically specialize an abstract sequence datatype@~citea{liu09}. We also
 @;demonstrate how to implement profile-guided receiver class@~citea{grove95}
 @;prediction using our mechanism. @Secref{implementation}
@@ -117,6 +117,6 @@ The main contributions of our work are: @itemlist[
   meta-programming.}
   @item{An open-source implementation of this approach in Racket, using existing
   profiling and meta-programming tools.}
-  @item{Open-source implementions of case studies demonstrating how past work can be
+  @item{Open-source implementations of case studies demonstrating how past work can be
   implemented and improved using our approach.}
 ]

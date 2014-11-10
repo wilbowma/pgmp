@@ -15,7 +15,7 @@ information available to the meta-programmer.
 Each existing profile-guided meta-program comes with its own toolkit,
 creating barriers to adopting and development.
 
-We propose a approach for supporting multiple profile-guided
+We propose an approach for supporting multiple profile-guided
 meta-program optimizations in a single general-purpose system.
 Our approach uses fine-grained profile information, while making
 use of standard and efficient basic block-level profile-instrumentation

@@ -106,7 +106,7 @@ separate source objects are created for @racket[#'(if ...)],
 @racket[#'(subject-contains-ci email "PLDI")], @racket[#'subject-contains-ci],
 @racket[#'email], @racket[#'"PLDI"], @racket[#'(flag email 'spam)], and
 so on. Note that @racket[#'flag] and @racket[#'email] appear multiple
-times, and will have a unique source object for each occurance.
+times, and will have a unique source object for each occurrence.
 
 @subsection{Chez Scheme Source Objects}
 
@@ -205,8 +205,8 @@ We generate at most one increment per block, and fewer in practice.
 To instrument block-level profiling, we reuse the above infrastructure
 by creating fake source objects. Before compiling a file, we reset
 global initial block number to 0, and create a fake source file
-based on the filename. We give each block a source object using the
-fake filename and using the blocks number as the starting and ending
+based on the file name. We give each block a source object using the
+fake file name and using the blocks number as the starting and ending
 file position.
 
 When loading profile information from a previous run, we compute profile
@@ -311,7 +311,7 @@ Since the source information has not changed, the meta-programs generate
 the same source code, and thus the compiler generates the same blocks.
 The blocks are then optimized with the correct profile information.
 
-@todo{Maybe only use the explination referring to the example.}
+@todo{Maybe only use the explanation referring to the example.}
 For example, to get both source-level and block-level optimizations on
 our running example, we would first instrument the program in
 @figure-ref{if-r-eg} for source profiling.

@@ -7,7 +7,7 @@
 
 @title[#:tag "example"]{A running example}
 We first introduce a Scheme macro which we will use as a running example
-and to famliarize readers with Scheme's meta-programming system. this
+and to familiarize readers with Scheme's meta-programming system. this
 example is not to be taken as a useful optimization.
 @figure-here["sample-macro" "Sample macro"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
@@ -46,7 +46,7 @@ is more likely to be executed. This macro is run at compile-time, while
 the resulting @racket[if] will be run at run-time.
 @Figure-ref{if-r-expand} shows the resulting code after @racket[if-r] is
 run.
-@figure-here["if-r-expand" (elem "Reslt of " @racket[if-r] " meta-program")
+@figure-here["if-r-expand" (elem "Result of " @racket[if-r] " meta-program")
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
 (define (classify email)
