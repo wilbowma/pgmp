@@ -103,10 +103,10 @@ the source language.
 In the case of our running example, the lexer and parser introduce
 source objects for each expression (and subexpression). That is,
 separate source objects are created for @racket[#'(if ...)],
-@racket[#'(subject-contains-ci "PLDI")], @racket[#'subject-contains-ci],
-@racket[#'"PLDI"], @racket[#'(flag email 'spam)], and so on. Note that
-@racket[#'flag] and @racket[#'email] appear twice, and will have a
-unique source object for each occurance.
+@racket[#'(subject-contains-ci email "PLDI")], @racket[#'subject-contains-ci],
+@racket[#'email], @racket[#'"PLDI"], @racket[#'(flag email 'spam)], and
+so on. Note that @racket[#'flag] and @racket[#'email] appear multiple
+times, and will have a unique source object for each occurance.
 
 @subsection{Chez Scheme Source Objects}
 
@@ -128,13 +128,16 @@ more useful if when they show up in error messages.
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 @(RACKETBLOCK0
 (define (make-fresh-source-obj-factory! prefix)
-    (let ([n 0])
-      (lambda (syn)
-        (let* ([sfd (make-source-file-descriptor
-                      (format "~a:~a:~a" (syntax->filename syn) prefix n) #f)]
-               [src (make-source-object n n sfd)])
-          (set! n (add1 n))
-          src)))))]
+ (let ([n 0])
+  (lambda (syn)
+   (let* ([sfd (make-source-file-descriptor
+                (format "~a:~a:~a"
+                 (syntax->filename syn)
+                 prefix n)
+                #f)]
+          [src (make-source-object n n sfd)])
+    (set! n (add1 n))
+    src)))))]
 
 @subsection{Racket Source Objects}
 
@@ -150,12 +153,15 @@ copy the line number, column number, etc. from the given syntax object.
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 @(RACKETBLOCK0
 (define (make-fresh-source-obj-factory! prefix)
-  (let ([n 0])
-    (lambda (syn)
-      (let ([src (struct-copy srcloc (syntax->srcloc syn)
-                   [source (format "~a:~a:~a" (syntax-source syn) prefix n)])])
-        (set! n (add1 n))
-        src)))))]
+ (let ([n 0])
+  (lambda (syn)
+   (let ([src (struct-copy srcloc
+               (syntax->srcloc syn)
+               [source (format "~a:~a:~a"
+                 (syntax-source syn)
+                 prefix n)])])
+    (set! n (add1 n))
+    src)))))]
 
 @section[#:tag "impl-instrumenting"]{Instrumenting code}
 In this section we discuss how we instrument code to collect profiling
@@ -305,6 +311,7 @@ Since the source information has not changed, the meta-programs generate
 the same source code, and thus the compiler generates the same blocks.
 The blocks are then optimized with the correct profile information.
 
+@todo{Maybe only use the explination referring to the example.}
 For example, to get both source-level and block-level optimizations on
 our running example, we would first instrument the program in
 @figure-ref{if-r-eg} for source profiling.

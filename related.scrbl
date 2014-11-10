@@ -1,9 +1,15 @@
 #lang scribble/base
-@(require "defs.rkt")
-@(require "bib.rkt")
-@(require scribble/manual)
-@(require scriblib/footnote)
-@(require scriblib/figure)
+@(require
+   "defs.rkt"
+   "bib.rkt"
+   scribble/manual
+   scriblib/footnote
+   scriblib/figure)
+
+@todo{Add links for all references.}
+
+@todo{Add missing first names to all references.}
+
 @title[#:tag "related" "Related and Future Work"]
 @section{Low-level PGO}
 Modern systems such as GCC, .NET, and LLVM use profile directed
@@ -52,13 +58,17 @@ runtime. It may also increase overhead, since we compute profile
 weights and many counters when loading new profile data.
 
 @section{Meta-program optimizations}
+
+@todo{Delite, Hermit references for more examples of meta-programming??}
+
 @todo{Rewrite}
+
 Meta-programming has proven successful at providing higher levels of
 abstraction while still producing efficient code. Meta-programming has
 been used to implement abstract libraries@~cite[boost]@todo{STL?},
 domain specific languages@~citea["sujeeth13" "flatt09"], and even whole
 general purpose languages@~citea["rafkind12" "tobin-hochstadt11"
-"tobin-hochstadt08" "barzilay05"]. 
+"tobin-hochstadt08" "barzilay05"].
 The HERMIT toolkit
 provides an API for performing program transformations on Haskell
 intermediate code before compiling, even allowing interactive
@@ -66,6 +76,8 @@ experimentation@~citea["farmer2012hermit"].
 These meta-programs can lose or
 obscure information during the translation into target-language code.
 
+@todo{Add two related works sitting on my desk for profile-guided
+meta-programming.}
 We're not the first to realize this. Many meta-program optimizations
 exist. Tobin-Hochstadt et. al. implement the optimizer for Typed Racket
 as a meta-program@~citea{tobin-hochstadt11}. Sujeeth et. al. provide a
