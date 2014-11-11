@@ -9,18 +9,15 @@
 
 @title[#:tag "case-studies"]{Case Studies}
 In this section we evaluate our approach.
-We show it is general enough to implement and improve upon existing
+We show it is general enough to implement and extend existing
 profile-guided meta-programs.
 We first demonstrate optimizing Scheme's @racket[case] construct, a
 multi-way branching construct similar to C's @code{switch}.
 Then we then demonstrates profile-guided receiver class
-prediction@~citea{grove95} for an object-oriented DSL.
-Finally we demonstrate that our approach is powerful enough to
-reimplement and improve upon Perflint@~citea{liu09} by providing a list
-and vector libraries that warn programmers when they may be using a less
-than optimal data structure, based on profile information.
-We provide implementations of all case studies in both Chez Scheme and
-Racket.
+prediction@~citea["holzle1994optimizing" "grove95"] for an
+object-oriented DSL.
+Finally we demonstrate that our approach can be used
+reimplement and build upon Perflint@~citea{liu09}.
 
 @section[#:tag "study-case"]{Profile-guided conditional branch optimization}
 The .NET compiler features value probes, which enable profile-guided
@@ -244,7 +241,7 @@ and inlines thost methods. Otherwise we fall back to dynamic dispatch.
                        #,(inline-method class #'x #'m #'(val* ...)))))
            [else (dynamic-dispatch obj m val* ...)]))])))]
 
-The entire implementation of profile-guided receiver class prediction 
+The entire implementation of profile-guided receiver class prediction
 is 44 lines of code. The rest of the OO DSL implementation requires an
 additional 82 lines.
 
