@@ -28,4 +28,4 @@
              #\y #\z)
             (sleep 0.000001)]
            [else (error 'run "Character I wasn't expecting: ~a" c)])))
-        #f #;(equal? flag 'good))
+        #t #;(equal? flag 'good))

@@ -2,9 +2,13 @@
 
 (require
   (only-in racket/math pi sqr)
-  rnrs
+  (only-in rnrs make-hashtable hashtable-set! hashtable-ref equal-hash
+           hashtable-keys)
   (for-syntax "profiling/exact-interface.rkt")
+  (for-syntax "profiling/utils.rkt")
+  (for-syntax (except-in racket class new field))
   "exclusive-cond.rkt")
+(provide class field method new field-set! class-equal?)
 
 (begin-for-syntax (define classes (make-hashtable equal-hash equal?)))
 
@@ -15,14 +19,14 @@
           (define-method (method* this* arg** ...) body** ...) ...)
        (let ([field-table (make-hashtable equal-hash equal?)]
              [method-table (make-hashtable equal-hash equal?)])
-         (for-each (lambda (field val) (hashtable-set! field-table (syntax->datum field) val))
-           #'(field* ...) #'(val* ...))
+         (for-each (lambda (field val) (hashtable-set! field-table field val))
+           (syntax->datum #'(field* ...)) (syntax->list #'(val* ...)))
          (for-each (lambda (method body* arg*)
-                     (hashtable-set! method-table (syntax->datum method)
-                       (cons* #`(lambda #,arg* #,@body*) arg* body*)))
-           #'(method* ...)
-           #'((body** ...) ...)
-           #'((this* arg** ...) ...))
+                     (hashtable-set! method-table method
+                       (list* #`(lambda #,arg* #,@body*) arg* body*)))
+           (syntax->datum #'(method* ...))
+           (syntax->list #'((body** ...) ...))
+           (syntax->list #'((this* arg** ...) ...)))
          (hashtable-set! classes (syntax->datum #'name)
            (cons field-table method-table))
          #'(void))])))
@@ -37,19 +41,20 @@
   (lambda (syn)
     (syntax-case syn ()
       [(_ obj field)
-       #`(hashtable-ref obj 'field &undefined)])))
+       #`(hashtable-ref obj 'field #f)])))
 
-(define-syntax method
+(define-syntax dynamic-dispatch
   (lambda (syn)
     (syntax-case syn ()
       [(_ obj method arg* ...)
-       #'((hashtable-ref obj 'method &undefined) obj arg* ...)])))
+       #'(let ([x obj]) ((hashtable-ref x 'method #f) x arg* ...))])))
+
 
 (define-syntax new
   (lambda (syn)
     (syntax-case syn ()
       [(_ name)
-       (let* ([class-tables (hashtable-ref classes (syntax->datum #'name) &undefined)]
+       (let* ([class-tables (hashtable-ref classes (syntax->datum #'name) #f)]
               [fields (car class-tables)]
               [methods (cdr class-tables)])
          #`(let ([ht (make-hashtable equal-hash equal?)])
@@ -57,12 +62,12 @@
              #,@(map
                   (lambda (field)
                     #`(hashtable-set! ht '#,field
-                        #,(hashtable-ref fields field &undefined)))
+                        #,(hashtable-ref fields field #f)))
                   (vector->list (hashtable-keys fields)))
              #,@(map
                   (lambda (method)
-                    #`(hashtable-set! ht '#,method #,(car
-                        (hashtable-ref methods method &undefined))))
+                    #`(hashtable-set! ht '#,method
+                        #,(car (hashtable-ref methods method #f))))
                   (vector->list (hashtable-keys methods)))
              ht))])))
 
@@ -72,83 +77,76 @@
   (lambda (syn)
     (syntax-case syn ()
       [(_ obj name)
-       #'(equal? (hashtable-ref obj 'class &undefined) 'name)])))
+       #'(eq? (hashtable-ref obj 'class #f) 'name)])))
 
-;; naïve inline; check all classes in arbitrary order.
-(define-syntax method-inline
+;; A receiver-class prediction implementation of method calls
+;; Strategy: manufactory new source objects for each class used
+;; at this class site. How? Create new source objects, one for each
+;; class based on this syn, and install them to be counted conditionally
+;; in method
+(begin-for-syntax
+  (define make-fresh-source-obj! (make-fresh-source-obj-factory!  "method-call")))
+(define-syntax method
   (lambda (syn)
+    (define profile-query-weight (load-profile-query-weight syn))
+    (define class-list (vector->list (hashtable-keys classes)))
+    (define srclocs (map (λ (x) (make-fresh-source-obj! syn)) class-list))
+    (define inline-limit (min 5 (length class-list)))
+    (define (inline-method class method obj vals)
+     (let* ([method-ht (cdr (hashtable-ref classes class #f))]
+            [method-info (hashtable-ref method-ht (syntax->datum method) #f)])
+       (with-syntax
+         ([(arg* ...) (cadr method-info)]
+          [(body body* ...) (cddr method-info)]
+          [(this-val* ...) `(,obj . ,vals)])
+         #`(let ([arg* this-val*] ...) body body* ...))))
     (syntax-case syn ()
       [(_ obj m val* ...)
-       (with-syntax ([(this-val* ...) #'(obj val* ...)])
-         #`(cond
-            #,@(map (lambda (class)
-                      (let* ([method-ht (cdr (hashtable-ref classes class &undefined))]
-                             [method-info (hashtable-ref method-ht (syntax->datum #'m) &undefined)])
-                        (with-syntax
-                          ([(arg* ...) (cadr method-info)]
-                           [(body* ...) (cddr method-info)])
-                          #`[(class-equal? obj #,(datum->syntax #'obj class))
-                            (let ([arg* this-val*] ...) body* ...)])))
-                 (vector->list (hashtable-keys classes)))
-            [else (method obj m val* ...)]))])))
-
-;; better; check all classes in most likely order
-(define-syntax method-profile-inline
-  (lambda (syn)
-    (syntax-case syn ()
-      [(_ obj m val* ...)
-       (with-syntax ([(this-val* ...) #'(obj val* ...)])
-         #`(exclusive-cond
-             #,@(map (lambda (class)
-                       (let* ([method-ht (cdr (hashtable-ref classes class &undefined))]
-                              [method-info (hashtable-ref method-ht (syntax->datum #'m) &undefined)])
-                          (with-syntax
-                            ([(arg* ...) (cadr method-info)]
-                             [(body* ...) (cddr method-info)])
-                            #`[(class-equal? obj #,(datum->syntax #'obj class))
-                              (let ([arg* this-val*] ...) body* ...)])))
-                  (vector->list (hashtable-keys classes)))
-             [else (method obj m val* ...)]))])))
-
-;; best; check likely classes in most likely order
-(define-syntax method-profile-prob-inline
-  (lambda (syn)
-    (syntax-case syn ()
-      [(_ obj m val* ...)
-       (let-values ([(_ profile-query-weight) (load-profile-info syn)])
-         (with-syntax ([(this-val* ...) #'(obj val* ...)])
-         #`(exclusive-cond
-             #,@(filter values
-                  (map (lambda (class)
-                         (let* ([method-ht (cdr (hashtable-ref classes class &undefined))]
-                                [method-info (hashtable-ref method-ht (syntax->datum #'m) &undefined)])
-                           (with-syntax
-                             ([(arg* ...) (cadr method-info)]
-                              [(body body* ...) (cddr method-info)])
-                             ;; Inline only the classes that take up
-                             ;; more than 20% of the computation.
-                             (if (> (or (profile-query-weight #'body) 0) .2)
-                                 #`[(class-equal? obj #,(datum->syntax #'obj class))
-                                    (let ([arg* this-val*] ...) body body* ...)]
-                                 #f))))
-                    (vector->list (hashtable-keys classes))))
-             [else (method obj m val* ...)])))])))
+       (with-syntax ([(arg* ...) (generate-temporaries (syntax->datum #'(val* ...)))])
+       (let* ([instrumented-dispatch
+                (map (λ (loc)
+                        (datum->syntax syn `(lambda ,#'(this arg* ...)
+                                              ,#'(dynamic-dispatch this m arg* ...))
+                                       (srcloc->list loc)))
+                     srclocs)]
+             [_sorted-class*weights (sort (map (λ (x class) (cons class (profile-query-weight x)))
+                                              srclocs class-list)
+                                    (λ (x y) (> (or (cdr x) 0) (or (cdr y) 0))))]
+             [no-profile-data? (not (ormap cdr _sorted-class*weights))]
+             [sorted-classes (map car _sorted-class*weights)]
+             [sorted-weights (map cdr _sorted-class*weights)])
+            #`(let* ([x obj])
+                (cond
+                  #,@(if no-profile-data?
+                         (for/list ([d instrumented-dispatch] [cls class-list])
+                           #`((class-equal? x #,(datum->syntax syn cls))
+                              (#,d x val* ...)))
+                         (for/list ([class (take sorted-classes inline-limit)]
+                                    [weight (take sorted-weights inline-limit)])
+                            (printf "Class ~a has weight ~a at call site ~a\n" class
+                                    weight (syntax->srcloc syn))
+                            #`((class-equal? x #,(datum->syntax syn class))
+                               #,(inline-method class #'m #'x #'(val* ...)))))))))])))
 
 (module+ test
   (require rackunit)
   (class Square
-    ((length 0) (width 0))
+    ((length 0))
     (define-method (area this)
-      (* (field this length) (field this width))))
+      (sqr (field this length))))
   (class Circle
     ((radius 0))
     (define-method (area this)
       (* pi (sqr (field this radius)))))
 
   (define c (new Circle))
+  (define s (new Square))
 
   (field-set! c radius 3)
+  (field-set! s length 3)
+  (check-true (class-equal? c Circle))
+  (check-true (class-equal? s Square))
+  (check-equal? (dynamic-dispatch c area) (* pi (sqr 3)))
   (check-equal? (method c area) (* pi (sqr 3)))
-  (check-equal? (method-inline c area) (* pi (sqr 3)))
-  (check-equal? (method-profile-inline c area) (* pi (sqr 3)))
-  (check-equal? (method-profile-prob-inline c area) (* pi (sqr 3))))
+  (check-equal? (dynamic-dispatch s area) (sqr 3))
+  (check-equal? (method s area) (sqr 3)))

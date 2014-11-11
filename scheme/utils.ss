@@ -14,14 +14,18 @@
     (cond
       [(syntax->annotation syn) =>
        (lambda (a) (source-file-descriptor-path (source-object-sfd (annotation-source a))))]
-      [else ""]))
+      [else #f]))
+
+  (define (syntax->port syn)
+    (open-file-input-port (syntax->filename syn)))
 
   (define (make-fresh-source-obj-factory! prefix)
     (let ([n 0])
       (lambda (syn)
         (let* ([sfd (make-source-file-descriptor
-                      (format "~a:~a:~a" (syntax->filename syn) prefix n) #f)]
-               [src (make-source-object n n sfd)])
+                      (format "~a:~a:~a" (or (syntax->filename syn) "") prefix n)
+                      (syntax->port syn))]
+               [src (make-source-object sfd n n)])
           (set! n (add1 n))
           src))))
 
@@ -30,4 +34,4 @@
       [(_ arg* ...)
        (if (top-level-bound? 'profile-query-weight)
            #'(profile-query-weight arg* ...)
-           #'(random 1))])))
+           #'(random 1.0))])))

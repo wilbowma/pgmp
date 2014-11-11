@@ -50,11 +50,11 @@
            (cdr p)))]
       ;; TODO Does this mean the profile information doesn't exist or
       ;; the counter was never reached?
-      [else 0]))
+      [else #f]))
   (define m (apply max (cons 0 (map cdr snapshots))))
   (values
     lookup
-    (lambda (stx) (/ (lookup stx) (max m 1)))))
+    (lambda (stx) (cond [(lookup stx) => (λ (x) (/ x (max m 1)))] [else #f]))))
 
 (define (load-profile stx-or-filename)
   (let-values ([(look-up _) (load-profile-info stx-or-filename)])
