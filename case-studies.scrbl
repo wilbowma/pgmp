@@ -197,27 +197,29 @@ In the final generated program, the most common case is checked first.
    [else (* n (fact (sub1 n)))]))))]
 
 @section[#:tag "study-virtual-call"]{Profile-guided receiver class prediction}
-In this example implement profile-guided receiver class
-prediction@~citea["holzle1994optimizing" "grove95"] for an object-oriented DSL implemented in
-Scheme. We perform this optimization by taking advantage of the
-@racket[exclusive-cond] construct we developed in the last section. This
-case study demonstrates that our mechanism is both general enough to implement
-well-known profile-guided optimizations, and powerful enough to provide
-DSL writers with standard PGOs.
+We provide a meta-program that implements profile-guided receiver class
+prediction@~citea["holzle1994optimizing" "grove95"] for a simplfied
+object-oriented DSL implemented as a syntax extension.
+This case study demonstrates that our mechanism is both general enough
+to implement well-known profile-guided optimizations, and powerful
+enough to provide DSL writers with standard PGOs.
 
 @Figure-ref{method-call-impl} shows the key parts of our implementation
 of recevier class prediction. A method call such as @racket[(method shape area)]
 will generate code as follows. First, we generate a new source object for each
-class in the system. Then we instrument a call to dynamic dispatch
+class in the system. Then we instrument a call to the dynamic dispatch
 routine for each of the newly generated source objects. When there is no
-profile data, we expand into a @racket[cond]@note{We could instrumented
-code size by creating a hash table of instrumented dynamic dispatch
-calls and expanding to calls through the hash table.} that calls the
+profile data, we expand into a @racket[cond]@note{A production
+implementation would create a table of instrumented dynamic
+dispatch calls and dynamically dispatch through this table, instead of
+instrumenting code with @racket[cond].} that
+calls the
 instrumented version of the dynamic dispatch depending on the class of
 the object @racket[shape]. When there is profiling
 information, we expand into a @racket[cond] that tests for the
-@racket[inline-limit] most frequently used classes at this method call site,
-and inline those methods. Otherwise we fall back to dynamic dispatch.
+most frequently used classes at this method call site,
+and inlines thost methods. Otherwise we fall back to dynamic dispatch.
+@todo{Maybe implement the instrumented hash table later}
 @figure**["method-call-impl" "Implementation of profile-guided receiver class prediction"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
