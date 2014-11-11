@@ -205,87 +205,113 @@ case study demonstrates that our mechanism is both general enough to implement
 well-known profile-guided optimizations, and powerful enough to provide
 DSL writers with standard PGOs.
 
-We borrow the following case study from Grove et. al.@~citea{grove95}. The
-classes @racket[Square] and @racket[Circle] implement the method
-@racket[area].  The naïve DSL compiler simply expands every method call
-into a conditional checks for known instances of classes and inlines the
-correct method bodies, as in @figure-ref{naive-method-inline}. We would
-like to inline the common cases, but if there are many known classes the
-conditional tests may be too expensive to make this worthwhile.
-Furthermore, we would like to perform the tests in order according to
-which is most likely to succeed.
-@;@racketblock[#,(port->string (open-input-file "cond-all.ss"))]
-@figure-here["naive-method-inline" "Generated receiver class prediction code."
-@(racketblock0
-(cond
- [(class-equal? obj Square)
-  (* (field obj length) (field obj width))]
- [(class-equal? obj Circle)
-  (* pi (sqr (field obj r)))]
- [else (method obj area)]))]
-
-As we saw in the previous section, @racket[exclusive-cond] provides a
-way to encode our high level knowledge of the program. In particular, we
-know class equality tests are mutually exclusive and safe to reorder. We
-can simply reimplement method calls using @racket[exclusive-cond]
-instead of @racket[cond] to get profile-guided receiver class
-prediction. To eliminate uncommon cases altogether and more quickly fall
-back to dynamic dispatch, we can even use the profile information to stop
-inlining after a certain threshold. This implementation is shown in
-@figure-ref{method-inline}. In this example, we arbitrarily choose to
-inline only methods that take up more than 20% of the computation.
-@figure**["method-inline" "The implementation of method inlining."
+@Figure-ref{method-call-impl} shows the key parts of our implementation
+of recevier class prediction. A method call such as @racket[(method shape area)]
+will generate code as follows. First, we generate a new source object for each
+class in the system. Then we instrument a call to dynamic dispatch
+routine for each of the newly generated source objects. When there is no
+profile data, we expand into a @racket[cond]@note{We could instrumented
+code size by creating a hash table of instrumented dynamic dispatch
+calls and expanding to calls through the hash table.} that calls the
+instrumented version of the dynamic dispatch depending on the class of
+the object @racket[shape]. When there is profiling
+information, we expand into a @racket[cond] that tests for the
+@racket[inline-limit] most frequently used classes at this method call site,
+and inline those methods. Otherwise we fall back to dynamic dispatch.
+@figure**["method-call-impl" "Implementation of profile-guided receiver class prediction"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
-; Programmer calls to obj.m(val* ...) expand to (method-inline obj m val* ...)
-; Inline likely classes in most likely order
-(define-syntax (method-inline syn)
- (syntax-case syn ()
-  [(_ obj m val* ...)
-  (with-syntax ([(this-val* ...) #'(obj val* ...)])
-  ;; Create an exclusive-cond, since it knows how to optimize clauses
-   #`(exclusive-cond
-       #,@(filter values
-            (map (lambda (class)
-                   (let* ([method-ht (cdr (hashtable-ref classes class #f))]
-                          [method-info (hashtable-ref method-ht (syntax->datum #'m) #f)])
-                    (with-syntax
-                      ([(arg* ...) (cadr method-info)] [(body body* ...) (cddr method-info)])
-                      ;; Inline only methods that use more than 20% of the computation.
-                      (if (> (or (profile-query-weight #'body) 0) .2)
-                          #`[(class-equal? obj #,(datum->syntax #'obj class))
-                             (let ([arg* this-val*] ...) body body* ...)]
-                          #f))))
-            (vector->list (hashtable-keys classes))))
-       ;; Fall back to dynamic dispatch
-       [else (method obj m val* ...)]))])))]
+(begin-for-syntax
+  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "method-call")))
+(define-syntax (method syn)
+  (define source-objs (map (λ (x) (make-fresh-source-obj! syn)) class-list))
+...
+  (syntax-case syn ()
+    [(_ obj m val* ...)
+    (let ([instrumented-dispatchs (for/list ([source-obj source-objs])
+                                    (instrument-dispatch source-obj #'m #'(val* ...)))]
+           [sorted-classes (drop-zero-weight (sort-by-weight source-objs class-list))]))
+...
+     #`(let* ([x obj])
+         (cond
+           #,@(if no-profile-data?
+                  (for/list ([d instrumented-dispatchs] [class class-list])
+                    #`((class-equal? x #,class) (#,d x)))
+                  (for/list ([class (take sorted-classes inline-limit)])
+                    #`((class-equal? x #,class)
+                       #,(inline-method class #'x #'m #'(val* ...)))))
+           [else (dynamic-dispatch obj m val* ...)]))])))]
 
-@figure["profile-guided-method-results"
-        "Profile-guided Generated code and expansion"
-@#reader scribble/comment-reader
-(racketblock0
-;; method call expands to ==>
-(exclusive-cond
- [(class-equal? obj Square)
-  ;; executed 2 times
-  (* (field obj length) (field obj width))]
- [(class-equal? obj Circle)
-  ;; executed 5 times
-  (* pi (sqr (field obj r)))]
- [else (method obj "area")])
-;; expands to ==>
-(cond
- [(class-equal? obj Circle)
-  ;; executed 5 times
-  (* pi (sqr (field obj r)))]
- [(class-equal? obj Square)
-  ;; executed 2 times
-  (* (field obj length) (field obj width))]
- [else (method obj "area")]))]
+The entire implementation of profile-guided receiver class prediction 
+is 44 lines of code. The rest of the OO DSL implementation requires an
+additional 82 lines.
 
-@Figure-ref{profile-guided-method-results} shows how our receiver
-class prediction example is optimized through @racket[exclusive-cond].
-Again, the generated @racket[cond] will test for the common case first.
+@Figure-ref{method-call-example} shows an example method call, the
+resulting code after instrumentation, and the resulting code after
+optimization. Note that the each occurences of
+@racket[(instrumented-dispatch x area)] has a different source objects,
+so they are each profiled separately.
+@figure**["method-call-example" "Example of profile-guided receiver class prediction"
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
+(RACKETBLOCK0
+(class Square
+  ((length 0))
+  (define-method (area this)
+    (sqr (field this length))))
+(class Circle
+  ((radius 0))
+  (define-method (area this)
+    (* pi (sqr (field this radius)))))
+(class Triangle
+  ((base 0) (height 0))
+  (define-method (area this)
+    (* 1/2 base height)))
+...
+(for/list ([s (circle-and-squares)])
+  (method s area))
+
+;; ---------------------------
+;; After instrumentation
+...
+(let* ([x c])
+  (cond
+    [(class-equal? x 'Square) (instrumented-dispatch x area)]
+    [(class-equal? x 'Circle) (instrumented-dispatch x area)]
+    [(class-equal? x 'Triangle) (instrumented-dispatch x area)]))
+
+;; ---------------------------
+;; After optimization
+...
+(let* ([x c])
+  (cond
+    [(class-equal? x 'Square) (let ([this x]) (sqr (field x length)))]
+    [(class-equal? x 'Circle) (let ([this x]) (* pi (sqr (field x radius))))]
+    [else (dynamic-dispatch x area)])))]
+
+We have demonstrated that our approach can easily implement a well known
+profile-guided optimization as a meta-program, but our approach provides
+one additional advantage. We can reuse @racket[exclusive-cond] to test
+for the most likely class first.
+@figure**["method-call-exclusive-cond" "Profile-guided recevier class prediction, sorted."
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
+(RACKETBLOCK0
+;; ---------------------------
+;; After optimization
+...
+(let* ([x c])
+  (exclusive-cond
+    [(class-equal? x 'Square) (let ([this x]) (sqr (field x length)))]
+    [(class-equal? x 'Circle) (let ([this x]) (* pi (sqr (field x radius))))]
+    [else (dynamic-dispatch x area)]))
+
+;; ---------------------------
+;; After more optimization
+...
+(let* ([x c])
+  (cond
+    [(class-equal? x 'Circle) (let ([this x]) (* pi (sqr (field x radius))))]
+    [(class-equal? x 'Square) (let ([this x]) (sqr (field x length)))]
+    [else (dynamic-dispatch x area)])))]
 
 @section[#:tag "study-datatype"]{Data Structure Specialization}
 @; Motivate an example that normal compilers just can't do
