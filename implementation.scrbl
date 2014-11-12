@@ -8,27 +8,31 @@
 
 @title[#:tag "implementation" "Implementations"]
 In this section we describe the instantiations of our approach in Chez
-Scheme and in Racket, and briefly desc
+Scheme and in Racket, and briefly describe other meta-programming
+systems in which our approach should apply.
 
 @section[#:tag "impl-chez"]{Chez Scheme implementation}
-Chez Scheme implements exact counter based profiling.
+Chez Scheme implements counter-based profiling.
 Adding a profile point for every single source expression requires care
 to instrument correctly and efficiently.
-As expressions optimizatiosn duplicate or throw out expressions, the
-profile points must not be duplicated or lost.
+As optimizations duplicate or throw out expressions, the profile points
+must not be duplicated or lost.
 
-For every profile point Chez Scheme generates an
-expression @racket[(profile src)], where @racket[src] is the source
-object for that profile point, treats this @racket[profile] expression
-as an effectful expression that must not be removed or duplicated.
+For every profile point, Chez Scheme generates an
+expression @racket[(profile e)], where @racket[e] is an object
+representing that profile point.
+Chez Scheme treats these @racket[profile] expressions as effectful, like
+an assignment to an external variable, and never duplicates or removes
+them.
 To instrument profiling efficiently, @racket[profile] expressions are
 preserved until generating basic blocks.
-While generating basic blocks, all the source objects from the profile
-expressions can be attached to the basic block in which they appear.
-@note{We reuse this infrastructure to profile basic blocks by generating
-a new profile point for each basic block.}
-Using techniques from @citet[burger98], we generate at most one counter
-per block, and fewer in practice.
+While generating basic blocks, all the profile points from
+@racket[profile] expressions are attached to the basic block in which
+they appear.
+@note{Chez Scheme reuses this infrastructure to profile basic blocks by
+generating a new profile point for each basic block.}
+Using techniques from @citet[burger98], Chez Scheme generate at most one
+counter per block, and fewer in practice.
 
 @;We reuse the source profiling infrastructure to instrumenting
 @;block-level profiling.
@@ -38,26 +42,25 @@ per block, and fewer in practice.
 @;stable across different runs.
 
 Chez Scheme implements profile points using @emph{source
-objects}@~cite[dybvig93] to uniquely identify profile points.
-Chez Scheme source objects contains a file name and starting and ending character
-positions.
-Source objects uniquely identify every source expression,
-providing fine-grain profile information.
+objects}@~cite[dybvig93].
+Chez Scheme source objects contains a filename and starting and ending
+character positions.
+Source objects uniquely identify every source expression, providing
+fine-grain profile information.
 The Chez Scheme reader automatically creates and attaches these to each
 syntax object read from a file, using them, e.g., to give error messages
 in terms of source locations.
 Chez Scheme also provides an API to programmatically manipulate source
-objects and attach them to syntax@~cite[csug-ch11].
+objects and attach them to syntax objects@~cite[csug-ch11].
 
-We generate a new source objects by adding a suffix to the file name of
-a base source object.
-By basing generated source objects on source objects from the original
-source program, errors in generated code are easier to debug as the
-generated code contains source file information from the meta-program
-that generated the code.
-The meta-programming system's runtime maintains an associative map of
-source objects to profile weights which is updated by API calls. The API
-provide by Chez Scheme nearly identical to the one sketched in
+We generate a new source objects by adding a suffix to the filename of a
+base source object.
+By basing generated source objects on those from the original source
+program, errors in generated code are easier to debug as the generated
+code contains source file in which the code was generated.
+The meta-programming system maintains an associative map of source
+objects to profile weights, which is updated by API calls.
+The API provide by Chez Scheme nearly identical to the one sketched in
 @secref{design-api-sketch}.
 
 @subsection{Source and Block PGO}
@@ -67,10 +70,10 @@ supports.
 However, since meta-programs may generate different source code after
 optimization, the low-level representation will change after
 meta-programs perform optimizations.
-Therefore we need to instrument and perform source and basic block-level
-optimizations separately.
-We describe a workflow for our approach via the running example from
-@figure-ref{if-r-eg}.
+Therefore, we need to instrument and perform source-level and basic
+block-level optimizations separately.
+We describe a workflow for using both source-level and basic block-level
+PGOs via the running example from @figure-ref{if-r-eg}.
 
 @;First we compile and instrument a program to collect source-level
 @;information.
@@ -90,10 +93,10 @@ We describe a workflow for our approach via the running example from
 @todo{Lots of `we'}
 
 To get both source-level and block-level optimizations, we first
-instrument the program for source profiling.
+instrument profiling for source expressions.
 After running it on representative inputs, we get the profile weights
 such as in @figure-ref{profile-weight-comps}.
-Next we recompile using that source profile information, and instrument
+Next, we recompile using that source profile information, and instrument
 profiling for basic blocks.
 The generated source code, @figure-ref{if-r-eg}, will remain stable as
 long as we continue to optimize using the source profile information.
@@ -102,18 +105,18 @@ blocks.
 Now we profile the basic blocks generated from the optimized source
 program.
 Finally, we use both the source profile information and the basic block
-profile information to do profile-guided optimizations via meta-programming
-and traditional low-level optimizations
+profile information to do both profile-guided meta-programming
+and low-level PGOs.
 
 @section[#:tag "impl-racket"]{Racket implementation}
 The Racket implementation uses a pre-existing Racket profiling
-implementation call @racket[errortrace].
-The @racket[errortrace] library provides exact profile counters, like
+library called @racket[errortrace].
+The @racket[errortrace] library provides counter-based profiling, like
 the Chez Scheme profiler.
 
-The Racket implemention implements profile points by using source
-information attached to each syntax object.
-Racket attaches the file name, line number, etc to every syntax object,
+The Racket implementation uses source information attached to each syntax
+object to implement profile points.
+Racket attaches the filename, line number, etc to every syntax object,
 and provides functions for attaching source information when building
 a new syntax object.
 Our implementation provides wrappers to extract source information into
@@ -125,15 +128,15 @@ Scheme.
 We implement a library which provides a similar API to the one sketched
 in @secref{design-api-sketch}.
 This library maintains the map from source objects to profile
-information and computers profile weights.
+information and computes profile weights.
 This library is implemented as a standard Racket library that can be
 called by meta-programs, and requires no changes to either the Racket
 implementation or the @racket[errortrace] library.
 
 @section{Instantiations in other meta-programming systems}
-Both of instantiations of our approach are in similar Scheme-style
-meta-programming systems, but the approach can work in any sufficiently
-expression meta-programming system.
+Both of our instantiations are in similar Scheme-style meta-programming
+systems, but the approach can work in any sufficiently expressive
+meta-programming system.
 
 Template Haskell@~cite[sheard02], MetaML@~cite[taha00],
 MetaOCaml@~cite[czarnecki04], and Scala@~cite[burmako2013scala] all
@@ -141,6 +144,6 @@ feature powerful meta-programming facilities similar to
 that of Scheme@~cite[dybvig93].
 They allow executing expressive programs at compile-time, provide direct
 access to input expressions, and provide template-style meta-programming
-facilities similar to Scheme.
+facilities.
 C++ template meta-programming is more restricted than the above systems,
-so it is not clear how to instantiate our approach for C++ templates. 
+so it is not clear how to instantiate our approach for C++ templates.
