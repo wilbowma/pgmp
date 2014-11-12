@@ -5,6 +5,16 @@
 @(require scriblib/footnote)
 @(require scriblib/figure)
 @title[#:tag "conclusion" "Conclusion"]
+Meta-programming is being used to implement high-level optimizations,
+generate code from high-level specifications, and create DSLs. Each of
+these can take advantage of PGO to optimize before information is lost
+or constraints are imposed. Until now, such optimizations have been
+implemented via toolchains designed for a specific meta-program or
+optimization. We have described a general mechanism for implementing
+arbitrary profile-guided meta-program optimizations, and demonstrated
+its use by implementing several optimizations previously implemented in
+seperate, specialized toolchains.
+
 We have presented a general mechanism for profile-guided meta-program
 optimizations implemented in Scheme. While our mechanism should easily
 extend to other meta-programming facilities, we conclude by discussing
@@ -28,19 +38,3 @@ exist for C++, so the challenge is in implementing source objects and
 @racket[profile-query-weight]. C++ templates offers no way to directly
 access and manipulate syntax, so it is not clear where to attach source
 objects.
-
-C preprocessor macros do support using syntax as input and output to
-macros, but are very limited in what can be done at compile time. Adding
-directives to create, instrument, and read source profile points might
-be enough to support limited profile-guided meta-programming using C
-preprocessor macros.
-
-Meta-programming is being used to implement high-level optimizations,
-generate code from high-level specifications, and create DSLs. Each of
-these can take advantage of PGO to optimize before information is lost
-or constraints are imposed. Until now, such optimizations have been
-implemented via toolchains designed for a specific meta-program or
-optimization. We have described a general mechanism for implementing
-arbitrary profile-guided meta-program optimizations, and demonstrated
-its use by implementing several optimizations previously implemented in
-seperate, specialized toolchains.

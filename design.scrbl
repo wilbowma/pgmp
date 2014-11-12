@@ -7,10 +7,10 @@
   scriblib/figure)
 
 @title[#:tag "design"]{Approach and API}
-This section presents the high-level design of our approach, discusses
-design decisions, and presents a sketch of the API provided to
-meta-programmers. We conclude section with a brief description of our
-implementations of this approach in Chez Scheme and Racket.
+This section presents the high-level design of our approach and presents
+a sketch of the API provided to meta-programmers.
+Our approach is not specific to a particular profile technique, but for
+simplicity our explinations refer to counter-based profile information.
 
 @;In a typical meta-programming situation, a meta-program takes as input
 @;a @emph{source program} in a high-level domain-specific language (DSL)
@@ -20,17 +20,40 @@ implementations of this approach in Chez Scheme and Racket.
 @;information for arbitrary points in the source program, arbitrary points
 @;in the target program, or both.
 
-@section[#:tag "design-profile-weights"]{Profile Information}
-While our approach is not specific to a particular profile technique, we
-refer to counter-based profile information to simplify explanations.
-We consider that profile point identified by the meta-program has a
-unique counter associated with it
+@section[#:tag "design-source-obj"]{Profile points}
+To store and access profile information, we need to associate profile
+information with the source expressions on which meta-programs operate.
+@emph{Profile points} uniquely identify expressions that should be profiled by
+the profiler.
+For instance, if two expressions are associated with the same profile point, then they
+both increment the same profile counter when executed.
+Conversely, if two expressions are associated with different source
+objects, then they increment different profile counters when executed.
 
-Absolute profile information such as exact counts are difficult to
-compare across different data sets.
+For fine-grain profiling, each input expression and subexpression can
+have a unique profile point.
+In the case of our running example, separate profile points are
+associated with @racket[#'(if ...)], @racket[#'(subject-contains email
+"PLDI")], @racket[#'subject-contains], @racket[#'email],
+@racket[#'"PLDI"], @racket[#'(flag email 'spam)], and so on.
+Note that @racket[#'flag] and @racket[#'email] appear multiple
+times, but each occurance can have a unique profile point.
+
+In addition to profile points associated with input expressions,
+meta-programs can also manufacture new profile-points.
+Meta-programmers may want to profile generated expressions separately
+from any other expression in the source program.
+
+The meta-programmer can access profile information by passing a profile
+points, or object with an associated profile point, to the API
+call @racket[profile-query] seen in our running example.
+
+@section[#:tag "design-profile-weights"]{Profile Information}
+Absolute profile information such as exact counts are incomparable
+across different data sets.
 Multiple data sets are important to ensure PGOs can optimize for
 multiple classes of inputs expected in production.
-Instead, our API provides profile @emph{weights}.
+Instead, our API provides @emph{profile weights}.
 The profile weight of a profile point in a given data set is the ratio of
 the absolute profile information for that profile point to the maximum of
 all other profile point, represented as a number in the range [0,1].
@@ -77,170 +100,39 @@ after each data set.
 (flag email 'spam)     → (1 + 10/100)/2   ;; 0.55
 }|]
 
-@section[#:tag "design-source-obj"]{Source objects}
-@todo{I don't like `profile points'}
-To store and access profile information, we need to associate profile
-points with profile information.
-We use @emph{source objects}@~cite[dybvig93] to uniquely identify
-profile points.
-Source objects are typically introduced by the lexer and parser for a
-source language and maintained throughout the compiler to correlate
-source expressions with intermediate or object code.
-This enables both error messages and debuggers to refer to source
-expressions instead of target or intermediate representations.
-
-We reuse source objects in our approach to uniquely identify profile
-points. As source objects uniquely identify every source expression, the
-provide very fine-grain profile information. If two expressions are
-associated with the same source object, then they both increment the
-same profile counter when executed. Conversely, if two expressions are
-associated with different source objects, then they increment different
-profile counters when executed.
-
-While source objects are typically introduced by the lexer and parser,
-we also require the ability to create new source objects in
-meta-programs.
-This is useful, for instance, when implementing a DSL. You may want to
-profile generated expressions separately from any other expression in
-the source language.
-
-In the case of our running example, the lexer and parser introduce
-source objects for each expression (and subexpression). That is,
-separate source objects are created for @racket[#'(if ...)],
-@racket[#'(subject-contains-ci email "PLDI")], @racket[#'subject-contains-ci],
-@racket[#'email], @racket[#'"PLDI"], @racket[#'(flag email 'spam)], and
-so on. Note that @racket[#'flag] and @racket[#'email] appear multiple
-times, and will have a unique source object for each occurrence.
-
-When loading profile information from a previous run, we compute profile
-weights and store them in an associative map from source objects to
-profile weights.
-The meta-programmer can access this information using an API
-call, such a @racket[profile-query] in our running example.
-
-@section[#:tag "design-instrumenting"]{Efficient Instrumentation}
-Adding a profile point for every single source expression requires care
-to instrument correctly and efficiently. This section describes
-efficient instrumentation techniques that preserve profile points.
-
-As expressions are duplicated or thrown out during optimization, the
-profile points must not be duplicated or lost.
-The language implementation should consider profile points as effectful
-expressions, such as an assignment to an external variable, that should
-never be lost or duplicated.
-For example, for every profile point the language could generate an
-expression @racket[(profile src)], where @racket[src] is the source
-object for that profile point, and never lose or duplicate
-@racket[(profile src)] expressions.
-
-@todo{Not sure how much of this is actually relevant to profiling
-techniques other than counter based. I can imagine timing the entry to a
-block, updating timers based on these profile forms... }
-
-To instrument profiling efficiently, @racket[profile] expressions can be
-preserved until generating basic blocks.
-While generating basic blocks, all the source objects from the profile
-expressions can be attached to the basic block in which they appear.
-After associating profile points with basic blocks, we can analyze the
-blocks to determine which profile points can be calculated in terms of
-other profile points.
-Instead of emitting counters for each profile points,
-some counters are computed as the sum of a list of other counters.
-This technique reduces the number of counter increments to at most one
-per block, and fewer in practice, using techniques from Burger and
-Dybvig@~cite[burger98].
-
-The above infrastructure is also useful for instrumenting block-level
-profiling.
-Recall that we can generate new source objects.
-When generating basic blocks, we attach a newly generated source
-objects for that block.
-The source objects need to be generated deterministically to remain
-stable across different runs.
-
-@section{Source and Block PGO}
-One goal of our approach is to complement rather than interfere with
-traditional, e.g., basic block-level PGO.
-However, since meta-programs may generate different source code after
-optimization, the low-level representation will change after
-meta-programs perform optimizations.
-Therefore we need to instrument and perform source and basic block-level
-optimizations separately.
-We describe a workflow for our approach via the running example from
-@figure-ref{if-r-eg}.
-
-@;First we compile and instrument a program to collect source-level
-@;information.
-@;We run this program and collect only source-level information.
-@;Next we recompile and optimize the program using the source-level
-@;information only, and instrument the program to collect block-level
-@;information.
-@;From this point on, source-level optimizations should run
-@;and the blocks should remain stable.
-@;We run this program and collect only the block-level information.
-@;Finally, we recompile the program
-@;with both source-level and block-level information.
-@;Since the source information has not changed, the meta-programs generate
-@;the same source code, and thus the compiler generates the same blocks.
-@;The blocks are then optimized with the correct profile information.
-
-@todo{Lots of `we'}
-
-To get both source-level and block-level optimizations, we first
-instrument the program for source profiling.
-After running it on representative inputs, we get the profile weights
-such as in @figure-ref{profile-weight-comps}.
-Next we recompile using that source profile information, and instrument
-profiling for basic blocks.
-The generated source code, @figure-ref{if-r-eg}, will remain stable as
-long as we continue to optimize using the source profile information.
-Since the generated source code remains stable, so do the generated basic
-blocks.
-Now we profile the basic blocks generated from the optimized source
-program.
-Finally, we use both the source profile information and the basic block
-profile information to do profile-guided optimizations via meta-programming
-and traditional low-level optimizations
-@figure["workflow-in-code" "This workflow in code"
-(racketblock0
-(run (instrument-source "spam-filter.rkt")
-     input1 input2)
-(load-source-profile-info)
-(run (instrument-blocks
-      (optimize-source "spam-filter.rkt"))
-     input1 input2)
-(load-source-profile-info)
-(load-block-profile-info)
-(compile (optimize-source "spam-filter.rkt")))]
-
 @section[#:tag "design-api-sketch"]{Complete API sketch}
-@#reader scribble/comment-reader
-(racketblock0
-;; Takes:   A syntax or source object
-;; Returns: A profile weight
-(define (profile-query-weight x) ...)
+Here we sketch the API.
 
-;; Takes: The name of a file contains profile
-;;   information
-;; Returns: Nothing. Updates an associative map
-;;   accessible by profile-query-weight
-(define (load-profile-info filename) ...)
+To create profile points,
+@(racketblock0
+(make-profile-point))
+generates profile points deterministically, to ensure
+profile information of generated profile points from previous runs
+is accessible.
 
-;; Takes: A file name
-;; Returns: Nothing. Saves information from the
-;;   profiling system to filename
-(define (save-profile-info filename) ...)
+To attach profile points to generated expressions,
+@(racketblock0
+(annotation-expr expr profile-point))
+takes an expression, such as a syntax object, and a profile
+point, and associates the expression with the profile point.
 
-;; Takes: A syntax object and a source object
-;; Returns: The given syntax object modified to
-;;   be associated with the given source object
-(define (annotate-syntax syn src) ...)
+To access profile information,
+@(racketblock0
+(profile-query expr))
+takes an expression associated with a profile point, and returns the
+profile information associated with that profile point.
 
-;; Takes: A syntax object
-;; Returns: A deterministically generated but
-;;   fresh source object, possibly based on the
-;;   source of the given syntax object
-(define (make-source-obj syn) ...))
+To store profile information a run,
+@(racketblock0
+(store-profile-info filename))
+takes a filename and stores profile information from
+the profiling system to file.
+
+To load profile information a run,
+@(racketblock0
+(load-profile-info filename))
+takes a filename and loads profile information from the file
+so the its accessible by @racket[profile-query].
 
 @;@section{Storing and Loading profile data}
 @;We store profile data by creating a hash table from source file names to
@@ -271,53 +163,3 @@ and traditional low-level optimizations
 @;and the counter we're currently loading. We store the weighted count and
 @;the current weight in the lookup table, incrementing the weight by one
 @;with each new data set.
-
-@section[#:tag "impl-chez"]{Chez Scheme implementation}
-In Chez Scheme, a source object contains a file name and starting and
-ending character positions.
-The Chez Scheme reader automatically creates and attaches these to each
-syntax object read from a file.
-Chez Scheme also provides an API to programmatically manipulate source
-objects and attach them to syntax@~cite[csug-ch11].
-
-We generate a new source objects by adding a suffix to the file name of
-a base source object.
-We generated the suffix from a user provided string and an internally
-incremented counter.
-By basing generated source object on source objects from the
-original source program, errors in generated code are
-easier to debug as the generated code contains source file information
-from the meta-program that generated the code.
-
-Chez Scheme implements exact counter based profiling using the
-instrumentation techniques described in @secref{design-instrumenting},
-including the basic block instrumentation techniques to perform
-traditional PGOs.
-
-The meta-programming system's runtime maintains an associative map of
-source objects to profile weights which is updated by API calls. The API
-provide by Chez Scheme nearly identical to the one sketched in
-@secref{design-api-sketch}.
-
-@section[#:tag "impl-racket"]{Racket implementation}
-Racket does not attach separate source objects to syntax.
-Instead, the reader attaches the file name, line number, column number,
-position, and span are all attached directly to the syntax object.
-Racket provides functions for attaching source information when building
-a new syntax object.
-We provide wrappers to extract source information into separate source
-objects, and to merge source objects into Racket syntax objects.
-We then generate source objects in essentially the same way as in Chez
-Scheme.
-
-We use one of the pre-existing Racket profiling implementation. The
-@racket[errortrace] library provides exact profile counters, like the
-Chez Scheme profiler.
-
-We implement a library which provides a similar API to the one sketched
-in @secref{design-api-sketch}.
-This library maintains the map from source objects to profile
-information and computers profile weights.
-This library is implemented as standard Racket library that can be
-called at by meta-program, and requires no changes to either the Racket
-implementation or the @racket[errortrace] library.

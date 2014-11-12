@@ -12,6 +12,7 @@
 @include-section{intro.scrbl}
 @include-section{example.scrbl}
 @include-section{design.scrbl}
+@include-section{implementation.scrbl}
 @include-section{case-studies.scrbl}
 @include-section{related.scrbl}
 @include-section{conclusion.scrbl}

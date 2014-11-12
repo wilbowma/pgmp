@@ -38,8 +38,8 @@ extension will receive the argument:
 This is a data representation of a term called a syntax object. The
 forms @racketmetafont{#'}, @racketmetafont{#`}, and @racketmetafont{#,}
 implement Lisp's quote, quasiquote, and unquote but on syntax instead of
-lists. @racket[syntax-case] performs pattern matching on syntax
-objects.
+lists. Together they give us a templating system for syntax.
+@racket[syntax-case] performs pattern matching on syntax objects.
 @figure-here["if-r-eg" (elem "Using " @racket[if-r])
 @#reader scribble/comment-reader
 (racketblock0

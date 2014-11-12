@@ -44,7 +44,7 @@ Scala.@~cite[burmako2013scala].
 @;Not sure this should be in the same paragraph but ...
 Using profile-guided meta-programming,
 Chen et.  al. implement a profile-guided meta-program for performing
-process placement for SMP clusters@~citea{chen06}.
+process placement for SMP clusters@~citea{chen06:mpipp}.
 Liu and Rus provide a tools that uses profile information to identify
 suboptimal usage of the C++ STL @~citea{liu09}.
 Hawkins et.  al. implement a compiler for a language that generates C++
@@ -86,19 +86,19 @@ library, using preexisting profiling tools.
 The remainder of the paper is organized as follows.
 In @secref{example} we present a running example and introduce
 meta-programming in Scheme.
-In @secref{design} we present the design of our system at a high-level,
-and the implementation for both Chez Scheme and Racket. In
-@secref{case-studies} we demonstrate that our approach is general enough
+In @secref{design} we present the design of our approach at a high-level
+and sketch an API.
+In @secref{implementation} we present two instantiation of our approach,
+one in Chez Scheme and one in Racket.
+In @secref{case-studies} we demonstrate that our approach is general enough
 to implement and extend existing profile-guided optimizations and
 profile-guided meta-programs.
-In @secref{related} we related to existing work
-on PGOs and profile-guided meta-programming.
-We conclude in @secref{conclusion} a discussion of how our approach could
-be implemented in other meta-programming systems.
+In @secref{related} we related to existing work on PGOs and
+profile-guided meta-programming.
 
 The main contributions of the paper are: @itemlist[
   @item{A general approach for profile-guided meta-programming.}
-  @item{An evaluation of this approach based on implementing existing
-  profile-guided meta-programs, using our approach.}
+  @item{Two instantiations of our approach}
+  @item{An evaluation of our approach based on implementing three
+  existing profile-guided meta-programs.}
 ]
-@todo{Don't like the phrasing of that second bullet}
