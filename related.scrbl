@@ -45,34 +45,25 @@ garbage collection.
 executed code on memory constrained systems.
 
 @section{Meta-program optimizations}
-
-@todo{Delite, Hermit references for more examples of meta-programming??}
-
-@todo{Rewrite}
-
-@todo{Add two related works sitting on my desk for profile-guided
-meta-programming.}
-
 Meta-programming combines the ability to provide high levels of
 abstraction while producing efficient code.
-Many meta-program optimizations exist.
-@citeta{tobin-hochstadt11} implement the optimizer for Typed Racket
-as a meta-program.
-@citeta{sujeeth13} provide a framework for generated optimized code from
-DSLs.
-@citeta["hawkins12"] implement a compiler for a language
-that generates C++ implementations of data structures based on
-high-level specifications.
+Meta-programming has been widely used to implement high performance DSLs
+@~citea["sujeeth13" "sujeeth2014delite" "rompf10"], whole
+general purpose languages@~citea["rafkind12" "tobin-hochstadt08"
+"barzilay05"],
+and production-quality compiler generators@~citea["keep2013nanopass"].
+@citeta{tobin-hochstadt11} implement the optimizer for the Typed Racket
+language as a meta-program.
 The HERMIT toolkit provides an API for performing program
 transformations on Haskell intermediate code before compiling, even
 allowing interactive experimentation@~citea["farmer2012hermit"].
+@citeta{hawkins12} implement a compiler for a language that generates
+C++ implementations of data structures based on high-level
+specifications.
 
-Previous works also exists that integrates profiling to guide
-meta-program optimizations.
+Previous works integrates profiling to guide meta-program optimizations.
 @citeta{chen06:mpipp} use profile-guided meta-programming for performing process
 placement for SMP clusters.
-@citeta{liu09} use profile information to identify suboptimial usage of
-the C++ STL in source code.
 @citeta{vsimunic2000source} use profile-guided meta-programing to
 optimize the energy usage of embedded programs.
 @citeta{karuri2005fine} use fine-grained source profile information to

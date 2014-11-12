@@ -7,8 +7,8 @@
   scriblib/figure)
 
 @title[#:tag "implementation" "Implementations"]
-In this section we instantiation of our approach in Chez Scheme and in
-Racket.
+In this section we describe the instantiations of our approach in Chez
+Scheme and in Racket, and briefly desc
 
 @section[#:tag "impl-chez"]{Chez Scheme implementation}
 Chez Scheme implements exact counter based profiling.
@@ -129,3 +129,18 @@ information and computers profile weights.
 This library is implemented as a standard Racket library that can be
 called by meta-programs, and requires no changes to either the Racket
 implementation or the @racket[errortrace] library.
+
+@section{Instantiations in other meta-programming systems}
+Both of instantiations of our approach are in similar Scheme-style
+meta-programming systems, but the approach can work in any sufficiently
+expression meta-programming system.
+
+Template Haskell@~cite[sheard02], MetaML@~cite[taha00],
+MetaOCaml@~cite[czarnecki04], and Scala@~cite[burmako2013scala] all
+feature powerful meta-programming facilities similar to
+that of Scheme@~cite[dybvig93].
+They allow executing expressive programs at compile-time, provide direct
+access to input expressions, and provide template-style meta-programming
+facilities similar to Scheme.
+C++ template meta-programming is more restricted than the above systems,
+so it is not clear how to instantiate our approach for C++ templates. 
