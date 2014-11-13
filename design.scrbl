@@ -16,14 +16,18 @@ simplicity our explanations refer to counter-based profile information.
 @section[#:tag "design-source-obj"]{Profile points}
 To store and access profile information, we need to associate profile
 information with the source expressions on which meta-programs operate.
-@emph{Profile points} uniquely identify expressions that should be profiled by
-the profiler.
+@emph{Profile points} uniquely identify expressions that should be
+profiled by the underlying profiling system.
 For instance, if two expressions are associated with the same profile point, then they
 both increment the same profile counter when executed.
 Conversely, if two expressions are associated with different profile
 points, then they increment different profile counters when executed.
+The profiling system uses profile points when a program is
+instrumented to collect profile information.
+When the program is not instrumented to collect profile information,
+profile points do not introduce any runtime overhead.
 
-For fine-grain profiling, each input expression and subexpression can
+For fine-grained profiling, each input expression and subexpression can
 have a unique profile point.
 In the case of our running example, separate profile points are
 associated with @racket[#'(if ...)], @racket[#'(subject-contains email
@@ -38,12 +42,11 @@ Meta-programmers may want to generate expressions that are profiled
 separately from any other expression in the source program.
 
 The meta-programmer can access profile information by passing a profile
-point, or object with an associated profile point, to the an API
-call, such as the function @racket[profile-query] seen in our running
-example.
+point, or object with an associated profile point, to an API call, such
+as the function @racket[profile-query] in our running example.
 
 @section[#:tag "design-profile-weights"]{Profile Information}
-Absolute profile information, such as the exact execute count of an
+Absolute profile information, such as the exact execution count of an
 expression, is incomparable across different data sets.
 Multiple data sets are important to ensure PGOs can optimize for
 multiple classes of inputs expected in production.

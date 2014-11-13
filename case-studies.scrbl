@@ -9,8 +9,8 @@
 
 @title[#:tag "case-studies"]{Case Studies}
 In this section we evaluate the generality of our approach by
-implementing existing PGOs and profile-guided meta-programs in
-the Racket instantiation of out approach.
+implementing existing PGOs and profile-guided meta-programs in the
+Racket instantiation of our approach.
 We first demonstrate optimizing Scheme's @racket[case], a
 multi-way branching construct similar to C's @code{switch}, as a
 meta-program.
@@ -164,10 +164,9 @@ In this case study we provide a meta-program that implements
 profile-guided receiver class prediction@~citea["holzle1994optimizing"
 "grove95"] for a simplified object system implemented as a syntax
 extension.
-This case study demonstrates that our mechanism is both general enough
-to implement well-known PGOs, and powerful enough to provide
-domain-specific languages with PGOs not available in the host
-language.
+This demonstrates that our mechanism is both general enough to implement
+well-known PGOs, and powerful enough to provide domain-specific
+languages with PGOs not available in the host language.
 The full implementation of profile-guided receiver class prediction is
 44-line, while the implementation of the entire object system (including
 receiver class prediction) is 129-line.
@@ -311,10 +310,9 @@ according to profile information.
 The full implementation of the list library is 80-line, the vector library is
 88-line, and the sequence library is 111-line.
 
-We provide implementations of lists and vectors@note{Vectors are
-essentially arrays in Scheme.}
-that warn the programmer when a different representation may lead to
-asymptotic performance gains.
+We provide implementations of lists and vectors that warn the programmer
+when a different representation may lead to asymptotic performance
+gains.
 The implementations provide wrappers around the standard list and vector
 functions, using newly generated profile point to separately profile
 each instance of the data structures.

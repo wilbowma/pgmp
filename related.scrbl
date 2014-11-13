@@ -17,7 +17,7 @@ positioning, register allocation, inlining, and conditional branch
 ordering.
 
 GCC profiles at the level of an internal control-flow graph (CFG).
-To maintain a consistent CFGs across instrumented and optimized
+To maintain consistent CFGs across instrumented and optimized
 builds, GCC requires similar optimization decisions across
 builds@~citea{chen10}.
 In addition to the common optimizations noted previously, .NET extends

@@ -48,20 +48,21 @@ character positions.
 Source objects uniquely identify every source expression, providing
 fine-grain profile information.
 The Chez Scheme reader automatically creates and attaches these to each
-syntax object read from a file, using them, e.g., to give error messages
-in terms of source locations.
+syntax object read from a file, using them to give error messages in
+terms of source locations, among other things.
 Chez Scheme also provides an API to programmatically manipulate source
 objects and attach them to syntax objects@~cite[csug-ch11].
 
-We generate a new source objects by adding a suffix to the filename of a
+We generate a new source object by adding a suffix to the filename of a
 base source object.
 By basing generated source objects on those from the original source
 program, errors in generated code are easier to debug as the generated
-code contains source file in which the code was generated.
+code contain source information from the file in which the code was
+generated.
 The meta-programming system maintains an associative map of source
 objects to profile weights, which is updated by API calls.
-The API provide by Chez Scheme nearly identical to the one sketched in
-@secref{design-api-sketch}.
+The API provided by Chez Scheme is nearly identical to the one sketched
+in @secref{design-api-sketch}.
 
 @subsection{Source and Block PGO}
 One goal of our approach is to complement rather than interfere with

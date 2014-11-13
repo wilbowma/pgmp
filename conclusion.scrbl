@@ -5,8 +5,8 @@
 @(require scriblib/footnote)
 @(require scriblib/figure)
 @title[#:tag "conclusion" "Conclusion"]
-Meta-programming is being used to implement high-level optimizations,
-generate code from high-level specifications, and create domain-specific
+Meta-programming is used to implement high-level optimizations, generate
+code from high-level specifications, and create domain-specific
 languages.
 Each of these can take advantage of PGO to optimize before information
 is lost or constraints are imposed.
