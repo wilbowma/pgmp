@@ -17,7 +17,7 @@ meta-program.
 Then we then implement profile-guided receiver class
 prediction@~citea["holzle1994optimizing" "grove95"] for an
 object system implemented as a syntax extension.
-Finally we implement a sequence datatype that specializaes each
+Finally we implement a sequence datatype that specializes each
 instance to a @racket[list] or @racket[vector], based on
 profiling information, automating the recommendations performed by tools
 like Perflint@~citea{liu09}.
@@ -162,7 +162,7 @@ implement a well-known PGO via meta-programming.
 @section[#:tag "study-virtual-call"]{Profile-guided receiver class prediction}
 In this case study we provide a meta-program that implements
 profile-guided receiver class prediction@~citea["holzle1994optimizing"
-"grove95"] for a simplfied object system implemented as a syntax
+"grove95"] for a simplified object system implemented as a syntax
 extension.
 This case study demonstrates that our mechanism is both general enough
 to implement well-known PGOs, and powerful enough to provide
@@ -173,13 +173,13 @@ The full implementation of profile-guided receiver class prediction is
 receiver class prediction) is 129-line.
 
 @Figure-ref{method-call-impl} shows the implementation of profile-guided
-recevier class prediction.
+receiver class prediction.
 A method call such as @racket[(method shape area)] is actually a
 meta-program that generates code as follows.
 First, it generates a new profile point for each class in the system.
 Then it attaches each profile point to a call to the dynamic dispatch
 routine.
-When profile data is not available, the implemation generates a @racket[cond]
+When profile data is not available, the implementation generates a @racket[cond]
 expression which tests the class of the object and calls the dynamic
 dispatch routine, but @emph{with a different profile point for each
 branch}.@note{A production implementation would create a table of
@@ -222,8 +222,8 @@ additional 87-line.
 @Figure-ref{method-call-example} shows an example method call, the
 resulting code after instrumentation, and the resulting code after
 optimization.
-Note that each occurence of @racket[(instrumented-dispatch x area)]
-has a different profile point, so each occurence is profiled separately.
+Note that each occurrence of @racket[(instrumented-dispatch x area)]
+has a different profile point, so each occurrence is profiled separately.
 @figure["method-call-example" "Example of profile-guided receiver class prediction"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
@@ -269,7 +269,7 @@ has a different profile point, so each occurence is profiled separately.
 
 As a further improvement, we could reuse @racket[exclusive-cond] to test
 for classes in the the most likely order.
-@figure["method-call-exclusive-cond" "Profile-guided recevier class prediction, sorted."
+@figure["method-call-exclusive-cond" "Profile-guided receiver class prediction, sorted."
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
 ;; ---------------------------

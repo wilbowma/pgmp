@@ -12,32 +12,32 @@
 
 @title[#:tag "related" "Related Work"]
 @section{Profile-guided optimizations}
-Modern systems such as GCC, .NET, and LLVM@~cite[lattner02] use profile
-directed optimizations.
-These systems uses profile information to guide decisions about code
-positioning, register allocation, inlining, and branch optimizations.
+Modern compilers such as GCC, .NET, and LLVM@~cite[lattner02] use
+profile-guided optimizations.
+These systems use profile information to guide decisions about code
+positioning, register allocation, inlining, and conditional branch
+ordering.
 
 GCC profiles at the level of an internal control-flow graph (CFG).
-To maintain a consistent CFGs across instrumented and optimizated
+To maintain a consistent CFGs across instrumented and optimized
 builds, GCC requires similar optimization decisions across
 builds@~cite[chen10].
 In addition to the common optimizations noted previously, .NET extends
-their profiling system to probe values in @racketkeywordfont{switch}
+their profiling system to probe values in @code{switch}
 statements.
-They can use this value information to optimize
-@racketkeywordfont{switch} branches, similar to the implementation of
-@racket[case] we presented in @secref{study-case}.
+They can use this value information to reorder the branches of a
+@code{switch} statement, as done for @racket[case] in @secref{study-case}.
 
 LLVM has a different model for PGO.
-LLVM uses a runtime reoptimizer that monitors the running program.
+LLVM uses a runtime reoptimizer that monitors the running
+program.
 The runtime can profile the program as it runs ``in the field'' and
 perform simple optimizations to the machine code, or call to an offline
-optimizer for more complex optimizations on the LLVM bytecode.
+optimizer for more complex optimizations on the LLVM bytecode@~citea{lattner2004llvm}.
 
 Recent work is still finding novel uses for profile information.
-@citeta{furr09} present a system for
-inferring types in dynamic languages to assist in
-debugging.
+@citeta{furr09} use profile information to infer types in dynamic
+languages to assist in debugging.
 @citeta{chen06:garbage} use profile information to reorganize the heap and optimize
 garbage collection.
 @citeta{luk02} use profile information to guide data prefetching.
@@ -45,9 +45,10 @@ garbage collection.
 executed code on memory constrained systems.
 
 @section{Meta-program optimizations}
-Meta-programming combines the ability to provide high levels of
+Meta-programming combines the ability to provide high-levels of
 abstraction while producing efficient code.
-Meta-programming has been widely used to implement high performance DSLs
+Meta-programming has been widely used to implement high performance
+domain-specific languages
 @~citea["sujeeth13" "sujeeth2014delite" "rompf10"], whole
 general purpose languages@~citea["rafkind12" "tobin-hochstadt08"
 "barzilay05"],
@@ -61,18 +62,19 @@ allowing interactive experimentation@~citea["farmer2012hermit"].
 C++ implementations of data structures based on high-level
 specifications.
 
-Previous works integrates profiling to guide meta-program optimizations.
+Previous work integrates profiling to guide meta-program optimizations.
 @citeta{chen06:mpipp} use profile-guided meta-programming for performing process
 placement for SMP clusters.
-@citeta{vsimunic2000source} use profile-guided meta-programing to
+@citeta{vsimunic2000source} use profile-guided meta-programming to
 optimize the energy usage of embedded programs.
 @citeta{karuri2005fine} use fine-grained source profile information to
 optimize ASIP designs.
 
-However, existing work introduce new toolkits for profiling and
+However, existing work introduces new toolkits for profiling and
 meta-programming.
-We provide a single, general-purpose mechanism in which we can implement
-new languages, DSLs, abstract libraries, and arbitrary meta-programs,
+We provide a single, general-purpose approach in which we can implement
+new general-purpose languages, domain-specific languages abstract
+libraries, and arbitrary meta-programs,
 all taking advantage of profile-guided optimizations.
 Further, our approach reuses existing meta-programming and profiling
 facilities, rather than implementing new tools that interface the
