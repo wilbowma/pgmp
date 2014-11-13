@@ -139,8 +139,8 @@ Both of our instantiations are in similar Scheme-style meta-programming
 systems, but the approach can work in any sufficiently expressive
 meta-programming system.
 
-Template Haskell@~citea{sheard2002template}, MetaML@~citea{taha00},
-and Scala@~citea{burmako2013scala} all
+Languages such as Template Haskell@~citea{sheard2002template}, MetaML@~citea{taha00},
+and Scala@~citea{burmako2013scala} 
 feature powerful meta-programming facilities similar to
 that of Scheme@~cite[dybvig93].
 They allow executing expressive programs at compile-time, provide direct

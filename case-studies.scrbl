@@ -138,7 +138,8 @@ expression from @figure-ref{case-example}
    (exclusive-cond
      [(key-in? t '(#\space #\tab))
       (white-space stream)]
-     [(key-in? t '(0 1 2 3 4 5 6 7 8 9)) (digit stream)]
+     [(key-in? t '(0 1 2 3 4 5 6 7 8 9))
+      (digit stream)]
      [(key-in? t '(#\()) (start-paren stream)]
      [(key-in? t '(#\))) (end-paren stream)]
      )))
