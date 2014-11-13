@@ -140,7 +140,7 @@ systems, but the approach can work in any sufficiently expressive
 meta-programming system.
 
 Template Haskell@~citea{sheard2002template}, MetaML@~citea{taha00},
-MetaOCaml@~citea{czarnecki04}, and Scala@~citea{burmako2013scala} all
+and Scala@~citea{burmako2013scala} all
 feature powerful meta-programming facilities similar to
 that of Scheme@~cite[dybvig93].
 They allow executing expressive programs at compile-time, provide direct
