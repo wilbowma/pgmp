@@ -25,25 +25,6 @@
                  #:pages '(36 45))
     #:url "http://pdf.aminer.org/000/244/348/commercializing_profile_driven_optimization.pdf"))
 
-(define chen10
-  (make-bib
-    #:title "Taming Hardware Event Samples for FDO Compilation"
-    #:author (authors "Deheo Chen"
-                      "Neil Vachharajani"
-                      "Robert Hundt"
-                      "Shih-wei Liao"
-                      "Vinodha Ramasamy"
-                      "Paul Yuan"
-                      "Wenguang Chen"
-                      "Weimin Zheng")
-    #:date 2010
-    #:location (proceedings-location
-                 "Annual IEEE/ACM international symposium on Code
-                 generation and optimization"
-                 #:series 8
-                 #:pages '(42 52))
-    #:url "http://hpc.cs.tsinghua.edu.cn/research/cluster/papers_cwg/tamingsample.pdf"))
-
 (define lattner02
   (make-bib
     #:title "LLVM: An infrastructure for multi-stage optimization"
@@ -52,57 +33,6 @@
                  #:institution "University of Illinois"
                  #:degree "Master")
     #:date 2002))
-
-(define erdweg11
-  (make-bib
-    #:title "SugarJ: Library-based Syntactic Language Extensibility"
-    #:author (authors "Sebastian Erdweg"
-                      "Tillmann Rendel"
-                      "Christian Kästner"
-                      "Klaus Ostermann")
-    #:location (proceedings-location
-                 "of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)"
-                 #:pages '(391 406))
-    #:url "http://www.informatik.uni-marburg.de/~seba/publications/sugarj.pdf"
-    ;; TODO: autobib chokes when url contains "%20" or "%7E"; should convert
-    ;; to " " and "~"
-    #:date 2011))
-
-(define taha00
-  (make-bib
-    #:title "MetaML and multi-stage programming with explicit annotations "
-    #:author (authors "Walid Taha" "Time Sheard")
-    #:location (journal-location
-                 "Theoretical Computer Science"
-                 #:pages '(211 242)
-                 #:number '(1 2)
-                 #:volume 248)
-    #:date 2000
-    #:url "http://www.cs.rice.edu/~taha/publications/journal/tcs00.pdf"))
-
-(define czarnecki04
-  (make-bib
-    #:title "DSL implementation in MetaOCaml, Template Haskell, and C++"
-    #:author (authors "Krzysztof Czarnecki"
-                      "John T O'Donnell"
-                      "Jörg Striegntiz"
-                      "Walid Taha")
-    #:location (proceedings-location
-                 "Domain-Specific Program Generation"
-                 #:pages '(51 72)
-                 #:volume "Springer Berlin Heidelberg.")
-    #:url "http://camlunity.ru/swap/Library/Computer Science/Metaprogramming/Domain-Specific Languages/DSL Implementation in MetaOCaml, Template Haskell and C++.pdf"
-    #:date 2004))
-
-(define sheard02
-  (make-bib
-    #:title "Template meta-programming for Haskell"
-    #:author (authors "Time Sheard"
-                       "Simon Peyton Jones")
-    #:location (proceedings-location
-                 "ACM SIGPLAN workshop on Haskell")
-    #:date 2002
-    #:url "http://research.microsoft.com/en-us/um/people/simonpj/Papers/meta-haskell/meta-haskell.pdf"))
 
 (define dybvig93
   (make-bib
