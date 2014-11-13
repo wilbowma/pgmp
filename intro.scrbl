@@ -40,7 +40,7 @@ suboptimal usage of the STL in C++ source code.
 Languages with general-purpose meta-programming systems include C, C++,
 Haskell@~citea{sheard2002template}, Java@~cite[erdweg11],
 ML@~cite[taha00 sheard02], Racket@~cite[plt-tr1],
-Scheme@~cite[dybvig93], and Scala@~cite[burmako2013scala].
+Scheme@~cite[dybvig93], and Scala@~citea{burmako2013scala}.
 
 Existing general-purpose meta-programming systems do not provide profile
 information about the input programs on which meta-programs operate.

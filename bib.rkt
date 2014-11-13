@@ -47,7 +47,7 @@
 (define lattner02
   (make-bib
     #:title "LLVM: An infrastructure for multi-stage optimization"
-    #:author "Chris Authors Lattner"
+    #:author "Chris Arthur Lattner"
     #:location (dissertation-location
                  #:institution "University of Illinois"
                  #:degree "Master")
@@ -142,16 +142,6 @@
     #:date 2011
     #:url "http://www.ccs.neu.edu/racket/pubs/pldi11-thacff.pdf"))
 
-(define burger98
-  (make-bib
-    #:title "An infrastructure for profile-driven dynamic recompilation."
-    #:author (authors "Robert G. Burger" "R. Kent Dybvig")
-    #:location (proceedings-location
-                 "International Conference on Computer Languages, 1998."
-                 #:pages '(240 249))
-    #:date 1998
-    #:url "http://pdf.aminer.org/000/289/483/an_infrastructure_for_profile_driven_dynamic_recompilation.pdf"))
-
 (define gcc
   (make-bib
     #:title "Optimize Options - Using the GNU Compiler Collection"
@@ -171,14 +161,6 @@
     #:date 2009
     #:url "http://www.boost.org"))
 
-(define burmako2013scala
-  (make-bib
-    #:title "Scala Macros: Let Our Powers Combine!"
-    #:author "Eugene Burmako"
-    #:location (proceedings-location
-                 "of the 4th Annual Scala Workshop")
-    #:date 2013))
-
 (define dybvig09csug
   (make-bib
     #:title "Chez Scheme Version 8 User's Guide"
@@ -189,14 +171,6 @@
 
 (define csug-ch11 (in-bib dybvig09csug " Chapter 11"))
 
-;(define srikant2007compiler
-;  (make-bib
-;    #:title "The compiler design handbook: optimizations and machine code generation"
-;    #:author (editor (authors "YN Srikant" "Priti Shankar"))
-;    #:location (book-location #:edition "1" #:publisher "CRC Press")
-;    #:date 2002))
-;(define gupta02 (in-bib srikant2007compiler " Chapter 4"))
-;; Awful hack
 #;(define gupta02
   (make-bib
     #:title (elem "Profile Guided Code Optimization. In " (editor (authors "YN Srikant" "Priti Shankar")))

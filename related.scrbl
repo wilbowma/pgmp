@@ -8,8 +8,6 @@
 
 @todo{Add links for all references.}
 
-@todo{Add missing first names to all references.}
-
 @title[#:tag "related" "Related Work"]
 @section{Profile-guided optimizations}
 Modern compilers such as GCC, .NET, and LLVM@~cite[lattner02] use
@@ -58,7 +56,7 @@ language as a meta-program.
 The HERMIT toolkit provides an API for performing program
 transformations on Haskell intermediate code before compiling, even
 allowing interactive experimentation@~citea["farmer2012hermit"].
-@citeta{hawkins12} implement a compiler for a language that generates
+@citeta["hawkins11" "hawkins12"] implement a compiler for a language that generates
 C++ implementations of data structures based on high-level
 specifications.
 

@@ -31,7 +31,7 @@ While generating basic blocks, all the profile points from
 they appear.
 @note{Chez Scheme reuses this infrastructure to profile basic blocks by
 generating a new profile point for each basic block.}
-Using techniques from @citet[burger98], Chez Scheme generate at most one
+Using techniques from @citeta{burger1998infrastructure}, Chez Scheme generate at most one
 counter per block, and fewer in practice.
 
 @;We reuse the source profiling infrastructure to instrumenting
@@ -138,8 +138,8 @@ Both of our instantiations are in similar Scheme-style meta-programming
 systems, but the approach can work in any sufficiently expressive
 meta-programming system.
 
-Template Haskell@~cite[sheard02], MetaML@~cite[taha00],
-MetaOCaml@~cite[czarnecki04], and Scala@~cite[burmako2013scala] all
+Template Haskell@~citea{sheard2002template}, MetaML@~cite[taha00],
+MetaOCaml@~cite[czarnecki04], and Scala@~citea{burmako2013scala} all
 feature powerful meta-programming facilities similar to
 that of Scheme@~cite[dybvig93].
 They allow executing expressive programs at compile-time, provide direct
