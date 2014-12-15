@@ -1,0 +1,142 @@
+First, we would like to thank all the reviews for their time and thoughtful responses.
+
+In response to reviewer one:
+
+The reviewer correctly points out that this paper includes no discussion
+of the overhead of the system or performance of optimized code. The case
+studies in our paper are standard optimizations from the literature with
+existing performance measurements.  The compile-time overhead
+will be specific to the optimization. Since the
+meta-program can run arbitrary code at compile-time, an optimization may
+have very small or very large overhead. Our technique would support
+them regardless.  As for measuring profiling overhead, such measurements
+would be specific to the profiler used to implement our technique. The
+profiler we use in our Chez Scheme implementation are based on standard,
+efficient profiling techniques. Previous work measured the overhead of
+the Chez Scheme profiler at about 9% additional running time on average
+[2].  The profiling library used in our Racket implementation has
+overhead ranging from 3% to 33% [1].
+
+The reviewer asks if the meta-programming approach is general enough to
+permit path and locality profiling. Our the technique is not specific to
+a particular kind of profiling, so long as profile points can be
+associated with the input to a meta-program, and the profiling
+information can be accessed by a meta-program. The details of how and
+what to profile depend on the implementation of the profiler.
+We have not given much thought to locality profiling or how we would use
+this information in our system.
+Our first impressions are that locality information is better used by
+low level optimizations as locality seems highly dependent on low level
+and architectural details.
+However, it is possible that some clever meta-programs could take
+advantage of locality profiling in our system.
+
+The reviewer notes that we do not discuss how profiling or
+meta-programming work in other meta-programming systems, such as
+Template Haskell or MetaML. We debated including such a section, but were
+concerned it detracted from the central point of the paper and would be
+highly speculative about details of how to implement our technique in
+these systems.  We are happy to add it if reviewers think it would be
+beneficial.
+
+The reviewer asks how aspect-oriented programming, which can be used to
+insert profiling code, compares to meta-programming. Aspect-oriented
+programming is orthogonal to meta-programming. Furthermore, we do not
+use meta-programming merely to insert profiling code, but to perform
+profile-guided optimizations at compile time. We are not aware of work
+that uses profile-guided aspect-oriented programming, but would be
+concerned that such techniques would perform optimizations at runtime
+rather than at compile time.
+
+In response to reviewer two:
+
+Reviewer two is concerned that the focus of our paper is too narrow for
+a conference such as PLDI. On the contrary, we are combining popular
+techniques which frequently appear at PLDI into a single general-purpose
+approach. For instance, Hawkins et. al. (2011, 2012) use special-purpose
+meta-programming techniques by providing a declarative language that
+generates efficient C++ data structures, while Chen et. al. (2006) use
+profile information to optimize the heap for locality. In fact, several
+of the most influential PLDI papers use profile information or
+meta-programming techniques [3], but the two techniques have yet to be
+combined into a single general purpose system!
+
+In response to reviewer three:
+
+The reviewer asks how do we ensure that profile points are not mixed up,
+for instance, when reordering conditional branches. In our Racket and
+Chez Scheme implementations, profile points are introduced in two ways:
+
+1) The language readers attaches source location information (filename, line
+number, character position) to each source expression. We use this
+source location to uniquely identify profile points. These profile
+points are always generated deterministically as long as the source code
+does not change. For instance, given a conditional statement in some source
+file, each branch has a different source location associated with it. If
+the branches are reordered, the original source location is reordered
+with the branches. Since we use source locations to identify profile
+points, and since source locations are implicitly maintained by the
+meta-programming systems of Racket and Chez Scheme, we usually do not
+need to explicitly ensure profile points are not mixed up.
+
+2) We explicitly introduce a new profile point with make-profile-point.
+In this case, we must take care to generate the profile point
+deterministically, and associate it with expressions deterministically.
+For instance, suppose we explicitly annotate the following conditional
+with profile points:
+
+...
+(define p1 (make-profile-point))
+(define p2 (make-profile-point))
+
+#'(cond
+    [(test1 #,(annotate p1 #'e1))]
+    [(test2 #,(annotate p2 #'e2))])
+
+If p1 and p2 are not generated deterministically, then using them to
+lookup profile information in later runs will result in potentially
+arbitrary results. The p1 generated on the optimizing run may not be the
+same p1 generated on the instrumented run. And, we must ensure we
+associate p1 with e1, and p2 with e2, both times.
+
+In our implementations, make-profile-point takes a source expression as
+input, and uses the source location information as a starting point to
+deterministically generate new profile points. In the above example, we
+would instead write:
+
+...
+(define p1 (make-profile-point #'e1))
+(define p2 (make-profile-point #'e2))
+
+#'(cond
+    [(test1 #,(annotate p1 #'e1))]
+    [(test2 #,(annotate p2 #'e2))])
+
+
+
+
+
+[1] http://www.ccs.neu.edu/racket/pubs/NU-CCIS-14-01.pdf
+
+[2] Robert G Burger and R Kent Dybvig. An infrastructure for profile-
+driven dynamic recompilation. In Proc. Computer Languages, 1998.
+Proceedings. 1998 International Conference on, 1998.
+http://www.cs.indiana.edu/~dyb/pubs/pdrtc.pdf
+
+[3] http://www.sigplan.org/Awards/PLDI/
+
+[4] Wen-ke Chen, Sanjay Bhansali, Trishul Chilimbi, Xiaofeng Gao, and Weihaw
+Chuang. Profile-guided Proactive Garbage Collec- tion for Locality
+Optimization. In Proc. The 2006 ACM SIG- PLAN Conference on Programming
+Language Design and Im- plementation, 2006b. http://doi.acm.org/10.1145/
+1133981.1134021
+
+[5] Peter Hawkins, Alex Aiken, Kathleen Fisher, Martin Rinard, and Mooly
+Sagiv. Data Representation Synthesis. In Proc. Proceed- ings of the 32Nd
+ACM SIGPLAN Conference on Programming Language Design and
+Implementation, 2011. http://doi. acm.org/10.1145/1993498.1993504
+
+[6] Peter Hawkins, Alex Aiken, Kathleen Fisher, Martin Rinard, and Mooly
+Sagiv. Concurrent Data Representation Synthesis. In Proc. Proceedings of
+the 33rd ACM SIGPLAN Conference on Programming Language Design and
+Implementation, 2012. http://doi.acm.org/10.1145/2254064.2254114

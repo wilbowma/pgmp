@@ -1,0 +1,176 @@
+Dear William,
+
+The PLDI’15 phase one author response period has started.  Responses are
+due three and a half days from now, at 3pm Wednesday, PST.
+
+This deadline is firm.   Please use this link to see the deadline in your
+own timezone:  http://bit.ly/1A5opEW
+
+At the end of  this response period the PC and ERC will determine which
+papers will continue to the second phase of the review process.   Less than
+half of all papers are expected to progress to the second phase.   I expect
+the outcome of this phase to be announced late on Friday December 19.
+
+A short explanation of the marking rubric your reviewers used:
+
+	Overall merit:
+		1.  Accept:  on balance this paper should appear in PLDI’15
+		2.  Reject:  on balance this paper is not ready to appear in PLDI’15
+
+	Conviction:
+		1.  High:  reviewer holds their position with conviction
+		2.  Low:  reviewer does not hold their position with conviction
+
+The author response is your opportunity to answer any reviewer questions,
+address any concerns, and/or correct any reviewer misunderstandings. 
+Please make your response short and to the point.   While there is no
+prescribed word limit, reviewers are under NO obligation to read beyond 500
+words, so concision is key.  You are not to add new material or new
+results, that opportunity passed with the paper deadline.
+
+If your paper progresses to the second phase, you will be given the
+opportunity to respond to the phase two reviews in mid January.
+
+You should be able to access your reviews at the link below.   You should
+find three reviews,  one from the PC and two from the ERC.
+
+https://pldi15.hotcrp.com/?email=wilbowma%40ccs.neu.edu
+
+If you have any questions, please contact me.
+
+Steve Blackburn
+PLDI’15 Program Chair
+
+===========================================================================
+                           PLDI '15 Review #193A
+                     Updated 9 Dec 2014 11:02:12am EST
+---------------------------------------------------------------------------
+                Paper #193: Profile-Guided Meta-Programming
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Accept
+                         Conviction: 1. High
+
+                         ===== Paper summary =====
+
+The paper describes the support for writing profile-guided
+meta-programs in a general-purpose meta-programming system, the
+implementation in Chez Scheme and Racket, and three uses---branch code
+placement, receiver class prediction, and data structure
+specialization.
+
+                        ===== Points in favor =====
+
+The approach is novel and significant as it enables profile-driven
+optimization through meta-programming, instead of having to relying on
+a compiler.  The meta-program code for the three use cases is given
+effectively in its entirely in less than two pages, demonstrating the
+concision, clarity and flexibility of profile-guided meta-programming.
+The writing is clear and easy to follow.
+
+                        ===== Points against =====
+
+Profiles are used to optimize performance, yet there is no performance
+evaluation nor explanations for its absence in the paper.  Also
+missing is the discussion of applicability of the approach in other
+types of profiling and meta-programming systems.
+
+                      ===== Comments for author =====
+
+Exposing profile information to meta-programmers provides the same
+advantages profile-guided optimization gives to compilers, but in a
+more flexible way.  The authors provide sufficient examples to make
+their case that their framework is flexible enough to handle a variety
+of optimizations, from general to domain specific.  
+
+The examples are well chosen.  Using the approach, a programmer can
+leverage the rich set of ideas in the compiler literature, adopting
+them to improve specific applications, e.g. branch code placement;
+adapting them to design new types of optimization, e.g. for OO
+languages and specialized data structures.  There are numerous
+potential benefits in following this approach.
+
+The idea is new and convincing.  Next I'll focus on three questions
+for the author(s).
+
+They paper includes no discussion of the overhead of the system or the
+performance of the optimized code.  While meta-programming has the
+advantage that the code runs at compile time, I would like to see that
+their system does not overly lengthen compilation nor does it add
+excessive overhead to the compiled result (perhaps due to profiling
+code).
+
+There is a mismatch in the view of a programmer and the execution on a
+machine.  The paper touches on the difference when noting that
+profiling points are based on expressions not code blocks.  Indeed,
+the compiled code has a graph structure.  A common type of analysis is
+path profiling, i.e. Ball and Larus 1994 (cited in the paper).  Another
+common analysis is for locality, i.e.  the reuse distance profiles
+used in the HPC Toolkit (Marin and Mellor-Crummey, SIGMETRICS 20014
+e.g.)  In these two examples, a program is modeled as a graph in the
+first case and an access stream in the second (although the result is
+reported using the program structure). Is the meta-programming
+approach general enough to permit path and locality profiling?
+
+The paper claims to be "parametric over the particular profiling
+technique and meta-programming system".  This is demonstrated by
+implementing it in Chez Scheme and Racket.  While they are different
+systems, a reader not familiar with them needs more information to
+understand the difference.  The paper mentions Template Haskell and
+MetaML but do not so much discuss how profiling or meta-programming
+would work in these systems.
+
+Aspect-oriented programming is a technique to let a programmer insert
+profiling code.  How does it compare with meta-programming?
+
+===========================================================================
+                           PLDI '15 Review #193B
+                     Updated 9 Dec 2014 12:38:12pm EST
+---------------------------------------------------------------------------
+                Paper #193: Profile-Guided Meta-Programming
+---------------------------------------------------------------------------
+
+                      Overall merit: 1. Reject
+                         Conviction: 1. High
+
+                         ===== Paper summary =====
+
+This paper describes an API to introduce profiling information that can be used during the compile time source-to-source translation (or preprocessing). The API includes mechanisms to associate profile-pints to expressions as well as storing and loading the profiling information into/from files. The paper presents three examples to illustrate the usefulness of the proposed api.
+
+                        ===== Points in favor =====
+
+I think this is a valuable contribution and the api should be useful to those developing optimizing metaprograms.
+
+                        ===== Points against =====
+
+Although the idea is useful, in my opinion its design and development is a relatively narrow problem  and not the best fit for a conference like PLDI.
+
+===========================================================================
+                           PLDI '15 Review #193C
+                     Updated 9 Dec 2014 2:07:50pm EST
+---------------------------------------------------------------------------
+                Paper #193: Profile-Guided Meta-Programming
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Accept
+                         Conviction: 1. High
+
+                         ===== Paper summary =====
+
+The paper presents techniques and APIs to make profiling data available to meta-programs (e.g. macros). The approach is described in detail and evaluated by implementing a set of common and interesting profile-guided optimizations (conditional branch optimization, receiver class prediction, data type specialization).
+Two implementations are presented (Racket and Chez Scheme).
+
+                        ===== Points in favor =====
+
+Profile guided optimization is a common theme in fully automatic JIT compilers, but this is the first paper that treats it as a meta-programming technique.
+
+The proposed directives seem powerful and simple at the same time.
+
+The evaluation provides convincing evidence that the proposed API (make-profile-point, profile-query, …) scales to interesting optimization cases.
+
+                        ===== Points against =====
+
+Some aspects of make-profile-point are not entirely clear. The paper says that it must "generate profile points deterministically", but I'm not sure i understand what that means in practice. For example, how do i ensure that profile points are not mixed up when reordering conditional branches?
+
+
+
