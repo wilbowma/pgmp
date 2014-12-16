@@ -1,61 +1,56 @@
-Review two is concerned that the focus of our paper is too narrow for
-a conference such as PLDI. On the contrary, this work combines popular
-techniques which frequently appear at PLDI into a single general-purpose
-approach. For instance, Hawkins et. al. (PLDI 2011, PLDI 2012) use special-purpose
-meta-programming techniques, while Chen et. al. (PLDI 2006) use
-profile-guided optimization. In fact, profile-guided optimization and
-meta-programming are featured in several of the most influential PLDI
-papers. For instance Pettis and Hansen (PLDI 1990) introduce
-profile-guided code positioning, while Frigo (PLDI 1999) describes a
-meta-program for generating performant C code.
+Review two states that the focus of our paper is too narrow for a
+conference such as PLDI. On the contrary, this work combines two
+techniques, profile guided optimization and meta-programming, which
+frequently appear at PLDI into a single general-purpose approach:
+Pettis and Hansen (PLDI 1990 most influential paper award)
+Frigo (PLDI 1999 most influential paper award)
+Chen et. al. (PLDI 2006)
+Hawkins et. al. (PLDI 2011, PLDI 2012)
 
 
-Reviewer one asks about performance evaluation. Our case studies have been
-found to be effective in the literature, and a performance evaluation of
-them in our system would measure the specifics of our Racket and
-Chez implementations more than the benefits of our technique.
+Reviewer A asks about performance evaluation. The optimizations used
+in our case studies have been found to be effective in the literature,
+and a performance evaluation in our system would measure the specifics
+of our Racket and Chez implementations more than the benefits of our
+technique, and would therefore be misleading.
 
-The compile-time overhead will be specific to the optimization. For
-instance, conditional branch reordering is a simple local change and
-will likely not have much overhead. However, performing function
-inlining as a profile-guided meta-program may be
-complicated; the meta-program must account for global changes to code
-size, may be run many times depending on the number of function calls,
-and slow down later stages of compilation.
+Review A also mentions compile-time overhead. The compile-time
+overhead will be specific to the optimization. For instance, conditional
+branch reordering is a simple local change and will likely not have much
+overhead. However, performing function inlining as a profile-guided
+meta-program may be complicated; the meta-program must account for
+global changes to code size, may be run many times depending on the
+number of function calls, and slow down later stages of compilation.
 
-The profiling overhead will be specific to the profiler used by the
-implementation of our technique. For instance, the profiler we use in
-our Chez Scheme implementation is based on standard, efficient profiling
-techniques. Previous work measured the overhead of the Chez Scheme
-profiler at about 9% additional running time on average [2].  The
-profiling library used in our Racket implementation has overhead ranging
-from 3% to 33% [1].
+Finally, review A mentions profiling overhead. Profiling overhead is
+specific to the profiler used by the implementation of our technique.
+For instance, previous work measured about 9% overhead of profiler we use in
+our Chez Scheme implementation [2].  The profiling library used in our
+Racket implementation has overhead ranging from 3% to 33% [1].
 
-We will add a discussion of performance and overhead to the paper.
+We will add a discussion of overhead to the paper.
 
-Review one asks if the meta-programming approach is general enough to
+Review A asks if the meta-programming approach is general enough to
 permit path and locality profiling. As long as costs measured by the
 profiler can be mapped to source program points, our techniques should
-apply. While path profiling could inform optimizations such as inlining,
-which can be expressed using our technique, we have not given much
-thought to locality profiling or how we would use this information in
-our system.  We conjecture locality information is better used by low
-level optimizations.  However, it is possible that some clever
-meta-programs could take advantage of locality profiling in our system.
+apply. Path profiling can inform optimizations such as inlining,
+which can be expressed using our technique.  We conjecture locality
+information is better used by low level optimizations.  However, it is
+possible that some clever meta-programs could take advantage of locality
+profiling in our system.
 
-Review one notes that we do not discuss how profiling or
-meta-programming work in other meta-programming systems, such as
-Template Haskell or MetaML. We will add a discussion of other
-meta-programming systems and how our technique might apply to them.
+Review A notes that we do not discuss how profiling or meta-programming
+work in other meta-programming systems, such as Template Haskell or
+MetaML. We will add a discussion of other meta-programming systems and
+how our technique might apply to them.
 
-Review one asks how aspect-oriented programming, which can be used to
-insert profiling code, compares to meta-programming. Aspect-oriented
-programming (AOP) is orthogonal to meta-programming. Our technique should work
-with an AOP based profiler, so long as profile points can be mapped to
-program points.
+Review A mentions aspect-oriented programming, which can be used to
+insert profiling code. Aspect-oriented programming (AOP) is orthogonal
+to meta-programming. Our technique should work with an AOP based
+profiler, so long as profile points can be mapped to program points.
 
 
-Review three asks how do we ensure that profile points are not mixed up,
+Reviewer C asks how do we ensure that profile points are not mixed up,
 for instance, when reordering conditional branches. In our
 implementations, profile points are introduced in two ways:
 
@@ -64,37 +59,16 @@ number, character position) to each source expression. We use this
 source location to uniquely identify profile points. These profile
 points are always generated deterministically. As they are attached
 directed to the source expressions we transform, they are implicitly
-preserved during macro transformations, such as branch reordering.
+preserved during code transformations, such as branch reordering.
 
 2) The meta-program explicitly introduces a new profile point with
 make-profile-point. In this case, make-profile-point must generate the
-profile point deterministically. For instance, suppose we explicitly
-annotate the following conditional with profile points:
-
-...
-(define p1 (make-profile-point))
-(define p2 (make-profile-point))
-
-#'(cond
-    [(test1 #,(annotate p1 #'e1))]
-    [(test2 #,(annotate p2 #'e2))])
-
-If p1 and p2 are not generated deterministically, then using them to
-lookup profile information in later runs will result in potentially
-arbitrary results. In our implementations, we solve this by providing
+profile point deterministically. Otherwise, when later runs lookup
+profile information for a generated profile point, the results may be
+arbitrary. In our implementations, we solve this by providing
 make-profile-point a source expression as input, and use the source
 location information as a starting point to deterministically generate
-new profile points. In the above example, we would instead write:
-
-...
-(define p1 (make-profile-point #'e1))
-(define p2 (make-profile-point #'e2))
-
-#'(cond
-    [(test1 #,(annotate p1 #'e1))]
-    [(test2 #,(annotate p2 #'e2))])
-
-
+new profile points.
 
 
 [1] http://www.ccs.neu.edu/racket/pubs/NU-CCIS-14-01.pdf
