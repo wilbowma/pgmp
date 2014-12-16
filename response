@@ -1,34 +1,38 @@
-Review two states that the focus of our paper is too narrow for a
-conference such as PLDI. On the contrary, this work combines two
-techniques, profile guided optimization and meta-programming, which
-frequently appear at PLDI into a single general-purpose approach:
-Pettis and Hansen (PLDI 1990 most influential paper award)
-Frigo (PLDI 1999 most influential paper award)
-Chen et. al. (PLDI 2006)
-Hawkins et. al. (PLDI 2011, PLDI 2012)
+Review A asks about the performance of optimized programs.  We
+considered at length how to address this issue while preparing the
+paper and concluded there was not much useful we could say.  The
+optimizations used in our case studies have been found to be effective
+in the literature, and a performance evaluation in our system would
+measure the specifics of our Racket and Chez Scheme implementations
+more than the benefits of our technique.  Furthermore, since some
+of the more interesting optimizations performed at the level of
+meta programs can change asymptotic behavior (for example, optimizations
+that select algorithms or data representations based on frequency
+of operations) it would be easy to create examples with arbitrary
+performance improvements, which would uninformative at best.
 
+Profiling overhead is specific to the profiler used by the
+implementation of our technique.  Previous work measured about 9%
+overhead of profiler we use in our Chez Scheme implementation [2].
+The profiling library used in our Racket implementation has overhead
+ranging from 3% to 33% [1].  In the typical workflow, profiling is
+disabled for production runs of a program, so this overhead affects
+only profiled runs during development.
 
-Reviewer A asks about performance evaluation. The optimizations used
-in our case studies have been found to be effective in the literature,
-and a performance evaluation in our system would measure the specifics
-of our Racket and Chez implementations more than the benefits of our
-technique, and would therefore be misleading.
+Review A also asks about compile-time overhead.  The overhead for
+loading profile information is linear in the number of source points,
+and the overhead for determining the weight of a particular source
+point is constant-time.  In both cases, the cost per source point
+is small---a hash-table write or read.  The overhead for performing
+an optimization based on profile information will be specific to
+the optimization. For instance, conditional branch reordering is a
+simple local change and will likely not have much overhead.  Performing
+function inlining as a profile-guided meta-program might be more
+costly; the meta-program must account for global changes to code
+size, may be run many times depending on the number of function
+calls, and may slow down (or speed up) later stages of compilation.
 
-Review A also mentions compile-time overhead. The compile-time
-overhead will be specific to the optimization. For instance, conditional
-branch reordering is a simple local change and will likely not have much
-overhead. However, performing function inlining as a profile-guided
-meta-program may be complicated; the meta-program must account for
-global changes to code size, may be run many times depending on the
-number of function calls, and slow down later stages of compilation.
-
-Finally, review A mentions profiling overhead. Profiling overhead is
-specific to the profiler used by the implementation of our technique.
-For instance, previous work measured about 9% overhead of profiler we use in
-our Chez Scheme implementation [2].  The profiling library used in our
-Racket implementation has overhead ranging from 3% to 33% [1].
-
-We will add a discussion of overhead to the paper.
+We will add a discussion of these issues to the final paper.
 
 Review A asks if the meta-programming approach is general enough to
 permit path and locality profiling. As long as costs measured by the
@@ -49,8 +53,18 @@ insert profiling code. Aspect-oriented programming (AOP) is orthogonal
 to meta-programming. Our technique should work with an AOP based
 profiler, so long as profile points can be mapped to program points.
 
+Review B states that the design and development of the idea is too
+narrow for a conference such as PLDI.  We respectfully disagree.
+This work combines two techniques, profile guided optimization and
+meta-programming, which frequently appear at PLDI, into a single
+general-purpose approach: Pettis and Hansen (PLDI 1990 most influential
+paper award); Frigo (PLDI 1999 most influential paper award); Chen
+et al. (PLDI 2006), Hawkins et al. (PLDI 2011, PLDI 2012).  If the
+mechanism seems straightforward to use or even to implement, that
+should be viewed as a positive, both in regard to the mechanism and
+in regard to our description of it.
 
-Reviewer C asks how do we ensure that profile points are not mixed up,
+Review C asks we ensure that profile points are not mixed up,
 for instance, when reordering conditional branches. In our
 implementations, profile points are introduced in two ways:
 
@@ -59,7 +73,7 @@ number, character position) to each source expression. We use this
 source location to uniquely identify profile points. These profile
 points are always generated deterministically. As they are attached
 directed to the source expressions we transform, they are implicitly
-preserved during code transformations, such as branch reordering.
+preserved during meta-programming code transformations.
 
 2) The meta-program explicitly introduces a new profile point with
 make-profile-point. In this case, make-profile-point must generate the
@@ -69,6 +83,14 @@ arbitrary. In our implementations, we solve this by providing
 make-profile-point a source expression as input, and use the source
 location information as a starting point to deterministically generate
 new profile points.
+
+In both cases, source information is attached directly to
+intermediate-langauge forms in all the downstream passes leading
+to the insertion of profile counters, which are themselves connected
+to the source information in the generated code.  The intermediate-language
+forms can thus be reordered or replicated by downstream passes
+without any concern about the compiler losing track of the source
+correlation.  The final paper will elaborate on this.
 
 
 [1] http://www.ccs.neu.edu/racket/pubs/NU-CCIS-14-01.pdf
