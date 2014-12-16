@@ -15,7 +15,7 @@ of our Racket and Chez implementations more than the benefits of our
 technique, and would therefore be misleading.
 
 Review A also mentions compile-time overhead. The compile-time
-overhead will be specific to the optimization. For instance, conditional
+overhead is specific to the optimization. For instance, conditional
 branch reordering is a simple local change and will likely not have much
 overhead. However, performing function inlining as a profile-guided
 meta-program may be complicated; the meta-program must account for
