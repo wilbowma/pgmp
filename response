@@ -1,37 +1,36 @@
 Review B states that the design and development of the idea is too
 narrow for a conference such as PLDI.  We respectfully disagree.  This
-work combines two techniques, profile guided optimization and
-meta-programming, each of which frequently appear at PLDI, into a single
-general-purpose approach: Pettis and Hansen (PLDI 1990 most influential
-paper award); Frigo (PLDI 1999 most influential paper award); Chen et
-al. (PLDI 2006), Hawkins et al. (PLDI 2011, PLDI 2012).  If the
-mechanism seems straightforward to use or even to implement, that should
-be viewed as a positive, both in regard to the mechanism and in regard
-to our description of it.
+work combines profile-guided optimization and meta-programming---two
+techniques which appear frequently at PLDI: Pettis and Hansen (PLDI 1990
+most influential paper award); Frigo (PLDI 1999 most influential paper
+award); Chen et al. (PLDI 2006), Hawkins et al. (PLDI 2011, PLDI 2012).
+If the mechanism seems straightforward to use or even to implement, that
+should be viewed as a positive, both in regard to the mechanism and our
+description of it.
 
 Review A asks about the performance of optimized programs. The
 optimizations used in our case studies have been found to be effective
-in the literature, and a performance evaluation in our system would
-measure the specifics of our Racket and Chez Scheme implementations more
-than the benefits of our technique.  Furthermore, since some of the more
-interesting optimizations performed at the level of meta programs can
-change asymptotic behavior (for example, optimizations that select
-algorithms or data representations based on frequency of operations) it
-would be easy to create examples with arbitrary performance
-improvements, which would uninformative at best.
+in the literature. A performance evaluation in our system would measure
+the specifics of our Racket and Chez Scheme implementations more than
+the benefits of our technique.  Furthermore, since some of the more
+interesting optimizations performed by meta-programs can change
+asymptotic behavior (for example, optimizations that select algorithms
+or data representations based on frequency of operations) it would be
+easy to create examples with arbitrary performance improvements, which
+would uninformative at best.
 
-Profiling overhead is inherited to the profiler used by the
+Profiling overhead is inherited by the profiler used by the
 implementation of our technique.  Previous work measured about 9%
-overhead of profiler we use in our Chez Scheme implementation [2].  The
+overhead of the profiler used in our Chez Scheme implementation [2].  The
 profiling library used in our Racket implementation has overhead ranging
-from 3% to 33% [1].  In the typical workflow, profiling is disabled for
-production runs of a program, so this overhead affects only profiled
-runs during development.
+from 3% to 33% [1].  Typically, profiling is disabled for production
+runs of a program, so this overhead affects only profiled runs during
+development.
 
 Review A also asks about compile-time overhead.  The overhead for
-loading profile information is linear in the number of source points,
-and the overhead for determining the weight of a particular source point
-is constant-time.  In both cases, the cost per source point is small---a
+loading profile information is linear in the number of profile points,
+and the overhead for determining the weight of a particular profile point
+is constant-time.  In both cases, the cost per profile point is small---a
 hash-table write or read.  The overhead for performing an optimization
 based on profile information will be specific to the optimization. For
 instance, conditional branch reordering is a simple local change and
@@ -44,7 +43,7 @@ up) later stages of compilation.
 We will add a discussion of profiling and compile-time overhead to the final paper.
 
 Review A asks if the meta-programming approach is general enough to
-permit path and locality profiling. As long as costs measured by the
+use path and locality profiling. As long as costs measured by the
 profiler can be mapped to source program points, our techniques should
 apply. Path profiling can inform optimizations such as inlining, which
 can be expressed using our technique.  We conjecture locality
@@ -57,10 +56,10 @@ work in other meta-programming systems, such as Template Haskell or
 MetaML. We will add a discussion of other meta-programming systems and
 how our technique might apply to them.
 
-Review A mentions aspect-oriented programming, which can be used to
-insert profiling code. Aspect-oriented programming (AOP) is orthogonal
-to meta-programming. Our technique should work with an AOP based
-profiler, so long as profile points can be mapped to program points.
+Review A mentions aspect-oriented programming (AOP), which can be used to
+insert profiling code. AOP is orthogonal to meta-programming. Our
+technique should work with an AOP based profiler, so long as profile
+points can be mapped to program points.
 
 Review C asks how we ensure that profile points are not mixed up,
 for instance, when reordering conditional branches. In our
