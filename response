@@ -1,13 +1,3 @@
-Review B states that the design and development of the idea is too
-narrow for a conference such as PLDI.  We respectfully disagree.  This
-work combines profile-guided optimization and meta-programming---two
-techniques which appear frequently at PLDI: Pettis and Hansen (PLDI 1990
-most influential paper award); Frigo (PLDI 1999 most influential paper
-award); Chen et al. (PLDI 2006), Hawkins et al. (PLDI 2011, PLDI 2012).
-If the mechanism seems straightforward to use or even to implement, that
-should be viewed as a positive, both in regard to the mechanism and our
-description of it.
-
 Review A asks about the performance of optimized programs. The
 optimizations used in our case studies have been found to be effective
 in the literature. A performance evaluation in our system would measure
@@ -61,12 +51,22 @@ insert profiling code. AOP is orthogonal to meta-programming. Our
 technique should work with an AOP based profiler, so long as profile
 points can be mapped to program points.
 
+Review B states that the design and development of the idea is too
+narrow for a conference such as PLDI.  We respectfully disagree.  This
+work combines profile-guided optimization and meta-programming---two
+techniques which appear frequently at PLDI: Pettis and Hansen (PLDI 1990
+most influential paper award); Frigo (PLDI 1999 most influential paper
+award); Chen et al. (PLDI 2006), Hawkins et al. (PLDI 2011, PLDI 2012).
+If the mechanism seems straightforward to use or even to implement, that
+should be viewed as a positive, both in regard to the mechanism and our
+description of it.
+
 Review C asks how we ensure that profile points are not mixed up,
 for instance, when reordering conditional branches. In our
 implementations, profile points are introduced in two ways:
 
-1) The language parser attaches source location information (filename, line
-number, character position) to each source expression. We use this
+1) The language parser attaches source location information (filename,
+line number, character position) to each source expression. We use this
 source location to uniquely identify profile points. These profile
 points are always generated deterministically. As they are attached
 directed to the source expressions we transform, they are implicitly
@@ -91,8 +91,9 @@ The final paper will elaborate on this.
 
 
 [1]  Vincent St-Amour, and Matthias Felleisen. Feature-specific
-profiling.  Technical Report NU-CCIS-8-28-14-1, Northeastern University,
-2014. http://www.ccs.neu.edu/racket/pubs/NU-CCIS-14-01.pdf
+profiling. Technical Report NU-CCIS-8-28-14-1, Northeastern University,
+2014.
+http://www.ccs.neu.edu/racket/pubs/NU-CCIS-14-01.pdf
 
 [2] Robert G Burger and R Kent Dybvig. An infrastructure for profile-
 driven dynamic recompilation. In Proc. Computer Languages, 1998.
@@ -102,7 +103,7 @@ http://www.cs.indiana.edu/~dyb/pubs/pdrtc.pdf
 [3] http://www.sigplan.org/Awards/PLDI/
 
 [4] Wen-ke Chen, Sanjay Bhansali, Trishul Chilimbi, Xiaofeng Gao, and
-Weihaw Chuang. Profile-guided Proactive Garbage Collection for Locality
+Weihaw Chuang. 2006. Profile-guided Proactive Garbage Collection for Locality
 Optimization. In Proceedings of the ACM SIGPLAN 2006 Conference on
 Programming Language Design and Implementation (PLDI '06).
 http://doi.acm.org/10.1145/1133981.1134021
@@ -116,12 +117,14 @@ http://doi. acm.org/10.1145/1993498.1993504
 [6] Peter Hawkins, Alex Aiken, Kathleen Fisher, Martin Rinard, and Mooly
 Sagiv. Concurrent Data Representation Synthesis. In Proceedings of the
 ACM SIGPLAN 2012 Conference on Programming Language Design and
-Implementation (PLDI '12). http://doi.acm.org/10.1145/2254064.2254114
+Implementation (PLDI '12).
+http://doi.acm.org/10.1145/2254064.2254114
 
 [7] Matteo Frigo. 1999. A fast Fourier transform compiler. In
 Proceedings of the ACM SIGPLAN 1999 conference on Programming language
 design and implementation (PLDI '99). ACM, New York, NY, USA, 169-180.
-DOI=10.1145/301618.301661 http://doi.acm.org/10.1145/301618.301661
+DOI=10.1145/301618.301661
+http://doi.acm.org/10.1145/301618.301661
 
 [8] Karl Pettis and Robert C. Hansen. 1990. Profile guided code
 positioning. In Proceedings of the ACM SIGPLAN 1990 conference on
