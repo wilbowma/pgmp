@@ -10,17 +10,5 @@ implementation of our approach is not a library as it requires changes
 to the profiling and runtime systems.
 
 Review E also points out that performance is not being evaluated at all.
-We invite the reviewer to to consult our first response, which covers
-this topic.
-
-;; -- OR
-
-Review E also points out that performance is not being evaluated at all.
-Reviews from phase one also pointed this out. The first three paragraphs
-of our first response address the lack of performance and overhead
-evaluation. In short, performance of optimized programs greatly depends
-on the optimization implemented in our approach, and profiling overhead
-greatly depends on the profiler used in the implementation of our
-approach. We present a general purpose approach for implementing
-profile-guided meta-programs, and evaluated the generality and
-programmability of our approach.
+We invite the reviewer to to consult our first response. The first three
+paragraphs of our first response cover this topic.
