@@ -1,0 +1,66 @@
+===========================================================================
+                           PLDI '15 Review #193D
+                     Updated 7 Jan 2015 5:45:36am EST
+---------------------------------------------------------------------------
+                Paper #193: Profile-Guided Meta-Programming
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Accept
+                         Conviction: 2. Low
+
+                         ===== Paper summary =====
+
+The authors propose a general mechanism for the implementation of profile-guided optimization in meta-programs. Existing meta-programs already use profile information for optimization but they have to implement ad hoc tools that interface the compiler and the profiling informations. The paper proposes a mechanism that generalizes the use of profile information of the optimization in meta-programs. 
+The idea of the mechanism is described in Section 3 and is based on an API that is responsible of handling the profile information, namely of collecting, storing and accessing them. Then the authors resent two implementations of the proposed mechanism by extending Chez Scheme and Racket with the implementation of the proposed API. The interaction between source code and low-level profile-guided optimization is discussed. 
+Then the authors perform case studies that shows that the proposed mechanism is general enough to support known optimization such as the reordering of the switch statements, and powerful enough to support class prediction. Moreover, they show that regatta can implement also data structure specialization and in this case the suggested specialization can be directly done by the compiler and not simply suggested to the programmer.
+
+                        ===== Points in favor =====
+
++ the proposed mechanism for profile-guided optimization seems to be a natural way for generalizing existing profile-guided optimization in meta-programs
+
+===========================================================================
+                           PLDI '15 Review #193E
+                     Updated 10 Jan 2015 6:05:31pm EST
+---------------------------------------------------------------------------
+                Paper #193: Profile-Guided Meta-Programming
+---------------------------------------------------------------------------
+
+                      Overall merit: 1. Reject
+                         Conviction: 2. Low
+
+                         ===== Paper summary =====
+
+This paper presents a library in Scheme that enables the specification of profile points and then the use of profiling results while metaprogramming.  The generality of this approach is evaluated by describing the implementations of various existing profile-guided implementations using the system.  The line counts for these implementations are low.
+
+                        ===== Points in favor =====
+
++ Clean and succinct API presented in Section 3.3 for combining metaprogramming and profiling.  Good examples help with clarity.
+
++ Evaluates the programmability of the system.
+
+                        ===== Points against =====
+
+- The API seems straight forward and the contribution over existing tools that combine metaprogramming and profiling is unclear.
+
+- The performance is not being evaluated at all.  The main reason to do profile-guided optimization is to improve performance.
+
+                      ===== Comments for author =====
+
+This paper was well written and clear, but since the work is not sufficiently placed in context or evaluated, it is difficult to put a finger on the contribution.  Section 3.3 appears to be the main contribution, a general API for setting and getting profile information in a metaprogram.  The case studies then illustrate the generality of this succinct interface.  What is missing is the key limitations being solved from existing systems.  Why are existing systems not as general?  The last paragraph of the Related Work Section touches on this, but doesn't answer it cleanly.  This paper is after all introducing a new library.  The only reason it doesn't interface with the compiler in ad hoc ways is that Scheme already has profiling and meta-programming libraries.
+
+Details
+    
+    - "In section #" --> "In Section #", naming the section so it should be capitalized.  Same with "Figure #".
+    
+    - In list at end of Section 1, start with lowercase letters and use commas after each bullet.  Second bullet should in in ", and".  Think of the list as a broken out sentence.
+    
+    - "extension which we use as a running" --> "extension that we use as a running".  "Which" vs. "that" usage is problematic throughout the paper.
+    
+    - "To create profile points, (make-profile-point) generates profile points", bit of redundancy here.
+    
+    - Figure 5 comes after Figure 7.
+    
+    - "44-line" --> "44 lines", same for other instances of line counts.
+
+
+
