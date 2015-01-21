@@ -1,14 +1,18 @@
-Review E states that this paper presents a library in Scheme. To be
-clear, we do not present a Scheme library in this paper. We present a
-general purpose approach to profile-guided meta-programming, including a
-description of a system agnostic API in Section 3.  We evaluate this
-approach by implementing it in two different systems---Chez Scheme and
-Racket (which is not a Scheme, despite similarities)---and
-describe and compare the two different implementations in Section 4. Only
-our Racket implementation of our approach is a library. The Chez Scheme
-implementation of our approach is not a library as it requires changes
-to the profiling and runtime systems.
+Review E points out that the contribution over existing tools is
+unclear.  We will fix this in the final version.  In essence, the
+new API differs from earlier work in that it permits arbitrary
+meta-programs to make use of profiling information, whereas previous
+applications of profiling in meta programming have been one-off,
+i.e., implemented by and for a single meta-program.  This is the
+sense in which our API is general-purpose, not ad-hoc, and is
+independent of the relative ease with which we added it to our
+Scheme and Racket implementations.  The API is also language-independent
+in that it can be incorporated into any meta-programming system
+that permits conditional rewrites, with the implementation guided
+by this paper and prior work that describes how to correlate profiling
+information with arbitrary source positions through arbitrary
+meta-program transformations.
 
-Review E also points out that performance is not being evaluated at all.
-We invite the reviewer to to consult our first response. The first three
-paragraphs of our first response cover this topic.
+Review E also points out that performance is not being evaluated
+at all.  We invite the reviewer to consult our first response. The
+first three paragraphs of our first response cover this topic.
