@@ -5,14 +5,14 @@ meta-programs to make use of profiling information, whereas previous
 applications of profiling in meta programming have been one-off,
 i.e., implemented by and for a single meta-program.  This is the
 sense in which our API is general-purpose, not ad-hoc, and is
-independent of the relative ease with which we added it to our
-Scheme and Racket implementations.  The API is also language-independent
-in that it can be incorporated into any meta-programming system
-that permits conditional rewrites, with the implementation guided
-by this paper and prior work that describes how to correlate profiling
-information with arbitrary source positions through arbitrary
-meta-program transformations.
+unrelated to the fact that we were able to leverage existing profiling
+mechanisms in both Chez Scheme and Racket to make our implementations
+in those systems relatively straightforward.  The API is also
+language-independent in that it can be incorporated into any
+meta-programming language that permits conditional rewrites and
+supported by any implementation that permits source profiling or
+is augmented to do so.
 
 Review E also points out that performance is not being evaluated
-at all.  We invite the reviewer to consult our first response. The
-first three paragraphs of our first response cover this topic.
+at all.  We will incorporate a discussion of this in the final paper
+per the first several paragraphs of our earlier response.
