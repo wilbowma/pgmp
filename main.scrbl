@@ -1,13 +1,17 @@
 #lang scribble/sigplan @preprint @10pt
-@(require "bib.rkt")
+@(require scriblib/footnote)
+@(require "defs.rkt" "bib.rkt")
 
 @title{Profile-Guided Meta-Programming}
-@(authorinfo "William J. Bowman" "wilbowma@ccs.neu.edu" "Northeastern
-University")
-@(authorinfo "Swaha Miller" "swaham@vmware.com" "VMware, Inc")
-@(authorinfo "Vincent St-Amour" "stamourv@ccs.neu.edu" "Northeastern
-University")
-@(authorinfo "R. Kent Dybvig" "dyb@cisco.com" "Cisco Systems, Inc")
+@(authorinfo "William J. Bowman"  "Northeastern University" "wilbowma@ccs.neu.edu")
+@(authorinfo
+  (elem "Swaha Miller" 
+   (titlenote "Author is currently affiliated with VMware, Inc (swaham@vmware.com)")
+  )
+  "Cisco Systems, Inc"
+  "swamille@cisco.com")
+@(authorinfo "Vincent St-Amour"  "Northeastern University" "stamourv@ccs.neu.edu")
+@(authorinfo "R. Kent Dybvig"  "Cisco Systems, Inc" "dyb@cisco.com")
 @include-abstract{abstract.scrbl}
 @include-section{intro.scrbl}
 @include-section{example.scrbl}
