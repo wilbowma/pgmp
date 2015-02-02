@@ -2,12 +2,12 @@
 @(require "bib.rkt")
 
 @title{Profile-Guided Meta-Programming}
-@;@(authorinfo "William J. Bowman" "wilbowma@ccs.neu.edu" "Northeastern
-@;University")
-@;@(authorinfo "Swaha Miller" "swamille@cisco.com" "Cisco Systems, Inc")
-@;@(authorinfo "R. Kent Dybvig" "dyb@cisco.com" "Cisco Systems, Inc")
-@;@(authorinfo "Vincent St-Amour" "stamourv@ccs.neu.edu" "Northeastern
-@;University")
+@(authorinfo "William J. Bowman" "wilbowma@ccs.neu.edu" "Northeastern
+University")
+@(authorinfo "Swaha Miller" "swaham@vmware.com" "VMware, Inc")
+@(authorinfo "Vincent St-Amour" "stamourv@ccs.neu.edu" "Northeastern
+University")
+@(authorinfo "R. Kent Dybvig" "dyb@cisco.com" "Cisco Systems, Inc")
 @include-abstract{abstract.scrbl}
 @include-section{intro.scrbl}
 @include-section{example.scrbl}
