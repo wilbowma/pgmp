@@ -6,7 +6,7 @@
 @(authorinfo "William J. Bowman"  "Northeastern University" "wilbowma@ccs.neu.edu")
 @(authorinfo
   (elem "Swaha Miller" 
-   (titlenote "Author is currently affiliated with VMware, Inc (swaham@vmware.com)")
+   (titlenote "Author's current affiliation: VMware, Inc (swaham@vmware.com)")
   )
   "Cisco Systems, Inc"
   "swamille@cisco.com")
