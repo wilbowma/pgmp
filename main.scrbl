@@ -9,7 +9,7 @@
    (titlenote "Author's current affiliation: VMware, Inc (swaham@vmware.com)")
   )
   "Cisco Systems, Inc"
-  "swamille@cisco.com")
+  "")
 @(authorinfo "Vincent St-Amour"  "Northeastern University" "stamourv@ccs.neu.edu")
 @(authorinfo "R. Kent Dybvig"  "Cisco Systems, Inc" "dyb@cisco.com")
 @include-abstract{abstract.scrbl}
