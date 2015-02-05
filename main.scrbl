@@ -3,11 +3,14 @@
 @(require "defs.rkt" "bib.rkt")
 
 @title{Profile-Guided Meta-Programming}
-@(authorinfo "William J. Bowman"  "Northeastern University" "wilbowma@ccs.neu.edu")
 @(authorinfo
-  (elem "Swaha Miller" 
-   (titlenote "Author's current affiliation: VMware, Inc")
-  )
+  (elem
+   "William J. Bowman"
+   (titlenote "Author's current affiliation: Northeastern University"))
+  (elem "Cisco Systems, Inc and " (linebreak) "Northeastern University ") "wilbowma@ccs.neu.edu")
+@(authorinfo
+  (elem "Swaha Miller"
+   (titlenote "Author's current affiliation: VMware, Inc"))
   "Cisco Systems, Inc"
   "swaham@vmware.com")
 @(authorinfo "Vincent St-Amour"  "Northeastern University" "stamourv@ccs.neu.edu")
