@@ -29,9 +29,15 @@
                (flag email 'spam)))))
 
   ;; Fake some profile points
+  ;; I'm breaking abstraction a little here. I happen to know that
+  ;; srclocs are valid profile-points.
   (define profile-point-t (srcloc "my-first-pgmp" 1 1 1 1))
   (define profile-point-f (srcloc "my-first-pgmp" 2 1 1 1))
-  ;; Generate some profile information
+
+  ;; Generate some profile information.
+  ;; I'm breaking abstraction a little here---I happen to know that
+  ;; profile information is stored as a list of pairs of profile-points
+  ;; and numbers.
   (with-output-to-file "my-first-pgmp.rkt.profile"
     (thunk
       (write (serialize (list (cons profile-point-t 10)
@@ -46,9 +52,9 @@
      (expand-once
        #`(if-r (subject-contains email "PLDI")
              ;; Annotate the branches with our new profile points
-             #,(quasisyntax/loc
-                 (build-source-location-syntax profile-point-t)
+             #,(annotate-syn
+                 profile-point-t
                  (flag email 'important))
-             #,(quasisyntax/loc
-                 (build-source-location-syntax profile-point-f)
+             #,(annotate-syn
+                 profile-point-f
                  (flag email 'spam)))))))

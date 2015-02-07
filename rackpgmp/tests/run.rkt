@@ -56,7 +56,7 @@
                     [current-compile (make-errortrace-compile-handler)])
                    ((dynamic-require main-module run) runs))
 
-    (save-profile profile-file (get-execute-counts))
+    (save-profile profile-file)
 
     (printf "  Post-optimization: ")
     (unless time?
@@ -70,13 +70,13 @@
 
 (module+ main
   (mark 10000000 "exclusive-cond-test.rkt" 'run)
-  (newline) (newline)
+   (newline)
   (mark 10000000 "case-test.rkt" 'run)
-  (newline) (newline)
+   (newline)
   (mark 1000000  "class-test.rkt" 'run)
-  (newline) (newline)
+   (newline)
   (mark 1000000  "perflinty-list.rkt" 'run #f)
-  (newline) (newline)
+   (newline)
   (mark 1000000  "perflinty-vector.rkt" 'run #f)
-  (newline) (newline)
+   (newline)
   (mark 8000000  "perflinty-auto.rkt" 'run))

@@ -16,8 +16,8 @@
   length
   ;; TODO: Is there a way to avoid exporting these? They should only be
   ;; called in this module, or by things generate by this module.
-  real:length real:list real:list? real:map real:car real:cdr real:cons
-  real:list-ref)
+  ;real:length real:list real:list? real:map real:car real:cdr real:cons
+  #;real:list-ref)
 
 (struct list-rep (op-table ls))
 
@@ -53,21 +53,21 @@
 (define-list-rep-op length ls ([rep ls]))
 
 (begin-for-syntax
-  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-list")))
+  (define make-profile-point (make-profile-point-factory "profiled-list")))
 (define-syntax (list x)
   ;; Create fresh source object. lsrc profiles operations that are
   ;; fast on lists, and vsrc profiles operations that are fast on
   ;; vectors.
   (define profile-query-weight (load-profile-query-weight x))
-  (define lsrc (make-fresh-source-obj! x))
-  (define vsrc (make-fresh-source-obj! x))
+  (define lsrc (make-profile-point x))
+  (define vsrc (make-profile-point x))
   ;; Defines all the sequences operations, giving profiled implementations
   (define op-name* '(list? map car cdr cons list-ref length))
   (define op*
     (map
       (lambda (v src)
-        (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
-      '(real:list? real:map real:car real:cdr real:cons real:list-ref real:length)
+        (annotate-syn src (lambda args #,(annotate-syn src (apply #,v args)))))
+      (syntax->list #'(real:list? real:map real:car real:cdr real:cons real:list-ref real:length))
       `(,#f        ,#f      ,lsrc      ,lsrc    ,lsrc     ,vsrc         ,vsrc)))
   (syntax-case x ()
     [(_ init* ...)

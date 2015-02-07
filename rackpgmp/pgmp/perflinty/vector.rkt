@@ -19,9 +19,9 @@
   ;list->vector
   ;; TODO: Is there a way to avoid exporting these? They should only be
   ;; called in this module, or by things generate by this module.
-  real:vector? real:vector-ref real:vector-copy real:vector-length
-  real:vector-map real:vector-append real:vector-set!
-  real:vector->list)
+;  real:vector? real:vector-ref real:vector-copy real:vector-length
+;  real:vector-map real:vector-append real:vector-set!
+  #;real:vector->list)
 
 (struct vector-rep (op-table vec))
 
@@ -57,24 +57,24 @@
 (define-vector-rep-op vector->list vec ([rep vec]))
 
 (begin-for-syntax
-  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-vector")))
+  (define make-profile-point (make-profile-point-factory "profiled-vector")))
 (define-syntax (vector x)
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
   ;; vectors.
   (define profile-query-weight (load-profile-query-weight x))
-  (define list-src (make-fresh-source-obj! x))
-  (define vector-src (make-fresh-source-obj! x))
+  (define list-src (make-profile-point x))
+  (define vector-src (make-profile-point x))
   ;; Defines all the sequences operations, giving profiled implementations
   (define op-name* '(vector? vector-ref vector-copy vector-length
     vector-map vector-append vector-set! vector->list))
   (define op*
     (map
       (lambda (v src)
-        (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
-      '(real:vector? real:vector-ref real:vector-copy real:vector-length
-        real:vector-map real:vector-append real:vector-set!
-        real:vector->list)
+        #`(lambda args #,(annotate-syn src (apply #,v args))))
+      (syntax->list #'(real:vector? real:vector-ref real:vector-copy real:vector-length
+                       real:vector-map real:vector-append real:vector-set!
+                       real:vector->list))
       (list #f vector-src list-src vector-src list-src list-src
             vector-src list-src)))
   (syntax-case x ()

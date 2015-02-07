@@ -18,11 +18,11 @@
   seq
   seq-length
 
-  list-copy
-  list-set!
-  vector-first
-  vector-rest
-  vector-cons
+;  list-copy
+;  list-set!
+;  vector-first
+;  vector-rest
+;  vector-cons
 
   (prefix-out test:
     (combine-out
@@ -77,14 +77,14 @@
 (define-seq-rep-op seq-length s ([rep s]))
 
 (begin-for-syntax
-  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "profiled-sequence")))
+  (define make-profile-point (make-profile-point-factory "profiled-sequence")))
 (define-syntax (seq x)
   ;; Create fresh source object. list-src profiles operations that are
   ;; fast on lists, and vector-src profiles operations that are fast on
   ;; vectors.
   (define profile-query-weight (load-profile-query-weight x))
-  (define list-src (make-fresh-source-obj! x))
-  (define vector-src (make-fresh-source-obj! x))
+  (define list-src (make-profile-point x))
+  (define vector-src (make-profile-point x))
   (define previous-list-usage (or (profile-query-weight list-src) 0))
   (define previous-vector-usage (or (profile-query-weight vector-src) 0))
   (define list>=vector (>= previous-list-usage previous-vector-usage))
@@ -94,13 +94,13 @@
   (define op*
     (map
       (lambda (v src)
-        (datum->syntax x `(lambda args (apply ,v args)) (srcloc->list src)))
+        #`(lambda args #,(annotate-syn src (apply #,v args))))
       (if list>=vector
-        '(list? map first rest cons append list-copy list-ref list-set!
-          length)
-        '(vector? vector-map vector-first vector-rest vector-cons
-          vector-append vector-copy vector-ref vector-set!
-          vector-length))
+        (syntax->list #'(list? map first rest cons append list-copy list-ref list-set!
+                  length))
+        (syntax->list #'(vector? vector-map vector-first vector-rest vector-cons
+                   vector-append vector-copy vector-ref vector-set!
+                   vector-length)))
       (list #f #f list-src list-src list-src list-src #f vector-src vector-src
             vector-src)))
   (syntax-case x ()

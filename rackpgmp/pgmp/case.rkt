@@ -1,5 +1,6 @@
 #lang racket
 (require
+  (for-syntax "profiling/exact-interface.rkt")
   "exclusive-cond.rkt"
   ;; TODO: Using rnrs hashtables to stay close to Scheme implementation, but
   ;; that's not really necessary. Move to Racket hashes
@@ -25,8 +26,7 @@
           ;; source-location.
           ;; TODO: This might indicate loading profile data should be done at a
           ;; global basis, rather than per macro .... but maybe not.
-          #,(quasisyntax/loc
-              x
+          #,(annotate-syn x
               (exclusive-cond
                   #,@(map (lambda (clause)
                             #`[(begin #,@(if (clause-inspect clause)

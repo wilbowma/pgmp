@@ -1,59 +1,83 @@
-#lang racket
+#lang racket/base
+
 (require
-  racket/trace
+  (only-in racket/function thunk)
+  (for-syntax racket/base)
   racket/serialize
-  syntax/srcloc)
+  syntax/srcloc
+  racket/contract
+  (only-in errortrace
+    profiling-enabled
+    execute-counts-enabled
+    instrumenting-enabled
+    get-execute-counts)
+  (only-in errortrace/errortrace-lib
+    make-errortrace-compile-handler))
 
-(provide (all-defined-out))
+(provide ::)
+(define-syntax-rule (:: id contract-expr)
+  (provide id))
+;(contract-out (id contract-expr))
 
+(:: profile-point? (-> any/c boolean?))
+(define profile-point? source-location?)
+
+(provide annotate-syn)
+(define-syntax (annotate-syn syn)
+  (syntax-case syn ()
+    [(_ profile-point syn ...)
+     #'(quasisyntax/loc
+         (build-source-location-syntax profile-point)
+         syn ...)]))
+
+(:: source-file->profile-file (-> (or/c path? path-string?) path-string?))
 (define (source-file->profile-file f)
-  (string-append (cond [(path? f)   (path->string f)]
-                       [(string? f) f]
-                       [else        (error "not a filename" f)])
-                 ".profile"))
+  (string->path
+    (string-append
+     (cond [(path? f) (path->string f)]
+           [(string? f) f])
+     ".profile")))
 
-;; TODO surely this must already exist somewhere
-(define (syntax->srcloc stx)
-  (srcloc (syntax-source stx)
-          (syntax-line stx)
-          (syntax-column stx)
-          (syntax-position stx)
-          (syntax-span stx)))
 
+(:: profile-file (-> (or/c source-location? path? path-string?)
+                     path-string?))
 (define (profile-file stx-or-filename)
   (cond
-    [(srcloc? stx-or-filename)
-     (source-file->profile-file (srcloc-source stx-or-filename))]
-    [(syntax? stx-or-filename)
-     (source-file->profile-file (syntax-source stx-or-filename))]
+    [(source-location? stx-or-filename)
+     (source-file->profile-file (source-location-source stx-or-filename))]
+    [(path? stx-or-filename)
+     (path->string stx-or-filename)]
     [(path-string? stx-or-filename)
      stx-or-filename]
     [else
       (error "not a filename" stx-or-filename)]))
 
-(define (srcloc->list srcloc)
-  (and srcloc
-       (list (srcloc-source srcloc)
-             (srcloc-line srcloc)
-             (srcloc-column srcloc)
-             (srcloc-position srcloc)
-             (srcloc-span srcloc))))
 
-(define (make-fresh-source-obj-factory! prefix)
+(:: make-profile-point-factory (-> string? (-> source-location? profile-point?)))
+(define (make-profile-point-factory prefix)
   (let ([n 0])
     (lambda (syn)
-      (let ([src (struct-copy srcloc (syntax->srcloc syn)
+      (let ([src (struct-copy srcloc (build-source-location syn)
                    [source (format "~a:~a:~a" (syntax-source syn) prefix n)])])
         (set! n (add1 n))
         src))))
 
-(define-syntax-rule (debugf str args ...) (void)#;(printf str args ...))
-
 (define (serialize-conv v)
-  (serialize (map (lambda (p) (cons (syntax->srcloc (car p)) (cdr p))) v)))
+  (serialize (map (lambda (p) (cons (build-source-location (car p)) (cdr p))) v)))
 
-(define (save-profile stx-or-filename v)
+(:: save-profile (-> (or/c source-location? path? path-string?)
+                     void?))
+(define (save-profile stx-or-filename)
   (with-output-to-file
     (profile-file stx-or-filename)
-    (lambda () (write (serialize-conv v)))
+    (thunk (write (serialize-conv (get-execute-counts))))
     #:exists 'replace))
+
+(:: run-with-profiling (-> module-path? void?))
+(define (run-with-profiling module-path)
+  (parameterize* ([current-namespace (make-base-namespace)]
+                  [execute-counts-enabled #t]
+                  [instrumenting-enabled #t]
+                  [profiling-enabled #t]
+                  [current-compile (make-errortrace-compile-handler)])
+    (dynamic-require module-path 0)))

@@ -45,8 +45,7 @@
 
 (begin-for-syntax
   (define (build-dynamic-dispatch loc obj method arg*)
-    (quasisyntax/loc
-      loc
+    (annotate-syn loc
       (let ([x #,obj]) ((hashtable-ref x '#,method #f) x #,@arg*)))))
 (define-syntax dynamic-dispatch
   (lambda (syn)
@@ -89,12 +88,12 @@
 ;; class based on this syn, and install them to be counted conditionally
 ;; in method
 (begin-for-syntax
-  (define make-fresh-source-obj! (make-fresh-source-obj-factory! "method-call")))
+  (define make-profile-point (make-profile-point-factory "method-call")))
 (define-syntax method
   (lambda (syn)
     (define profile-query-weight (load-profile-query-weight syn))
     (define class-list (vector->list (hashtable-keys classes)))
-    (define srclocs (map (lambda (x) (make-fresh-source-obj! syn)) class-list))
+    (define srclocs (map (lambda (x) (make-profile-point syn)) class-list))
     (define inline-limit (min 5 (length class-list)))
     (define (inline-method class method obj vals)
      (let* ([method-ht (cdr (hashtable-ref classes class #f))]
@@ -110,7 +109,7 @@
        (let* ([instrumented-dispatch
                 (map (lambda (loc)
                       #`(lambda (this arg* ...)
-                          #,(build-dynamic-dispatch (datum->syntax #f '() (srcloc->list loc)) #'obj #'m #'(arg* ...))))
+                          #,(build-dynamic-dispatch loc #'obj #'m #'(arg* ...))))
                      srclocs)]
              [_sorted-class*weights (sort (map (λ (x class) (cons class (profile-query-weight x)))
                                               srclocs class-list)
@@ -118,21 +117,18 @@
              [no-profile-data? (not (ormap cdr _sorted-class*weights))]
              [sorted-classes (map car _sorted-class*weights)]
              [sorted-weights (map cdr _sorted-class*weights)])
-            (quasisyntax/loc syn
-              (let* ([x obj])
-                   (when (null? (inspect-receiver-class-list))
-                     (inspect-receiver-class-list '#,(take sorted-classes inline-limit)))
-                   (cond
-                     #,@(if no-profile-data?
-                            (for/list ([d instrumented-dispatch] [cls class-list])
-                                      #`((class-equal? x #,(datum->syntax syn cls))
-                                         (#,d x val* ...)))
-                            (for/list ([class (take sorted-classes inline-limit)]
-                                       [weight (take sorted-weights inline-limit)])
-                                      #;(printf "Class ~a has weight ~a at call site ~a\n" class
-                                              weight (syntax->srcloc syn))
-                                      #`((class-equal? x #,(datum->syntax syn class))
-                                         #,(inline-method class #'m #'x #'(val* ...))))))))))])))
+            #`(let* ([x obj])
+                  (when (null? (inspect-receiver-class-list))
+                    (inspect-receiver-class-list '#,(take sorted-classes inline-limit)))
+                  (cond
+                    #,@(if no-profile-data?
+                           (for/list ([d instrumented-dispatch] [cls class-list])
+                             #`((class-equal? x #,(datum->syntax syn cls))
+                                (#,d x val* ...)))
+                           (for/list ([class (take sorted-classes inline-limit)]
+                                      [weight (take sorted-weights inline-limit)])
+                           #`((class-equal? x #,(datum->syntax syn class))
+                              #,(inline-method class #'m #'x #'(val* ...)))))))))])))
 
 (module+ test
   (require rackunit)
