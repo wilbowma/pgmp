@@ -1,8 +1,14 @@
-# Need my custom hacked version now.
-SCRIBBLE=scribble
+.PHONY: all paper.pdf clean test
 
-all: main.pdf
+all:
+	@echo "make paper.pdf  -- Build the paper."
+	@echo "make test       -- Run the tests/microbenchmarks."
 
-main.pdf: smaller.tex abstract.scrbl implementation.scrbl design.scrbl conclusion.scrbl example.scrbl case-studies.scrbl intro.scrbl main.scrbl related.scrbl defs.rkt bib.rkt results.scrbl bib.bib
-	$(SCRIBBLE) ++style smaller.tex --pdf main.scrbl
+test:
+	cd rackpgmp; $(MAKE) $(MFLAGS) test
 
+paper.pdf:
+	cd paper; $(MAKE) $(MFLAGS) paper.pdf
+
+clean:
+	cd paper; $(MAKE) $(MFLAGS) clean
