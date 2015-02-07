@@ -29,8 +29,8 @@ To optimize and rerun the module:
 > racket -t example.rkt
 ```
 
-See [examples](pgmp/examples) for some example profile-guided
-meta-programs.
+See [examples](../blob/master/rackpgmp/examples) for some example programs implemented
+with or implementing profile-guided meta-programs.
 
 Test and micrbenchmarks
 ======================
@@ -40,4 +40,4 @@ To run the test and microbenchmark suite:
 make test
 ```
 
-See [tests](pgmp/tests) for the test and microbenchmark suite.
+See [tests](../blob/master/rackpgmp/tests) for the test and microbenchmark suite.
