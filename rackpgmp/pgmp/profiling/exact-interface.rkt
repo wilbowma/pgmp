@@ -19,12 +19,12 @@
 
 ;; Returns two functions, a lookup function returning exact counts, and
 ;; function that returns relative weight (i.e. profile-query-weight)
-(:: load-profile-info
+(:: load-profile
    (-> (or/c source-location? path? path-string?)
        (values
-         (-> source-location? (or/c natural-number/c #f))
-         (-> source-location? (or/c number? #f)))))
-(define (load-profile-info stx-or-filename)
+         (-> profile-point? (or/c natural-number/c #f))
+         (-> profile-point? (or/c (real-in 0 1) #f)))))
+(define (load-profile stx-or-filename)
   (define snapshots
     (let ([file (profile-file stx-or-filename)])
       (with-handlers ([exn:fail:filesystem? (lambda _ '())])
@@ -45,14 +45,14 @@
 
 (:: load-profile-look-up
     (-> (or/c source-location? path?  path-string?)
-        (-> source-location? (or/c natural-number/c #f))))
+        (-> profile-point? (or/c natural-number/c #f))))
 (define (load-profile-look-up stx-or-filename)
-  (let-values ([(profile-look-up _) (load-profile-info stx-or-filename)])
+  (let-values ([(profile-look-up _) (load-profile stx-or-filename)])
     profile-look-up))
 
 (:: load-profile-query-weight
     (-> (or/c source-location? path? path-string?)
-        (-> source-location? (or/c number? #f))))
+        (-> profile-point? (or/c (real-in 0 1) #f))))
 (define (load-profile-query-weight stx-or-filename)
-  (let-values ([(_ profile-query-weight) (load-profile-info stx-or-filename)])
+  (let-values ([(_ profile-query-weight) (load-profile stx-or-filename)])
     profile-query-weight))

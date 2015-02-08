@@ -1,9 +1,14 @@
 pgme
 ====
 
-A library for Profile-Guided Meta-programming, in Racket.
+A library for Profile-Guided Meta-Programming, in Racket.
 
 `tests` contains a set of tests and microbenchmarks, which do not
 represent real world programs.
 
-`cd tests; racket run.rkt` runs the test and microbenchmark suite.
+`examples` contains a set of examples using the pgmp library.
+
+`make test` will run the test and microbenchmark suite; it might take a
+while.
+
+`make examples` will run the examples; it will not take very long.

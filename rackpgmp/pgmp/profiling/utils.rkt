@@ -16,8 +16,7 @@
 
 (provide ::)
 (define-syntax-rule (:: id contract-expr)
-  (provide id))
-;(contract-out (id contract-expr))
+  (provide (contract-out (id contract-expr))))
 
 (:: profile-point? (-> any/c boolean?))
 (define profile-point? source-location?)
@@ -25,10 +24,10 @@
 (provide annotate-syn)
 (define-syntax (annotate-syn syn)
   (syntax-case syn ()
-    [(_ profile-point syn ...)
+    [(_ profile-point template)
      #'(quasisyntax/loc
          (build-source-location-syntax profile-point)
-         syn ...)]))
+         template)]))
 
 (:: source-file->profile-file (-> (or/c path? path-string?) path-string?))
 (define (source-file->profile-file f)
