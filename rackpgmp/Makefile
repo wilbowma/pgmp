@@ -13,7 +13,7 @@ install:
 	$(MAKE) $(MFLAGS) examples
 
 update:
-	raco pkg update --link rackpgmp
+	raco pkg update --link ../rackpgmp
 	$(MAKE) $(MFLAGS) examples
 
 remove:
