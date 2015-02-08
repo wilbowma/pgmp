@@ -1,10 +1,10 @@
 #lang racket/base
 
 (require
+  pgmp
   (only-in racket/math pi sqr)
   (only-in rnrs make-hashtable hashtable-set! hashtable-ref equal-hash
            hashtable-keys)
-  (for-syntax "profiling/exact-interface.rkt")
   (for-syntax (except-in racket class new field)))
 (provide class field method new field-set! class-equal?
          inspect-receiver-class-list)

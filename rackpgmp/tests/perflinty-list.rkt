@@ -2,7 +2,7 @@
 
 (require
   rackunit
-  "../pgmp/perflinty/list.rkt")
+  "../perflinty/list.rkt")
 (provide run)
 
 #;(begin-for-syntax

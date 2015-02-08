@@ -1,10 +1,9 @@
 #lang racket/base
 (require
   (prefix-in real: racket/list)
-  (prefix-in real: racket/base)
   (for-syntax
     racket/base
-    "../profiling/exact-interface.rkt"))
+    "../pgmp/api/exact.rkt"))
 (provide
   list
   list?
@@ -13,11 +12,7 @@
   cdr
   cons
   list-ref
-  length
-  ;; TODO: Is there a way to avoid exporting these? They should only be
-  ;; called in this module, or by things generate by this module.
-  ;real:length real:list real:list? real:map real:car real:cdr real:cons
-  #;real:list-ref)
+  length)
 
 (struct list-rep (op-table ls))
 
@@ -47,7 +42,7 @@
 ;; TODO: This might need to be a macro, as it kind of needs to generate
 ;; new sources
 (define-list-rep-op cons ls (x [rep ls]))
-;; TODO: ref should probably count higher indecies more expensive, but
+;; TODO: ref should probably count higher indices more expensive, but
 ;; that would require more clever engineering.
 (define-list-rep-op list-ref ls ([rep ls] n))
 (define-list-rep-op length ls ([rep ls]))

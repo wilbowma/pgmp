@@ -2,7 +2,7 @@
 
 (require
   racket/cmdline
-  (only-in "profiling/utils.rkt"
+  (only-in "api/exact.rkt"
     source-file->profile-file
     save-profile
     run-with-profiling))

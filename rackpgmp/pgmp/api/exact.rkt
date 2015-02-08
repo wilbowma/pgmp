@@ -9,13 +9,20 @@
   racket/serialize
   syntax/srcloc
   racket/contract
-  "utils.rkt")
+  "utils.rkt"
+
+  (only-in errortrace
+    profiling-enabled
+    execute-counts-enabled
+    instrumenting-enabled
+    get-execute-counts)
+  (only-in errortrace/errortrace-lib
+    make-errortrace-compile-handler))
 
 (provide
+  source-file->profile-file
   make-profile-point-factory
-  annotate-syn
-  save-profile
-  run-with-profiling)
+  annotate-syn)
 
 ;; Returns two functions, a lookup function returning exact counts, and
 ;; function that returns relative weight (i.e. profile-query-weight)
@@ -56,3 +63,23 @@
 (define (load-profile-query-weight stx-or-filename)
   (let-values ([(_ profile-query-weight) (load-profile stx-or-filename)])
     profile-query-weight))
+
+(:: save-profile (-> (or/c source-location? path? path-string?)
+                     void?))
+(define (save-profile stx-or-filename)
+  (with-output-to-file
+    (profile-file stx-or-filename)
+    (thunk (write (serialize-conv (get-execute-counts))))
+    #:exists 'replace))
+
+(define (serialize-conv v)
+  (serialize (map (lambda (p) (cons (build-source-location (car p)) (cdr p))) v)))
+
+(:: run-with-profiling (-> module-path? void?))
+(define (run-with-profiling module-path)
+  (parameterize* ([current-namespace (make-base-namespace)]
+                  [execute-counts-enabled #t]
+                  [instrumenting-enabled #t]
+                  [profiling-enabled #t]
+                  [current-compile (make-errortrace-compile-handler)])
+    (dynamic-require module-path 0)))

@@ -4,7 +4,7 @@
   racket/vector
   (for-syntax
     racket/base
-    "../profiling/exact-interface.rkt"))
+    "../pgmp/api/exact.rkt"))
 (provide
   seq?
   seq-map
@@ -17,12 +17,6 @@
   seq-set!
   seq
   seq-length
-
-;  list-copy
-;  list-set!
-;  vector-first
-;  vector-rest
-;  vector-cons
 
   (prefix-out test:
     (combine-out

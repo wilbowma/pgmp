@@ -3,17 +3,19 @@
 @title{Perflinty}
 @(require
    (for-label
-     "../perflinty/auto.rkt"
-     "../perflinty/vector.rkt"
-     "../perflinty/list.rkt"))
+     (prefix-in builtin: racket/base)
+     "../auto.rkt"
+     "../vector.rkt"
+     "../list.rkt"))
 
-@defmodule[pgmp/perflinty]
-
-This sections describes a profile-guided data structure specialization
-library provided by @racket[pgmp], similar in spirit to
-@hyperlink{https://dl.acm.org/citation.cfm?id=1545076}["Perflint"].
-The library currently supports a limited subset of @racket[list] and
-@racket[vector] operations.
+@declare-exporting[#:use-sources (racket/base)]
+This guide describes a profile-guided data structure specialization
+library similar in spirit to
+@hyperlink["https://dl.acm.org/citation.cfm?id=1545076"]{Perflint},
+provided by the @racket[rackpgmp] pacakge.
+The library currently supports a limited subset of
+@racketlink[builtin:list @racketfont{list}] and
+@racketlink[builtin:vector @racketfont{vector}] operations.
 
 @section{Perflinty Lists}
 @defmodule[pgmp/perflinty/list]
@@ -35,5 +37,6 @@ fast on vectors.
 @defmodule[pgmp/perflinty/auto]
 
 This section describes a sequence library that automatically
-specializes each instance to a @racket[list] or @racket[vector],
+specializes each instance to a @racket[list] or
+@racket[vector],
 depending on which operations are performed on that instance.

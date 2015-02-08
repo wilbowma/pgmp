@@ -6,15 +6,24 @@
     syntax/srcloc
     "../main.rkt"))
 
-@title{PGMP -- Profile-Guided Meta-Programming}
+@title{PGMP: Profile-Guided Meta-Programming}
+This collection provides a similar API to that described in
+@hyperlink["https://williamjbowman.com/papers.html#pgmp"]{Profile-Guided
+Meta-Programming}. It also provides some useful profile-guided
+meta-programs.
+
+@margin-note{The @racketmodname[pgmp] module reexports @racketmodname[pgmp/api/exact]
+at phase level 0 and 1, and @racketmodname[pgmp/case], and
+@racketmodname[pgmp/exclusive-cond] at phase level 0.}
 
 @table-of-contents[]
 
 @section{API}
 
-@defmodule[pgmp]
+@defmodule[#:multi (pgmp pgmp/api/exact) #:no-declare]
+@declare-exporting[pgmp/api/exact]
 
-This section describes the API provided by @racket[pgmp] for
+This section describes the API provided by @racketmodname[pgmp] for
 meta-programmers to write their own profile-guided meta-programs.
 
 @defproc[(make-profile-point-factory [prefix string?])
@@ -70,27 +79,25 @@ Returns the second value returned by @racket[load-profile].
 
 @section{Profile-Guided Conditionals}
 
-@defmodule[pgmp]
-
-This sections describes several profile-guided conditional braching
-forms provided by @racket[pgmp].
+@defmodule[pgmp/case #:no-declare]
+@declare-exporting[pgmp/case #:use-sources (pgmp/exclusive-cond)]
 
 @defform[(case val-expr case-clause ...)]{
-Like Racket's builtin @racket[builtin:case], but may sort
+Like Racket's @racketlink[builtin:case @racketfont{case}], but may sort
 @racket[case-clause]s in order of most frequently executed. An @racket[else]
 clause, if one exists, will always be last.
 }
+
+@defmodule[pgmp/exclusive-cond #:no-declare]
 
 @defform[(exclusive-cond exclusive-cond-clause ...)
          #:grammar
          [(exclusive-cond-clause (code:line [test-expr then-body ...+])
                                  (code:line [else then-body ...+])
                                  [test-expr => proc-expr])]]{
-Like Racket's builtin @racket[cond], but may sort
+Like Racket's @racket[cond], but may sort
 @racket[exclusive-cond-clause]s in order of most frequently executed.
 An @racket[else] clause, if one exists, will always be last.
 Note that the clauses must be mutually exclusive or which branch is
 taken is nondeterministic.
 }
-
-@include-section{perflinty.scrbl}

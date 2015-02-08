@@ -5,14 +5,7 @@
   (for-syntax racket/base)
   racket/serialize
   syntax/srcloc
-  racket/contract
-  (only-in errortrace
-    profiling-enabled
-    execute-counts-enabled
-    instrumenting-enabled
-    get-execute-counts)
-  (only-in errortrace/errortrace-lib
-    make-errortrace-compile-handler))
+  racket/contract)
 
 (provide ::)
 (define-syntax-rule (:: id contract-expr)
@@ -60,23 +53,3 @@
                    [source (format "~a:~a:~a" (syntax-source syn) prefix n)])])
         (set! n (add1 n))
         src))))
-
-(define (serialize-conv v)
-  (serialize (map (lambda (p) (cons (build-source-location (car p)) (cdr p))) v)))
-
-(:: save-profile (-> (or/c source-location? path? path-string?)
-                     void?))
-(define (save-profile stx-or-filename)
-  (with-output-to-file
-    (profile-file stx-or-filename)
-    (thunk (write (serialize-conv (get-execute-counts))))
-    #:exists 'replace))
-
-(:: run-with-profiling (-> module-path? void?))
-(define (run-with-profiling module-path)
-  (parameterize* ([current-namespace (make-base-namespace)]
-                  [execute-counts-enabled #t]
-                  [instrumenting-enabled #t]
-                  [profiling-enabled #t]
-                  [current-compile (make-errortrace-compile-handler)])
-    (dynamic-require module-path 0)))

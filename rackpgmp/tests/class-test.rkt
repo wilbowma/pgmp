@@ -1,7 +1,7 @@
 #lang racket
 
 (require
-  "../pgmp/class.rkt"
+  "../examples/class.rkt"
   (only-in racket/math pi sqr)
   rackunit)
 (provide run)

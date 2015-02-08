@@ -1,5 +1,5 @@
 #lang racket
-(require (for-syntax "profiling/exact-interface.rkt"))
+(require (for-syntax "api/exact.rkt"))
 
 (provide exclusive-cond)
 

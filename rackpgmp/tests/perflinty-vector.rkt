@@ -1,7 +1,7 @@
 #lang racket
 
 (require
-  "../pgmp/perflinty/vector.rkt"
+  "../perflinty/vector.rkt"
   rackunit)
 (provide run)
 

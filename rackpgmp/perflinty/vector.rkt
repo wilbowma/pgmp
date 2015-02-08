@@ -1,11 +1,9 @@
 #lang racket/base
 (require
-  racket/trace
   (prefix-in real: racket/vector)
-  (prefix-in real: racket/base)
   (for-syntax
     racket/base
-    "../profiling/exact-interface.rkt"))
+    "../pgmp/api/exact.rkt"))
 (provide
   vector
   vector?
@@ -15,13 +13,7 @@
   vector-map
   vector-append
   vector-set!
-  vector->list
-  ;list->vector
-  ;; TODO: Is there a way to avoid exporting these? They should only be
-  ;; called in this module, or by things generate by this module.
-;  real:vector? real:vector-ref real:vector-copy real:vector-length
-;  real:vector-map real:vector-append real:vector-set!
-  #;real:vector->list)
+  vector->list)
 
 (struct vector-rep (op-table vec))
 
