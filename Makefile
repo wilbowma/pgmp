@@ -1,25 +1,31 @@
-.PHONY: all paper.pdf clean test rackpgmp update remove
+.PHONY: all paper.pdf clean test rackpgmp update remove docs examples
 
 all:
 	@echo "make paper.pdf  -- Build the paper."
+	@echo "make install    -- Install the rackpgmp package."
+	@echo "make update     -- Update the rackpgmp package."
 	@echo "make test       -- Run the tests/microbenchmarks."
-	@echo "make install    -- Install the rackpgmp package"
-	@echo "make update     -- Update the rackpgmp package"
-	@echo "make remove     -- Remove the rackpgmp package"
+	@echo "make examples   -- Run examples."
+	@echo "make docs       -- Open the docs. rackpgmp must be installed."
+	@echo "make remove     -- Remove the rackpgmp package."
 
 install:
-	raco pkg install --link rackpgmp
-	raco test rackpgmp/examples/*.rkt
+	cd rackpgmp; $(MAKE) $(MFLAGS) install
 
 update:
-	raco pkg update --link rackpgmp
-	raco test rackpgmp/examples/*.rkt
+	cd rackpgmp; $(MAKE) $(MFLAGS) update
+
+docs:
+	cd rackpgmp; $(MAKE) $(MFLAGS) docs
 
 remove:
-	raco pkg remove rackpgmp
+	cd rackpgmp; $(MAKE) $(MFLAGS) remove
 
 test:
 	cd rackpgmp; $(MAKE) $(MFLAGS) test
+
+examples:
+	cd rackpgmp; $(MAKE) $(MFLAGS) examples
 
 paper.pdf:
 	cd paper; $(MAKE) $(MFLAGS) paper.pdf

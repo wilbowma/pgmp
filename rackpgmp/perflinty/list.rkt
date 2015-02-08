@@ -1,6 +1,7 @@
 #lang racket/base
 (require
   (prefix-in real: racket/list)
+  (prefix-in real: racket/base)
   (for-syntax
     racket/base
     "../pgmp/api/exact.rkt"))

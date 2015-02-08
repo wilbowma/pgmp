@@ -14,7 +14,7 @@
     get-execute-counts)
   (only-in errortrace/errortrace-lib
     make-errortrace-compile-handler)
-  (only-in "../pgmp/profiling/utils.rkt"
+  (only-in "../pgmp/api/exact.rkt"
     source-file->profile-file
     save-profile))
 
