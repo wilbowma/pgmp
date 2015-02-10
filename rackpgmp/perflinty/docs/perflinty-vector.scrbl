@@ -17,7 +17,7 @@ are asymptotically fast on vectors.
 
 @defform[(vector v ...)]{
 Like @racketlink[builtin:vector @racketfont{vector}], but not a
-@racket[procedure], and constructs a separately profiled instance of a
+@racket[procedure?], and constructs a separately profiled instance of a
 Perflinty @racket[vector].
 
 Note that currently Racket @racketlink[builtin:vector @racketfont{vector}]s

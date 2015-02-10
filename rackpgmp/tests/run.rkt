@@ -69,14 +69,14 @@
             ((dynamic-require main-module run) runs #t)))))
 
 (module+ main
-  (mark 10000000 "exclusive-cond-test.rkt" 'run)
+  (mark 2000000 "exclusive-cond-test.rkt" 'run)
    (newline)
-  (mark 10000000 "case-test.rkt" 'run)
+  (mark 2000000 "case-test.rkt" 'run)
    (newline)
   (mark 1000000  "class-test.rkt" 'run)
    (newline)
-  (mark 1000000  "perflinty-list.rkt" 'run #f)
+  (mark 100  "perflinty-list.rkt" 'run #f)
    (newline)
-  (mark 1000000  "perflinty-vector.rkt" 'run #f)
+  (mark 100  "perflinty-vector.rkt" 'run #f)
    (newline)
   (mark 8000000  "perflinty-auto.rkt" 'run))

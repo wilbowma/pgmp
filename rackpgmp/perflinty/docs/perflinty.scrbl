@@ -1,12 +1,12 @@
 #lang scribble/manual
-
-@title{Perflinty}
 @(require
    (for-label
      (prefix-in builtin: racket/base)
      "../auto.rkt"
      "../vector.rkt"
      "../list.rkt"))
+
+@title{Perflinty}
 
 @declare-exporting[#:use-sources (racket/base)]
 This guide describes a profile-guided data structure specialization
