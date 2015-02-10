@@ -10,13 +10,11 @@
   syntax/srcloc
   racket/contract
   "utils.rkt"
-
-  (only-in errortrace
+  (only-in errortrace/errortrace-lib
     profiling-enabled
     execute-counts-enabled
     instrumenting-enabled
-    get-execute-counts)
-  (only-in errortrace/errortrace-lib
+    get-execute-counts
     make-errortrace-compile-handler))
 
 (provide

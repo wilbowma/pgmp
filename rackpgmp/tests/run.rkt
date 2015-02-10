@@ -6,13 +6,12 @@
 
 (require
   rackunit
-  (only-in errortrace
+  (only-in errortrace/errortrace-lib
     profiling-enabled
     profile-paths-enabled
     execute-counts-enabled
     instrumenting-enabled
-    get-execute-counts)
-  (only-in errortrace/errortrace-lib
+    get-execute-counts
     make-errortrace-compile-handler)
   (only-in "../pgmp/api/exact.rkt"
     profile-file
