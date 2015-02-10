@@ -20,11 +20,11 @@ remove:
 	raco pkg remove rackpgmp
 
 test:
-	cd tests; rm -r compiled/ *.profile; racket -t run.rkt
+	cd tests; rm -rf compiled/ *.profile; racket -t run.rkt
 
 docs:
 	raco docs pgmp
 	raco docs perflinty
 
 examples:
-	cd examples; rm -r compiled/ *.profile; raco test *.rkt
+	cd examples; rm -rf compiled/ *.profile; raco test *.rkt
