@@ -20,7 +20,8 @@
     make-errortrace-compile-handler))
 
 (provide
-  source-file->profile-file
+  profile-point?
+  profile-file
   make-profile-point-factory
   annotate-syn)
 

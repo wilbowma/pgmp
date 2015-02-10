@@ -30,7 +30,10 @@
   (check-equal? flag 'good))
 
 (module+ test
+  (require syntax/location)
+  (parameterize ([current-output-port (open-output-nowhere)]
+                 [current-error-port (open-output-nowhere)])
+    (run-with-profiling (quote-module-path ".."  main)))
+  (save-profile (build-path (current-directory) "exclusive-cond.rkt"))
   (parameterize ([current-output-port (open-output-nowhere)])
-    (run-with-profiling `(submod ,(build-path (current-directory) "exclusive-cond.rkt") main)))
-  (save-profile "exclusive-cond.rkt.profile")
-  (dynamic-require `(submod ,(build-path (current-directory) "exclusive-cond.rkt") main) 0))
+    (dynamic-require (quote-module-path ".." main) 0)))

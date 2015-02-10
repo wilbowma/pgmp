@@ -3,7 +3,6 @@
 (require
   racket/cmdline
   (only-in "api/exact.rkt"
-    source-file->profile-file
     save-profile
     run-with-profiling))
 
@@ -19,4 +18,4 @@
     #:args ()
      (when (module-path)
        (run-with-profiling `(submod ,(module-path) main))
-       (save-profile (source-file->profile-file (module-path))))))
+       (save-profile (module-path)))))
