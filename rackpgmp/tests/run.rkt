@@ -15,7 +15,7 @@
   (only-in errortrace/errortrace-lib
     make-errortrace-compile-handler)
   (only-in "../pgmp/api/exact.rkt"
-    source-file->profile-file
+    profile-file
     save-profile))
 
 (define-syntax (maybe-time syn)
@@ -29,10 +29,10 @@
 (define (mark runs mod-path run [time? #t])
   (let ()
     (printf "~a test:~n" mod-path)
-    (define profile-file (source-file->profile-file mod-path))
     (instrumenting-enabled #f)
 
-    (with-handlers ([exn:fail:filesystem? (lambda _ (void))]) (delete-file profile-file))
+    (with-handlers ([exn:fail:filesystem? (lambda _ (void))])
+                   (delete-file (profile-file mod-path)))
 
     (define main-module mod-path)
     (printf "  Pre-optimization:  ")
@@ -56,7 +56,7 @@
                     [current-compile (make-errortrace-compile-handler)])
                    ((dynamic-require main-module run) runs))
 
-    (save-profile profile-file)
+    (save-profile mod-path)
 
     (printf "  Post-optimization: ")
     (unless time?
