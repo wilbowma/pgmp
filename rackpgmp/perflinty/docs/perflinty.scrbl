@@ -10,33 +10,29 @@
 
 @declare-exporting[#:use-sources (racket/base)]
 This guide describes a profile-guided data structure specialization
-library similar in spirit to
+collection similar in spirit to
 @hyperlink["https://dl.acm.org/citation.cfm?id=1545076"]{Perflint},
 provided by the @racket[rackpgmp] pacakge.
-The library currently supports a limited subset of
+
+The collection currently supports a limited subset of
 @racketlink[builtin:list @racketfont{list}] and
 @racketlink[builtin:vector @racketfont{vector}] operations.
 
-@section{Perflinty Lists}
-@defmodule[pgmp/perflinty/list]
+Each instance of a @racket[list], @racket[vector], or @racket[seq]
+provided by the collection is separately profiled using a naïve scoring
+system. Each instance keeps track of various @tech{score}s. A
+@deftech{score} is kept for each potential data structure representation
+of the instance. For example, a @racket[list] keeps two @tech{score}s:
+one for @racket[list] operations and one for @racket[vector] operations.
+Each @tech{score} measures how frequently operations that are
+asymptotically fast for that data structure are used on the
+instance.
+The operations provided by the modules of this collection use and
+increment these scores differently.
 
-This section describes a list library that warns the user when
-operations that are asymptotically fast on vectors are being called on
-instances of a list more often than operations that are asymptotically
-fast on lists.
+As currently implemented, these scores are not fine-grained and may not
+provide an accurate heuristic.
 
-@section{Perflinty Vectors}
-@defmodule[pgmp/perflinty/vector]
-
-This section describes a vector library that warns the user when
-operations that are asymptotically fast on lists are being called on
-instances of a vector more often than operations that are asymptotically
-fast on vectors.
-
-@section{Perflinty Auto}
-@defmodule[pgmp/perflinty/auto]
-
-This section describes a sequence library that automatically
-specializes each instance to a @racket[list] or
-@racket[vector],
-depending on which operations are performed on that instance.
+@include-section{perflinty-list.scrbl}
+@include-section{perflinty-vector.scrbl}
+@include-section{perflinty-auto.scrbl}
