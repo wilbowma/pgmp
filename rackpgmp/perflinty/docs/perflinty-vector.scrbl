@@ -36,7 +36,7 @@ Like @racketlink[builtin:vector? @racketfont{vector?}], but only returns
 
 @defproc[(vector-map [proc? procedure?] [v vector?]) vector?]{
 Like @racketlink[builtin:vector-map @racketfont{vector-map}], but for Perflinty
-@racket[vecotrs]s.
+@racket[vectors]s.
 
 @racket[vector-map] adds 1 to the @racket[list] @tech{score}.
 }

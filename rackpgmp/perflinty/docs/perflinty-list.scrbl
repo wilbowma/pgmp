@@ -15,7 +15,7 @@ fast on lists.
 
 @defform[(list v ...)]{
 Like @racketlink[builtin:list @racketfont{list}], but not a
-@racket[procedure?] and constructes a separately profiled instance of a
+@racket[procedure?] and constructs a separately profiled instance of a
 Perflinty @racket[list].
 
 Note that currently Racket @racketlink[builtin:list @racketfont{list}]s

@@ -12,7 +12,7 @@
 This guide describes a profile-guided data structure specialization
 collection similar in spirit to
 @hyperlink["https://dl.acm.org/citation.cfm?id=1545076"]{Perflint},
-provided by the @racket[rackpgmp] pacakge.
+provided by the @racket[rackpgmp] package.
 
 The collection currently supports a limited subset of
 @racketlink[builtin:list @racketfont{list}] and

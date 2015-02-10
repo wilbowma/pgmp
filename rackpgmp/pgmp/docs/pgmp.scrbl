@@ -103,9 +103,9 @@ new profile points example profile data.
 (define profile-point-f (make-profile-point _syntax))]]
 
 We use @racket[make-profile-point-factory] to create a function
-that generates fresh profile points using the prefix @racket["my-frsit-pgmp"],
+that generates fresh profile points using the prefix @racket["my-first-pgmp"],
 and define two new profile points @racket[profile-point-t] and
-@racket[profile-point-f]. The profile point generater expects a
+@racket[profile-point-f]. The profile point generator expects a
 piece of syntax. For this example, we assume we have some appropriate
 piece of syntax @racket[_syntax] which we use where needed
 places. In practice, this piece of syntax will be something in scope
@@ -293,5 +293,5 @@ Like Racket's @racket[cond], but may sort
 @racket[exclusive-cond-clause]s in order of most frequently executed.
 An @racket[else] clause, if one exists, will always be last.
 Note that the clauses must be mutually exclusive or which branch is
-taken is nondeterministic.
+taken is non-deterministic.
 }
