@@ -1,4 +1,4 @@
-pgme
+pgmp
 ====
 
 A library for Profile-Guided Meta-Programming, in Racket.

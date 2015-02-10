@@ -14,7 +14,7 @@ To install the Racket package, run
 raco pkg install git://github.com/bluephoenix47/pgmp/?path=rackpgmp
 ```
 
-Standard Usage
+Quick Start
 =====
 
 To profile a module which uses a profile-guided meta-program:
@@ -29,8 +29,8 @@ To optimize and rerun the module:
 > racket -t example.rkt
 ```
 
-See [examples](../blob/master/rackpgmp/examples) for some example programs implemented
-with or implementing profile-guided meta-programs.
+For more information, run `raco docs pgmp` and see
+[examples](../blob/master/rackpgmp/examples).
 
 Test and micrbenchmarks
 ======================
