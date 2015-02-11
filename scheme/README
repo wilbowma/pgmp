@@ -1,3 +1,6 @@
-All examples, except let-loop.ss, run under Petite Chez Scheme 8.4. They
-will be unable to take advantage of profile driven optimizations,
-however, without Chez Scheme's new profiling API.
+All examples, except let-loop.ss, run under Petite Chez Scheme 8.4.
+However, they will be unable to take advantage of profile driven
+optimizations without a more up-to-date version of full Chez Scheme.
+Unfortunately, obtaining a copy may prove difficult.
+
+You should probably just see the open-source Racket version.
