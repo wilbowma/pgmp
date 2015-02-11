@@ -33,7 +33,7 @@ To optimize and rerun the module:
 ```
 
 For more information, run `raco docs pgmp`, `raco docs perflinty`, and see
-[examples](../blob/master/rackpgmp/examples).
+[examples](../master/rackpgmp/examples).
 
 Test and micro-benchmarks
 ======================
@@ -43,4 +43,4 @@ To run the test and micro-benchmark suite:
 make test
 ```
 
-See [tests](../blob/master/rackpgmp/tests) for the test and micro-benchmark suite.
+See [tests](../master/rackpgmp/tests) for the test and micro-benchmark suite.
