@@ -109,7 +109,9 @@ and define two new profile points @racket[profile-point-t] and
 piece of syntax. For this example, we assume we have some appropriate
 piece of syntax @racket[_syntax] which we use where needed
 places. In practice, this piece of syntax will be something in scope
-when defining a new profile-guided @gtech{macro}.
+when defining a new profile-guided@gtech{macro}.
+If you are following along in the @gtech{REPL}, use some arbitrary
+piece of syntax such as @racket[#'void].
 
 Next, we generate some profile information and save it to
 the file expected by @racket[load-profile-query-weight]. We use
