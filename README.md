@@ -6,12 +6,12 @@ Source code for [Profile-Guided Meta-Programming, PLDI 2015](https://www.william
 Installing
 ==========
 
-All Racket code runs under Racket 6.1.1.
+All Racket code runs under Racket 6.1.1, on Linux, Mac, and Windows.
 
 To install the Racket package, run
 
 ```
-raco pkg install git://github.com/bluephoenix47/pgmp/?path=rackpgmp
+raco pkg install git://github.com/bluephoenix47/pgmp?path=rackpgmp
 ```
 
 Quick Start
