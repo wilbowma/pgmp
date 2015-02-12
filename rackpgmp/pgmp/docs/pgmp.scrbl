@@ -30,7 +30,53 @@ at phase level 0 and 1, and @racketmodname[pgmp/case], and
 
 @table-of-contents[]
 
-@section{Examples and Tutorial}
+@section{PGMP Quick Start}
+
+@subsection{Instrumenting and optimizing}
+
+This section presents the standard workflow for profiling and optimizing
+a profile-guided @gtech{macro}. We present a small example program using
+@racket[case], a profile-guided @gtech{macro} defined by
+@racketmodname[pgmp/case].
+
+@racketmod[
+#:file "example-parser.rkt"
+racket/base
+(require pgmp)
+
+_...
+
+(define (parse stream)
+ (case (peek-char stream)
+  [(#\space #\tab) (white-space stream)]
+  [(0 1 2 3 4 5 6 7 8 9) (digit stream)]
+  [(#\() (start-paren stream)]
+  [(#\)) (end-paren stream)]
+  _...))
+
+(module+ main (parse _input-stream))]
+
+Here we define a @racket[module] that uses @racket[case]. To
+get the benefits of @racket[case], we first need to instrument
+and run the @racket[module]. There are two ways to do this.
+
+@racketmodname[pgmp] provides a commandline utility through
+@exec{raco}. We could instrument and profile the module by running
+the command
+@exec{raco pgmp --profile example-parser.rkt}. To optimize
+and run the module, we can henceforth use @exec{racket -t
+example-parser.rkt}. @racket[case] will automatically
+load and use the profile data from the instrumented run.
+
+Alternatively, @racketmodname[pgmp] also provides API functions to
+instrument and profile one @racket[module] from another. We can use the
+API to instrument and profile the module,
+then optimize and run the module via @racket[dynamic-require].
+
+@interaction[
+(eval:alts (run-with-profiling `(submod "example-parser.rkt" main)) (void))
+(eval:alts (save-profile "example-parser.rkt") (void))
+(eval:alts (dynamic-require `(submod "example-parser.rkt" main) 0) (void))]
 
 @subsection{My First Profile-Guided Meta-Program}
 In this tutorial, we present the API defined in @racketmodname[pgmp/api/exact]
@@ -152,53 +198,6 @@ the right file.
            #,(annotate-syn
              profile-point-f
              (flag email 'spam))))))]]
-
-@subsection{Instrumenting and optimizing}
-
-This section presents the standard workflow for profiling and optimizing
-a profile-guided @gtech{macro}. We present a small example program using
-@racket[case], a profile-guided @gtech{macro} defined by
-@racketmodname[pgmp/case].
-
-@racketmod[
-#:file "example-parser.rkt"
-racket/base
-(require pgmp)
-
-_...
-
-(define (parse stream)
- (case (peek-char stream)
-  [(#\space #\tab) (white-space stream)]
-  [(0 1 2 3 4 5 6 7 8 9) (digit stream)]
-  [(#\() (start-paren stream)]
-  [(#\)) (end-paren stream)]
-  _...))
-
-(module+ main (parse _input-stream))]
-
-Here we define a @racket[module] that uses @racket[case]. To
-get the benefits of @racket[case], we first need to instrument
-and run the @racket[module]. There are two ways to do this.
-
-@racketmodname[pgmp] provides a commandline utility through
-@exec{raco}. We could instrument and profile the module by running
-the command
-@exec{raco pgmp --profile example-parser.rkt}. To optimize
-and run the module, we can henceforth use @exec{racket -t
-example-parser.rkt}. @racket[case] will automatically
-load and use the profile data from the instrumented run.
-
-Alternatively, @racketmodname[pgmp] also provides API functions to
-instrument and profile one @racket[module] from another. We can use the
-API to instrument and profile the module,
-then optimize and run the module via @racket[dynamic-require].
-
-@interaction[
-(eval:alts (run-with-profiling `(submod "example-parser.rkt" main)) (void))
-(eval:alts (save-profile "example-parser.rkt") (void))
-(eval:alts (dynamic-require `(submod "example-parser.rkt" main) 0) (void))]
-
 @section{API}
 
 @defmodule[#:multi (pgmp pgmp/api/exact) #:no-declare]
