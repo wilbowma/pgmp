@@ -1,3 +1,5 @@
+;; These dummy wrappers are provided to run the scheme code without full
+;; Chez.
 (library (utils)
   (export datum->annotated-syntax
           make-fresh-source-obj-factory!

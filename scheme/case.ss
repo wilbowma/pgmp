@@ -1,3 +1,5 @@
+;; Copyright © 2015 Cisco Systems, Inc
+
 (library (case)
   (export case)
   (import (exclusive-cond) (except (chezscheme) case))
