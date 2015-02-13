@@ -46,12 +46,12 @@ racket/base
 
 _...
 
-(define (parse stream)
- (case (peek-char stream)
-  [(#\space #\tab) (white-space stream)]
-  [(0 1 2 3 4 5 6 7 8 9) (digit stream)]
-  [(#\() (start-paren stream)]
-  [(#\)) (end-paren stream)]
+(define (parse _stream)
+ (case (peek-char _stream)
+  [(#\space #\tab) (white-space _stream)]
+  [(0 1 2 3 4 5 6 7 8 9) (digit _stream)]
+  [(#\() (start-paren _stream)]
+  [(#\)) (end-paren _stream)]
   _...))
 
 (module+ main (parse _input-stream))]
