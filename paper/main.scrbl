@@ -1,4 +1,4 @@
-#lang scribble/sigplan @preprint @10pt
+#lang scribble/sigplan @preprint
 @(require scriblib/footnote)
 @(require "defs.rkt" "bib.rkt")
 
