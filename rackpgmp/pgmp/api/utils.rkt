@@ -4,6 +4,7 @@
   (only-in racket/function thunk)
   (only-in racket/format ~a)
   (for-syntax racket/base)
+  (for-template racket/base)
   racket/serialize
   syntax/srcloc
   racket/contract)
@@ -21,7 +22,7 @@
     [(_ profile-point template)
      #'(quasisyntax/loc
          (build-source-location-syntax profile-point)
-         template)]))
+         ((lambda () template)))]))
 
 (define (source-file->profile-file f)
   (string->path (string-append f ".profile")))

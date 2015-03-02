@@ -133,7 +133,10 @@ Otherwise, we generate a normal @racket[if] form.
             (flag email 'spam))))]]
 
 We see that when we expand @racket[if-r] before any profile information is generated
-and saved, the test and branches stay in the original order.
+and saved, the test and branches stay in the original order. While
+expanding is useful for debugging, it can expose implementation specific
+details, so do not rely on the output of expand being in a specific
+form.
 
 Before @racket[if-r] will reorder its branches, we need to generate some
 profile information. While we could use @racket[run-with-profiling] and
@@ -198,6 +201,10 @@ the right file.
            #,(annotate-syn
              profile-point-f
              (flag email 'spam))))))]]
+
+Note that the branches have been eta-expanded by @racket[annotate-syn].
+This is an implementation detail used to coerce @racket[errortrace] into
+accepting the new profile point.
 @section{API}
 
 @defmodule[#:multi (pgmp pgmp/api/exact) #:no-declare]
@@ -295,4 +302,16 @@ Like Racket's @racket[cond], but may sort
 An @racket[else] clause, if one exists, will always be last.
 Note that the clauses must be mutually exclusive or which branch is
 taken is non-deterministic.
+
+When generated from another macro, be sure to preserve location
+information at the top level to ensure profile data can be loaded
+correctly.
+@examples[
+#:eval evaler
+#:escape UNSYNTAX
+(define-syntax (dispatch syn)
+  (define branches _...)
+  (quasisyntax/loc syn
+    #`(exclusive-cond
+        #,@branches)))]
 }
