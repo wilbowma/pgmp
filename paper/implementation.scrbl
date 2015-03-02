@@ -8,8 +8,9 @@
 
 @title[#:tag "implementation" "Implementations"]
 In this section we describe the instantiations of our approach in Chez
-Scheme and in Racket, and briefly describe other meta-programming
-systems in which our approach should apply.
+Scheme and in Racket, discuss compile-time and profiling overhead, and
+briefly describe other meta-programming systems in which our approach
+should apply.
 
 @section[#:tag "impl-chez"]{Chez Scheme implementation}
 Chez Scheme implements counter-based profiling.
@@ -133,6 +134,32 @@ information and computes profile weights.
 This library is implemented as a standard Racket library that can be
 called by meta-programs, and requires no changes to either the Racket
 implementation or the @racket[errortrace] library.
+
+@section[#:tag "impl-overhead"]{Compile-time and Profiling Overhead}
+In this section, we briefly discuss the overhead caused by implementing our
+API and by implementing optimizations using our approach.
+
+In our implementations, the overhead for loading profile information is
+linear in the number of profile points, and the overhead for determining
+the weight of a particular profile point is constant-time. In both
+cases, the cost per profile point is small---a hash-table write or read.
+The overhead for performing an optimization based on profile information
+will be specific to the optimization. For instance, conditional branch
+reordering such as @racket[exclusive-cond] is a simple local change and
+will likely not have much overhead. Performing function inlining as a
+profile-guided meta-program might be more costly; the meta-program must
+account for global changes to code size, may be run multiple times
+depending on the number of function calls, and may slow down (or speed
+up) later stages of compilation.
+
+Profiling overhead is inherited by the profiler used by the
+implementation of our technique. Previous work measured about 9%
+overhead of the profiler used in our Chez Scheme
+implementation@~citea{burger1998infrastructure}. The
+profiling library used in our Racket implementation has overhead ranging
+from 3% to 33%@~cite[stamour14]. Typically, profiling is disabled for
+production runs of a program, so this overhead affects only profiled
+runs during development.
 
 @section[#:tag "impl-other"]{Instantiations in other meta-programming systems}
 Both of our instantiations are in similar Scheme-style meta-programming

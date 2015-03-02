@@ -116,3 +116,12 @@
             #:location (techrpt-location #:institution "PLT Design Inc."
                                          #:number "PLT-TR-2010-1")
             #:url      "http://racket-lang.org/tr1/"))
+
+(define stamour14
+  (make-bib #:title "Feature-specific profiling"
+            #:author (authors "Vincent St-Amour" "Mattias Felleisen")
+            #:date 2014
+            #:location (techrpt-location #:institution "Northeastern
+                                         University"
+                                         #:number "NU-CCIS-8-28-14-1")
+            #:url "http://www.ccs.neu.edu/racket/pubs/NU-CCIS-14-01.pdf"))
