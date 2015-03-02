@@ -134,13 +134,12 @@ This library is implemented as a standard Racket library that can be
 called by meta-programs, and requires no changes to either the Racket
 implementation or the @racket[errortrace] library.
 
-@section{Instantiations in other meta-programming systems}
+@section[#:tag "impl-other"]{Instantiations in other meta-programming systems}
 Both of our instantiations are in similar Scheme-style meta-programming
 systems, but the approach can work in any sufficiently expressive
 meta-programming system.
-
 Languages such as Template Haskell@~citea{sheard2002template}, MetaML@~citea{taha00},
-and Scala@~citea{burmako2013scala} 
+and Scala@~citea{burmako2013scala}
 feature powerful meta-programming facilities similar to
 that of Scheme@~cite[dybvig93].
 They allow executing expressive programs at compile-time, provide direct
@@ -148,3 +147,54 @@ access to input expressions, and provide template-style meta-programming
 facilities.
 C++ template meta-programming is more restricted than the above systems,
 so it is not clear how to instantiate our approach for C++ templates.
+In this section we briefly sketch
+implementation strategies for other general-purpose meta-programming systems.
+
+@subsection{TemplateHaskell}
+TemplateHaskell@~citea{sheard2002template}, which is provided with the
+current version of the Glasgow Haskell Compilers (GHC) (version 7.8.4),
+provides general-purpose meta-programming to Haskell.
+
+GHC has a profiler that profiles "cost-centres". By default,
+each function defines a cost-centres, but the user can define new
+cost-centres by adding an @emph{annotation} to the source code of the form
+@tt{{#- SCC "cost-centre-name" #-}}.
+Cost-centres map easily to profile points.
+
+TemplateHaskell, as GHC 7.7, supports generating and querying annotations. Since
+cost-centres are defined via annotations, implementing
+@racket[make-profile-point], @racket[annotate-expr], and
+@racket[profile-query] should be simple.
+
+As the output of the profiler is an easily parsed file that associates time and
+allocation with each cost-centre, implementing @racket[load-profile]
+should be as simple as writing a parser for the .prof file.
+As profiling in Haskell exists largely outside the language and
+inside the GHC toolchain, implementing @racket[store-profile] in the
+language would not be useful. Instead, this is done using a system
+call such as @exec{ghc -prof filename.hs}.
+
+@subsection{MetaOCaml}
+MetaOCaml is an implementation of MetaML@~citea{taha00} based on OCaml.
+MetaOCaml provides general-purpose meta-programming based on multi-stage
+programming.
+
+OCaml features a counter-based profiler that associates counts with the
+locations of certain source AST nodes. It is unclear how much
+location and AST information is currently exposed to MetaOCaml, but
+exposing some of these internals would make it simple to implement
+@racket[load-profile] and @racket[profile-query]. As the profiler is
+based on source locations, implementing @racket[make-profile-point] and
+@racket[annotate-expr] may require similar tricks to those used in our
+implementations.
+
+As with GHC, implementing @racket[store-profile] inside the language is
+not useful, and profiling in OCaml is done via a call such as
+@exec{ocamlcp -p a filename.ml -o filename; ./filename}.
+
+@subsection{Scala}
+Scala features powerful general-purpose meta-programming, including
+template-style meta-programming, and various reflection libraries.
+Unfortunately, the only profilers for Scala seem to be at the level of
+the JVM. Without a source-level profiler, implementing our API in Scala
+would be difficult.

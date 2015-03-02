@@ -115,7 +115,7 @@ of a generated profile point across multiple runs.
 
 To attach profile points to expressions,
 @(racketblock0
-(annotation-expr expr profile-point))
+(annotate-expr expr profile-point))
 takes an expression, such as a syntax object, and a profile
 point, and associates the expression with the profile point. The
 underlying profiling system should then profile that expression
