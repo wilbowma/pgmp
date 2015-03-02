@@ -26,7 +26,7 @@
           ;; source-location.
           ;; TODO: This might indicate loading profile data should be done at a
           ;; global basis, rather than per macro .... but maybe not.
-          #,(annotate-syn x
+          #,(quasisyntax/loc x
               (exclusive-cond
                   #,@(map (lambda (clause)
                             #`[(begin #,@(if (clause-inspect clause)
