@@ -25,6 +25,11 @@ representing that profile point.
 Chez Scheme treats these @racket[profile] expressions as effectful, like
 an assignment to an external variable, and never duplicates or removes
 them.
+Even if the original expression associated with the @racket[profile]
+form is duplicated or removed, the @racket[profile] form itself is
+preserved separately.
+This ensures profile points are not conflated or lost during
+compilation.
 To instrument profiling efficiently, @racket[profile] expressions are
 preserved until generating basic blocks.
 While generating basic blocks, all the profile points from
@@ -145,12 +150,12 @@ the weight of a particular profile point is constant-time. In both
 cases, the cost per profile point is small---a hash-table write or read.
 The overhead for performing an optimization based on profile information
 will be specific to the optimization. For instance, conditional branch
-reordering such as @racket[exclusive-cond] is a simple local change and
-will likely not have much overhead. Performing function inlining as a
-profile-guided meta-program might be more costly; the meta-program must
-account for global changes to code size, may be run multiple times
-depending on the number of function calls, and may slow down (or speed
-up) later stages of compilation.
+reordering---such as @racket[exclusive-cond] in the next section---is a
+simple local change and will likely not have much compile-time overhead.
+Performing function inlining as a profile-guided meta-program might be
+more costly; the meta-program must account for global changes to code
+size, may be run multiple times depending on the number of function
+calls, and may slow down (or speed up) later stages of compilation.
 
 Profiling overhead is inherited by the profiler used by the
 implementation of our technique. Previous work measured about 9%
