@@ -202,9 +202,11 @@ language would not be useful. Instead, this is done using a system
 call such as @exec{ghc -prof filename.hs}.
 
 @subsection{MetaOCaml}
-MetaOCaml is an implementation of MetaML@~citea{taha00} based on OCaml.
+MetaOCaml is a reimplementation of MetaML@~citea{taha00} based on OCaml.
 MetaOCaml provides general-purpose meta-programming based on multi-stage
-programming.
+programming. The most recent version, BER MetaOCaml N102, is implemented
+on top of OCaml version 4.02.1.
+@todo{Citations?}
 
 OCaml features a counter-based profiler that associates counts with the
 locations of certain source AST nodes. It is unclear how much
@@ -213,7 +215,7 @@ exposing some of these internals would make it simple to implement
 @racket[load-profile] and @racket[profile-query]. As the profiler is
 based on source locations, implementing @racket[make-profile-point] and
 @racket[annotate-expr] may require similar tricks to those used in our
-implementations.
+Racket and Chez Scheme implementations.
 
 As with GHC, implementing @racket[store-profile] inside the language is
 not useful, and profiling in OCaml is done via a call such as
@@ -222,6 +224,10 @@ not useful, and profiling in OCaml is done via a call such as
 @subsection{Scala}
 Scala features powerful general-purpose meta-programming, including
 template-style meta-programming, and various reflection libraries.
-Unfortunately, the only profilers for Scala seem to be at the level of
-the JVM. Without a source-level profiler, implementing our API in Scala
-would be difficult.
+@todo{Citations?}
+
+The only profilers for Scala seem to be at the level of the JVM,
+however, JVM bytecode retains much source information. It should be
+possible to map the profiling information at the JVM level back to Scala
+source code. With such a mapping, a Scala implementation of our API
+should be similar to our Racket implementation.
