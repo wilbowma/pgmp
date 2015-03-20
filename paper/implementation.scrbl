@@ -39,7 +39,7 @@ generated.
 The meta-programming system maintains an associative map of source
 objects to profile weights, which is updated by API calls.
 The API provided by Chez Scheme is nearly identical to the one sketched
-in @secref{design-api-sketch}.
+in @Secref{design-api-sketch}.
 
 Chez Scheme implements counter-based profiling.
 Adding a profile point for every single source expression requires care
@@ -123,7 +123,7 @@ The @racket[errortrace] library provides counter-based profiling, like
 the Chez Scheme profiler.
 
 We implement a library which provides a similar API to the one sketched
-in @secref{design-api-sketch}.
+in @Secref{design-api-sketch}.
 This library maintains the map from source objects to profile
 information and computes profile weights.
 This library is implemented as a standard Racket library that can be

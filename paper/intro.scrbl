@@ -69,16 +69,16 @@ We also implement this approach in Racket@~cite[plt-tr1] purely as a
 library, using pre-existing profiling and meta-programming tools.
 
 The remainder of the paper is organized as follows.
-In @secref{example}, we present a running example and introduce
+In @Secref{example}, we present a running example and introduce
 Scheme-style meta-programming.
-In @secref{design}, we present the design of our approach and an example
+In @Secref{design}, we present the design of our approach and an example
 of an API provided by a meta-programming system using our approach.
-In @secref{implementation}, we present two instantiations of our
+In @Secref{implementation}, we present two instantiations of our
 approach, one in Chez Scheme and one in Racket.
-In @secref{case-studies}, we demonstrate that our approach is general
+In @Secref{case-studies}, we demonstrate that our approach is general
 enough to implement and extend existing PGOs and profile-guided
 meta-programs.
-In @secref{related}, we related to existing work on PGOs and
+In @Secref{related}, we related to existing work on PGOs and
 profile-guided meta-programming.
 
 The main contributions of the paper are: @itemlist[

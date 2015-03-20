@@ -24,7 +24,7 @@ In addition to the common optimizations noted previously, .NET extends
 their profiling system to probe values in @code{switch}
 statements.
 They can use this value information to reorder the branches of a
-@code{switch} statement, as done for @racket[case] in @secref{study-case}.
+@code{switch} statement, as done for @racket[case] in @Secref{study-case}.
 
 LLVM has a different model for PGO.
 LLVM uses a runtime reoptimizer that monitors the running
