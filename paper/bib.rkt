@@ -125,3 +125,14 @@
                                          University"
                                          #:number "NU-CCIS-8-28-14-1")
             #:url "http://www.ccs.neu.edu/racket/pubs/NU-CCIS-14-01.pdf"))
+
+(define scala-overview-tech-report
+  (make-bib #:title "An Overview of the Scala Programming Language"
+            #:author (authors "Martin Odersky" "Philippe Altherr" "Vincent Cremet"
+                              "Burak Emir" "Sebastian Maneth" "Stéphane Micheloud" 
+                              "Nikolay Mihaylov" "Michel Schinz" "Erik Stenman" 
+                              "Matthias Zenger")
+            #:date 2004
+            #:location (techrpt-location #:institution "EPFL Lausanne"
+                                         #:number "IC/2004/64")
+            #:url "http://lampwww.epfl.ch/~odersky/papers/ScalaOverview.html"))

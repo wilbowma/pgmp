@@ -13,15 +13,44 @@ briefly describe other meta-programming systems in which our approach
 should apply.
 
 @section[#:tag "impl-chez"]{Chez Scheme implementation}
+Chez Scheme implements profile points using @emph{source
+objects}@~cite[dybvig93].
+Chez Scheme source objects contains a filename and starting and ending
+character positions.
+Source objects uniquely identify every source expression, providing
+fine-grain profile information.
+The Chez Scheme reader automatically creates and attaches these to each
+syntax object read from a file, using them to give error messages in
+terms of source locations, among other things.
+Since the reader automatically attaches source objects to each
+expression in a file, each source expression comes with a unique,
+deterministically generated profile point.
+Chez Scheme also provides an API to programmatically manipulate source
+objects and attach them to syntax objects@~cite[csug-ch11].
+This API is used to implement @racket[make-profie-point] and
+@racket[annotat-expr].
+
+We deterministically generate a fresh source objects by adding a suffix to
+the filename of a base source object.
+By basing generated source objects on those from the original source
+program, errors in generated code are easier to debug as the generated
+code contain source information from the file in which the code was
+generated.
+The meta-programming system maintains an associative map of source
+objects to profile weights, which is updated by API calls.
+The API provided by Chez Scheme is nearly identical to the one sketched
+in @secref{design-api-sketch}.
+
 Chez Scheme implements counter-based profiling.
 Adding a profile point for every single source expression requires care
 to instrument correctly and efficiently.
 As optimizations duplicate or throw out expressions, the profile points
 must not be duplicated or lost.
 
-For every profile point, Chez Scheme generates an
-expression @racket[(profile e)], where @racket[e] is an object
-representing that profile point.
+To ensure profile points are not duplicated, lost, or otherwise mixed
+up, Chez Scheme makes profile points explicit in the intermediate
+langauges by generating an expression @racket[(profile e)], where
+@racket[e] is a source object.
 Chez Scheme treats these @racket[profile] expressions as effectful, like
 an assignment to an external variable, and never duplicates or removes
 them.
@@ -30,6 +59,7 @@ form is duplicated or removed, the @racket[profile] form itself is
 preserved separately.
 This ensures profile points are not conflated or lost during
 compilation.
+
 To instrument profiling efficiently, @racket[profile] expressions are
 preserved until generating basic blocks.
 While generating basic blocks, all the profile points from
@@ -46,29 +76,6 @@ counter per block, and fewer in practice.
 @;blocks, we attach a newly generated source objects for that block.
 @;The source objects need to be generated deterministically to remain
 @;stable across different runs.
-
-Chez Scheme implements profile points using @emph{source
-objects}@~cite[dybvig93].
-Chez Scheme source objects contains a filename and starting and ending
-character positions.
-Source objects uniquely identify every source expression, providing
-fine-grain profile information.
-The Chez Scheme reader automatically creates and attaches these to each
-syntax object read from a file, using them to give error messages in
-terms of source locations, among other things.
-Chez Scheme also provides an API to programmatically manipulate source
-objects and attach them to syntax objects@~cite[csug-ch11].
-
-We generate a new source object by adding a suffix to the filename of a
-base source object.
-By basing generated source objects on those from the original source
-program, errors in generated code are easier to debug as the generated
-code contain source information from the file in which the code was
-generated.
-The meta-programming system maintains an associative map of source
-objects to profile weights, which is updated by API calls.
-The API provided by Chez Scheme is nearly identical to the one sketched
-in @secref{design-api-sketch}.
 
 @subsection{Source and Block PGO}
 One goal of our approach is to complement rather than interfere with
@@ -116,13 +123,8 @@ profile information to do both profile-guided meta-programming
 and low-level PGOs.
 
 @section[#:tag "impl-racket"]{Racket implementation}
-The Racket implementation uses a pre-existing Racket profiling
-library called @racket[errortrace].
-The @racket[errortrace] library provides counter-based profiling, like
-the Chez Scheme profiler.
-
-The Racket implementation uses source information attached to each syntax
-object to implement profile points.
+In Racket, we implement profile points using source information attached
+to each syntax object.
 Racket attaches the filename, line number, etc to every syntax object,
 and provides functions for attaching source information when building
 a new syntax object.
@@ -131,6 +133,11 @@ separate source objects, and to merge source objects into Racket syntax
 objects.
 We then generate source objects in essentially the same way as in Chez
 Scheme.
+
+The Racket implementation uses a pre-existing Racket profiling
+library called @racket[errortrace].
+The @racket[errortrace] library provides counter-based profiling, like
+the Chez Scheme profiler.
 
 We implement a library which provides a similar API to the one sketched
 in @secref{design-api-sketch}.
@@ -171,7 +178,7 @@ Both of our instantiations are in similar Scheme-style meta-programming
 systems, but the approach can work in any sufficiently expressive
 meta-programming system.
 Languages such as Template Haskell@~citea{sheard2002template}, MetaML@~citea{taha00},
-and Scala@~citea{burmako2013scala}
+and Scala@~cite[scala-overview-tech-report]
 feature powerful meta-programming facilities similar to
 that of Scheme@~cite[dybvig93].
 They allow executing expressive programs at compile-time, provide direct
@@ -228,8 +235,8 @@ not useful, and profiling in OCaml is done via a call such as
 
 @subsection{Scala}
 Scala features powerful general-purpose meta-programming, including
-template-style meta-programming, and various reflection libraries.
-@todo{Citations?}
+template-style meta-programming, and various reflection
+libraries@~citea{burmako2013scala}.
 
 The only profilers for Scala seem to be at the level of the JVM,
 however, JVM bytecode retains much source information. It should be
