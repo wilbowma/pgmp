@@ -89,23 +89,6 @@ block-level optimizations separately.
 We describe a workflow for using both source-level and basic block-level
 PGOs via the running example from @figure-ref{if-r-eg}.
 
-@;First we compile and instrument a program to collect source-level
-@;information.
-@;We run this program and collect only source-level information.
-@;Next we recompile and optimize the program using the source-level
-@;information only, and instrument the program to collect block-level
-@;information.
-@;From this point on, source-level optimizations should run
-@;and the blocks should remain stable.
-@;We run this program and collect only the block-level information.
-@;Finally, we recompile the program
-@;with both source-level and block-level information.
-@;Since the source information has not changed, the meta-programs generate
-@;the same source code, and thus the compiler generates the same blocks.
-@;The blocks are then optimized with the correct profile information.
-
-@todo{Lots of `we'}
-
 To get both source-level and block-level optimizations, we first
 instrument profiling for source expressions.
 After running it on representative inputs, we get the profile weights
@@ -217,8 +200,7 @@ call such as @exec{ghc -prof filename.hs}.
 MetaOCaml is a reimplementation of MetaML@~citea{taha00} based on OCaml.
 MetaOCaml provides general-purpose meta-programming based on multi-stage
 programming. The most recent version, BER MetaOCaml N102, is implemented
-on top of OCaml version 4.02.1.
-@todo{Citations?}
+on top of OCaml version 4.02.1@~citea{bermetaocaml}.
 
 OCaml features a counter-based profiler that associates counts with the
 locations of certain source AST nodes. It is unclear how much
