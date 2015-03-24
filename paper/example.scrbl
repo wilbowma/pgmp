@@ -29,7 +29,7 @@ In @Figure-ref{sample-macro},
 @racket[define-syntax] introduces a new syntax extension @racket[if-r].
 Any uses of @racket[if-r] in the source will be rewritten using the code
 in the body of the extension. The syntax extension can be thought of as
-a function from source expressions to source expression.
+a function from source expressions to @nonbreaking{source expression.}
 @figure-here["if-r-eg" (elem "Using " @racket[if-r])
 @#reader scribble/comment-reader
 (racketblock0
@@ -45,7 +45,7 @@ a function from source expressions to source expression.
       (flag email 'spam)
       (flag email 'important))))]
 For example, in @Figure-ref{if-r-eg} the syntax extension @racket[if-r]
-receives the argument:
+receives @nonbreaking{the argument:}
 @racketblock0[
 #'(if-r (subject-contains-ci email "PLDI")
         (flag email 'important)
@@ -56,7 +56,7 @@ forms @racketmetafont{#'}, @racketmetafont{#`}, and @racketmetafont{#,}
 provide a templating system for syntax objects@note{Specifically, these
 forms implement Lisp's quote, quasiquote, and unquote on syntax objects
 instead of lists.}, and @racket[syntax-case] performs pattern matching
-on syntax objects.
+on @nonbreaking{syntax objects.}
 
 At compile time, @racket[if-r] looks up the profile information
 attached to each branch, using @racket[profile-query], and generates an

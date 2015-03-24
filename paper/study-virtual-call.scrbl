@@ -70,7 +70,7 @@ additional 87-line.
 resulting code after instrumentation, and the resulting code after
 optimization.
 Note that each occurrence of @racket[(instrumented-dispatch x area)]
-has a different profile point, so each occurrence is profiled separately.
+has a different profile point, so each occurrence is @nonbreaking{profiled separately.}
 @figure["method-call-example" "Example of profile-guided receiver class prediction"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0

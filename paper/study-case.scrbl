@@ -43,7 +43,7 @@ information.
 Each clause of the generated @racket[exclusive-cond] tests if the
 key expression is @racket[equal?] to any key in the list of keys from
 the @racket[case] clause.
-The full implementation of @racket[case] is 41-line.
+The full implementation of @racket[case] @nonbreaking{is 41-line.}
 @figure-here["case-example" (elem "An example using " @racket[case])
 @(racketblock0
 (define (parse stream)
@@ -148,4 +148,4 @@ implement a well-known PGO via meta-programming.
 It also demonstrates some important features of our approach.
 Namely, that through our approach new PGOs can easily be defined in
 terms of existing ones, and new optimizations can be exposed when
-programmers can encode domain specific knowledge into the program.
+programmers can encode domain specific knowledge into @nonbreaking{the program.}

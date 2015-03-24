@@ -15,7 +15,7 @@ They allow executing expressive programs at compile-time, provide direct
 access to input expressions, and provide templating systems for
 manipulating expressions.
 In this section we briefly sketch implementation strategies for other
-general-purpose meta-programming systems.
+general-purpose @nonbreaking{meta-programming systems.}
 
 @section{Template Haskell}
 Template Haskell@~citea{sheard2002template} provides general-purpose

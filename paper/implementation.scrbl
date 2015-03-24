@@ -137,7 +137,7 @@ The compile-time overhead of our API is small.
 In our implementations, loading profile information is linear in the
 number of profile points, and querying the weight of a particular
 profile point is constant-time.
-The API does not introduce slowdown at runtime, however.
+The API does not introduce slowdown at @nonbreaking{runtime, however.}
 
 Profile-guided meta-programs may also slow down (or speed up)
 compilation, as they run at compile-time.
