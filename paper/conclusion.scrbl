@@ -14,5 +14,4 @@ Until now, such optimizations have been implemented via tools designed
 for a specific meta-program or optimization.
 We have described a general mechanism for implementing arbitrary
 profile-guided meta-programs, and evaluated its use by implementing
-several PGOs and profile-guided meta-programs in a single
-general-purpose system.
+several profile-guided meta-programs in a single general-purpose system.
