@@ -13,7 +13,7 @@ approach.
 Our approach is not specific to a particular profiling technique, but for
 simplicity our explanations refer to counter-based profile information.
 
-@section[#:tag "design-source-obj"]{Profile points}
+@section[#:tag "design-source-obj"]{Profile Points}
 To store and access profile information, we need to associate profile
 information with the source expressions on which meta-programs operate.
 @emph{Profile points} uniquely identify expressions that should be
@@ -41,9 +41,9 @@ meta-programs can also manufacture new profile points.
 Meta-programmers may want to generate expressions that are profiled
 separately from any other expression in the source program.
 
-The meta-programmer can access profile information by passing a profile
-point, or object with an associated profile point, to an API call, such
-as the function @racket[profile-query] in our running example.
+Meta-programmers can access profile information by passing a profile
+point, or an object with an associated profile point, to an API call,
+such as the function @racket[profile-query] in our running example.
 
 @section[#:tag "design-profile-weights"]{Profile Information}
 Absolute profile information, such as the exact execution count of an
@@ -98,27 +98,27 @@ after each data set.
 (flag email 'spam)     → (1 + 10/100)/2   ;; 0.55
 }|]
 
-@section[#:tag "design-api-sketch"]{Complete API sketch}
-Here we sketch an example of an API provided by a meta-programming
-system using our approach.
+@section[#:tag "design-api-sketch"]{Complete API Sketch}
+In this section, we sketch an example of an API provided by a
+meta-programming system using our approach.
 The API assumes the underlying language implementation has some way to
 profile expressions that are associated with profile points.
-The API is only concerned with providing the meta-program with access
-that profile information and the ability to manipulate profile points.
+The API is only concerned with providing meta-programs with access
+to that profile information and the ability to manipulate profile points.
 
 To create profile points,
 @(racketblock0
 (make-profile-point))
 generates profile points. This function must generate profile points
-deterministically so the meta-program can access the profile information
+deterministically so meta-programs can access the profile information
 of a generated profile point across multiple runs.
 
 To attach profile points to expressions,
 @(racketblock0
 (annotate-expr expr profile-point))
 takes an expression, such as a syntax object, and a profile
-point, and associates the expression with the profile point. The
-underlying profiling system should then profile that expression
+point, and associates the expression with the profile point.
+The underlying profiling system should then profile that expression
 separately from any other expression with a different associated profile
 point.
 
