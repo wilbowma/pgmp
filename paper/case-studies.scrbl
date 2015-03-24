@@ -127,9 +127,9 @@ Then it sorts the clauses by profile weight and generates a regular
 The full implementation of @racket[exclusive-cond] is 24-line.
 
 @Figure-ref{case-expansion} shows the code generated from the example @racket[case]
-expression from @figure-ref{case-example}
+expression from @Figure-ref{case-example}
 @figure-here["case-expansion"
-        (elem "Generated code from " @figure-ref{case-example})
+        (elem "Generated code from " @Figure-ref{case-example})
 @#reader scribble/comment-reader
 @(racketblock0
 ;; After case expands

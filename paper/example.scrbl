@@ -25,12 +25,12 @@ meta-programming.
            ; if true branch is more frequent:
            #'(if test t-branch f-branch)))])))]
 
-In @figure-ref{sample-macro},
+In @Figure-ref{sample-macro},
 @racket[define-syntax] introduces a new syntax extension @racket[if-r].
 Any uses of @racket[if-r] in the source will be rewritten using the code
 in the body of the extension. The syntax extension can be thought of as
 a function from source expressions to source expression.  For example,
-in @figure-ref{if-r-eg} the syntax extension @racket[if-r] receives the
+in @Figure-ref{if-r-eg} the syntax extension @racket[if-r] receives the
 argument:
 @racketblock0[
 #'(if-r (subject-contains-ci email "PLDI")

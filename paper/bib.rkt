@@ -99,7 +99,7 @@
     #:url "http://www.scheme.com/csug8"
     #:date 2011))
 
-(define csug-ch11 (in-bib dybvig09csug " Chapter 11"))
+(define csug-ch11 (in-bib dybvig09csug ", Chapter 11"))
 
 #;(define gupta02
   (make-bib
