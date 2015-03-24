@@ -7,9 +7,9 @@
   scriblib/figure)
 
 @title[#:tag "design"]{Approach and API}
-This section presents the design of our approach and presents
-an example of an API provided to meta-programmers by a meta-programming
-system using our approach.
+This section presents our approach and presents an example of an API
+provided to meta-programmers by a meta-programming system using our
+approach.
 Our approach is not specific to a particular profiling technique, but for
 simplicity our explanations refer to counter-based profile information.
 
