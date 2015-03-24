@@ -129,8 +129,11 @@ location to profile weight, and provide @racket[profile-query],
 simple Racket functions that can be called by meta-programs.
 
 @section[#:tag "impl-overhead"]{Compile-time and Profiling Overhead}
-As our API runs at compile-time, using it can slow the compilation
-process. However, this slowdown is small.
+As with any technique for performing profile-guided optimizations, our
+approach introduces compile-time overhead for optimizations and runtime
+overhead when profiling.
+
+The compile-time overhead of our API is small.
 In our implementations, loading profile information is linear in the
 number of profile points, and querying the weight of a particular
 profile point is constant-time.
