@@ -16,22 +16,28 @@ These systems use profile information to guide decisions about code
 positioning, register allocation, inlining, and conditional branch
 ordering.
 
+@todo{The next four paragraphs seem kind of like disorganized thoughts}
 GCC profiles at the level of an internal control-flow graph (CFG).
 To maintain consistent CFGs across instrumented and optimized
 builds, GCC requires similar optimization decisions across
-builds@~citea{chen10}.
+builds@~citea{chen10}. 
+This requirement is similar to how we ensure consistency when using both
+source and block-level PGOs in Chez Scheme.
+
 In addition to the common optimizations noted previously, .NET extends
 their profiling system to probe values in @code{switch}
 statements.
 They can use this value information to reorder the branches of a
 @code{switch} statement, as done for @racket[case] in @Secref{study-case}.
+Our approach can express this optimization using the same mechanisms as
+all the other optimizations we studied.
 
 LLVM has a different model for PGO.
-LLVM uses a runtime reoptimizer that monitors the running
-program.
+LLVM uses a runtime reoptimizer that monitors the running program.
 The runtime can profile the program as it runs ``in the field'' and
 perform simple optimizations to the machine code, or call to an offline
-optimizer for more complex optimizations on the LLVM bytecode@~citea{lattner2004llvm}.
+optimizer for more complex optimizations on the LLVM
+bytecode@~citea{lattner2004llvm}.
 
 Recent work is still finding novel uses for profile information.
 @citeta{furr09} use profile information to infer types in dynamic
@@ -56,9 +62,9 @@ language as a meta-program.
 The HERMIT toolkit provides an API for performing program
 transformations on Haskell intermediate code before compiling, even
 allowing interactive experimentation@~citea["farmer2012hermit"].
-@citeta["hawkins11" "hawkins12"] implement a compiler for a language that generates
-C++ implementations of data structures based on high-level
-specifications.
+@citeta["hawkins11" "hawkins12"] implement a compiler for a language
+that generates C++ implementations of data structures based on
+high-level specifications.
 
 Previous work integrates profiling to guide meta-program optimizations.
 @citeta{chen06:mpipp} use profile-guided meta-programming for performing process
