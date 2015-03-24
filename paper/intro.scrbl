@@ -46,8 +46,8 @@ Existing general-purpose meta-programming systems do not provide profile
 information about the input programs on which meta-programs operate.
 Therefore, existing profile-guided meta-programs introduce new
 special-purpose toolkits for profiling and meta-programming.
-Instead, general-purpose meta-programming systems should provide access
-to profile information.
+Instead, existing general-purpose meta-programming systems should provide access
+to profile information from existing profilers.
 Meta-programmers could then implement profile-guided meta-programs while
 reusing the meta-programming and profiling tools of an existing,
 familiar, system.
@@ -71,19 +71,22 @@ library, using pre-existing profiling and meta-programming tools.
 The remainder of the paper is organized as follows.
 In @Secref{example}, we present a running example and introduce
 Scheme-style meta-programming.
-In @Secref{design}, we present the design of our approach and an example
-of an API provided by a meta-programming system using our approach.
-In @Secref{implementation}, we present two instantiations of our
+In @Secref{design}, we present our approach and an example API for
+supporting profile-guided meta-programming in a general-purpose
+meta-programming system.
+In @Secref{implementation}, we present two implementations of our
 approach, one in Chez Scheme and one in Racket.
+In @Secref{impl-other}, we sketch implementations for other
+general-purpose meta-programming systems.
 In @Secref{case-studies}, we demonstrate that our approach is general
 enough to implement and extend existing PGOs and profile-guided
 meta-programs.
-In @Secref{related}, we related to existing work on PGOs and
+In @Secref{related}, we relate to existing work on PGOs and
 profile-guided meta-programming.
 
 The main contributions of the paper are: @itemlist[
   @item{A general approach for profile-guided meta-programming.}
-  @item{Two instantiations of our approach}
+  @item{Two implementations of our approach}
   @item{An evaluation of our approach based on implementing three
   existing profile-guided meta-programs.}
 ]

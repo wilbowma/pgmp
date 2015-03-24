@@ -10,7 +10,7 @@
 @title[#:tag "case-studies"]{Case Studies}
 In this section we evaluate the generality of our approach by
 implementing existing PGOs and profile-guided meta-programs in the
-Racket instantiation of our approach.
+Racket implementation of our approach.
 We first demonstrate optimizing Scheme's @racket[case], a
 multi-way branching construct similar to C's @code{switch}, as a
 meta-program.

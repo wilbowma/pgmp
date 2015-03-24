@@ -7,7 +7,7 @@
   scriblib/figure)
 
 @title[#:tag "implementation" "Implementations"]
-In this section we describe the instantiations of our approach in Chez
+In this section we describe the implementations of our approach in Chez
 Scheme and in Racket, and discuss compile-time and profiling overhead.
 
 @section[#:tag "impl-chez"]{Chez Scheme Implementation}

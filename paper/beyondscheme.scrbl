@@ -5,7 +5,7 @@
   scribble/manual)
 
 @title[#:tag "impl-other"]{Beyond Scheme and Racket}
-Both of our instantiations are for similar Scheme-style meta-programming
+Both of our implementations are for similar Scheme-style meta-programming
 systems, but the approach should work in most meta-programming system.
 Languages such as Haskell@~citea{sheard2002template}, MetaML@~citea{taha00},
 and Scala@~cite[scala-overview-tech-report]
