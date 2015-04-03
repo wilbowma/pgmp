@@ -6,87 +6,77 @@
 
 @title[#:tag "intro" "Introduction"]
 @; What is profile-guided optimization?
-Profile-guided optimization (PGO) is a compiler technique in which a
-compiler uses profile information, e.g., counts of how often each
-expression is executed, gathered from test runs on representative sets
-of inputs to generate more efficient code.
-The profile information acts as an oracle for runtime behavior, and
-informs low-level optimization decisions, e.g., decisions about
-reordering basic blocks, inlining, reordering conditional branches, and
+Profile-guided optimization (PGO) is an optimization technique in which a
+compiler uses profile information gathered at runtime to improve the
+performance of the generated code.
+The profile information acts as an oracle for runtime behavior.
+For example, a profiler might gather information about how many times
+each function in a program is called to inform decisions about function
+inlining.
+Profile information is used to guide decisions about reordering
+basic blocks, function inlining, reordering conditional branches, and
 function layout in memory@~citea{gupta02}.
-The resulting code usually exhibits improved performance, at least on
+Code generated using PGOs usually exhibits improved performance, at least on
 the represented class of inputs, compared to code generated with static
 optimization heuristics.
-For example, using profiling information to inform inlining decisions in
-Java resulted in up to 59% improvement over static
-heuristics@~citea{Arnold:2000}.
+For example, @citeta{Arnold:2000} show that using profiling information
+to guide inlining decisions in Java resulted in up to 59% improvement
+over static heuristics.
 Modern compilers that support PGO include .NET, GCC, and
 LLVM@~cite[lattner02].
 @todo{Not sure if I should cite .net and gcc documentation or not.}
 
-@; Profile-directed meta-programming!
+@; Introduce profile-guided meta-programming.
 Profile information has also proven useful to implement profile-guided
 meta-programs.
 @; Introduce meta-programming
-Meta-programs, i.e., programs that operate on programs, are
-used to implement high-level abstractions such as
-efficient abstract libraries like Boost@~cite[boost] and
-high-performance domain specific languages@~citea["sujeeth2014delite"
-"rompf10"].
-Using profile-guided meta-programming,
-@citeta{chen06:mpipp} implement process placement for SMP clusters.
-@citeta{liu09} provide tools that use profile information to identify
-suboptimal usage of the STL in C++ source code.
+Meta-programs are programs that operate on programs.
 Languages with general-purpose meta-programming systems include C, C++,
-Haskell@~citea{sheard2002template}, Java@~citea{erdweg11},
-ML@~citea{taha00}, Racket@~cite[plt-tr1],
-Scheme@~cite[dybvig93], and Scala@~citea{burmako2013scala}.
+Java@~citea{erdweg11}, ML@~citea{taha00}, OCaml@~citea{bermetaocaml},
+Racket@~cite[plt-tr1], Scheme@~cite[dybvig93],
+Scala@~citea{burmako2013scala}, and Template
+Haskell@~citea{sheard2002template}.
+Meta-programming is used to implement high-level yet efficient abstractions.
+Boost libraries@~cite[boost] make heavy use of C++ meta-programming.
+@; And profile-guided meta-programming
+@citeta["sujeeth2014delite"] and @citeta["rompf10"] implement high-performance domain
+specific languages using staged meta-programming in Scala.
+@citeta{chen06:mpipp} implement process placement for SMP clusters using
+profile-guided meta-programming.
+@citeta{liu09} provide tools that use profile information to identify
+suboptimal usage of the STL in C++ @nonbreaking{source code}.
 
-Existing general-purpose meta-programming systems do not provide profile
-information about the input programs on which meta-programs operate.
-Therefore, existing profile-guided meta-programs introduce new
-special-purpose toolkits for profiling and meta-programming.
-Instead, existing general-purpose meta-programming systems should provide access
-to profile information from existing profilers.
+@; Claim the state of the art is insufficient.
+Current meta-programming systems do not provide profile information
+about the input programs on which meta-programs operate.
+Therefore, profile-guided meta-programs introduce new special-purpose
+toolkits for profiling and meta-programming.
+@; And propose a solution
+Instead, meta-programming systems should provide access to profile
+information from existing profilers.
 Meta-programmers could then implement profile-guided meta-programs while
-reusing the meta-programming and profiling tools of an existing,
-familiar, system.
-Programmers could then take advantage of all the meta-programs
-implemented in that system.
-
-We propose an approach for supporting profile-guided
-meta-programming in a general-purpose meta-programming system.
-The approach provides a simple API through which meta-programs can
-access fine-grain source-level profile information, and does not
-interfere with traditional, i.e., ``low-level'' PGOs.
-@todo{Say something about profiling information being available for
-run-time decisions, in later sections}
-
-We implement this approach in Chez Scheme using standard and efficient
-block-level profiling
-techniques@~citea["ball1994optimally" "burger1998infrastructure"].
-We also implement this approach in Racket@~cite[plt-tr1] purely as a
-library, using pre-existing profiling and meta-programming tools.
+reusing the meta-programming and profiling tools of a familiar system.
+We present a design for supporting profile-guided meta-programming in
+general-purpose meta-programming systems.
+To demonstrate the generality of our design, we implement it in two
+languages.
+Both implementations reuse existing meta-programming and
+profiling infrastructure.
+@;We also implement this approach in Racket@~cite[plt-tr1] purely as a
+@;library, using pre-existing profiling and meta-programming tools.
 
 The remainder of the paper is organized as follows.
-In @Secref{example}, we present a running example and introduce
+In @Secref{example}, we introduce a running example and
 Scheme-style meta-programming.
-In @Secref{design}, we present our approach and an example API for
-supporting profile-guided meta-programming in a general-purpose
-meta-programming system.
-In @Secref{implementation}, we present two implementations of our
-approach, one in Chez Scheme and one in Racket.
+In @Secref{design}, we describe our requirements on the underlying
+profiling system and an API for supporting profile-guided
+meta-programming.
+In @Secref{implementation}, we present two implementations of the
+specification in @Secref{design}: one in Chez Scheme and one in Racket.
 In @Secref{impl-other}, we sketch implementations for other
 general-purpose meta-programming systems.
-In @Secref{case-studies}, we demonstrate that our approach is general
+In @Secref{case-studies}, we demonstrate that our design is general
 enough to implement and extend existing PGOs and profile-guided
 meta-programs.
 In @Secref{related}, we relate to existing work on PGOs and
 @nonbreaking{profile-guided meta-programming}.
-
-The main contributions of the paper are: @itemlist[
-  @item{A general approach for profile-guided meta-programming.}
-  @item{Two implementations of our approach}
-  @item{An evaluation of our approach based on implementing three
-  existing profile-guided meta-programs.}
-]

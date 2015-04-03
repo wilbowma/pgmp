@@ -10,6 +10,10 @@
 In this section we describe the implementations of our approach in Chez
 Scheme and in Racket, and discuss compile-time and profiling overhead.
 
+@todo{Integrate this:
+Our Chez Scheme implementation uses standard and efficient
+block-level profiling techniques@~citea["ball1994optimally"
+"burger1998infrastructure"].}
 @section[#:tag "impl-chez"]{Chez Scheme Implementation}
 Chez Scheme implements profile points using @emph{source
 objects}@~cite[dybvig93].
