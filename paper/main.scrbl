@@ -7,7 +7,7 @@
   (elem
    "William J. Bowman"
    (titlenote "Author's current affiliation: Northeastern University"))
-  (elem "Cisco Systems, Inc and " (linebreak) "Northeastern University") 
+  (elem "Northeastern University and " (linebreak) "Cisco Systems, Inc")
   "wjb@williamjbowman.com")
 @(authorinfo
   (elem "Swaha Miller"
