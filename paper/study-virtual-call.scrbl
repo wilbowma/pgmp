@@ -50,7 +50,7 @@ additional 87-line.
 (define-syntax (method syn)
   (syntax-case syn ()
     [(_ obj m val* ...)
-     ...
+     ....
      ;; Don't copy the object expression throughout the template.
      #`(let* ([x obj])
          (cond
@@ -86,13 +86,13 @@ has a different profile point, so each occurrence is @nonbreaking{profiled separ
   ((base 0) (height 0))
   (define-method (area this)
     (* 1/2 base height)))
-...
+....
 (for/list ([s (list cir1 cir2 cir3 sqr1)])
   (method s area))
 
 ;; ---------------------------
 ;; After instrumentation
-...
+....
 (for/list ([s (list cir1 cir2 cir3 sqr1)])
   (let* ([x s])
     (cond
@@ -106,7 +106,7 @@ has a different profile point, so each occurrence is @nonbreaking{profiled separ
 
 ;; ---------------------------
 ;; After optimization
-...
+....
 (for/list ([s (list cir1 cir2 cir3 sqr1)])
   (let* ([x s])
     (cond
@@ -123,7 +123,7 @@ for classes in the the most likely order.
 (RACKETBLOCK0
 ;; ---------------------------
 ;; After optimization
-...
+....
 (for/list ([s (list cir1 cir2 cir3 sqr1)])
   (let* ([x s])
     (exclusive-cond
@@ -135,7 +135,7 @@ for classes in the the most likely order.
 
 ;; ---------------------------
 ;; After more optimization
-...
+....
 (for/list ([s (list cir1 cir2 cir3 sqr1)])
   (let* ([x s])
     (cond

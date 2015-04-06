@@ -52,7 +52,7 @@ The full implementation of @racket[case] @nonbreaking{is 41-line.}
   [(0 1 2 3 4 5 6 7 8 9) (digit stream)]
   [(#\() (start-paren stream)]
   [(#\)) (end-paren stream)]
-  ...)))]
+  ....)))]
 
 @figure**["case-impl" (elem "Implementation of " @racket[case])
 @#reader scribble/comment-reader #:escape-id UNSYNTAX

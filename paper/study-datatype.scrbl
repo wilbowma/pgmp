@@ -31,14 +31,14 @@ the vector library is 88-line, and the sequence library is 111-line.
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
 (struct list-rep (instr-op-table ls))
-...
+....
 (define-syntax (profiled-list syn)
   ;; Create fresh profile points.
   ;; Use list-src to profile operations that are asymptotically fast on lists
   ;; Use vector-src profile operations that are asymptotically fast on vectors
   (define list-src (make-profile-point))
   (define vector-src (make-profile-point))
-  ...
+  ....
   (syntax-case syn ()
     [(_ init-vals ...)
      (unless (>= (profile-query list-src) (profile-query vector-src))
@@ -101,14 +101,14 @@ using a list @emph{or} vector, depending on the profile information.
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
 (struct seq-rep (instr-op-table s))
-...
+....
 (define-syntax (seq syn)
    (define list-src (make-profile-point))
    (define vector-src (make-profile-point))
    (define previous-list-usage (profile-query list-src))
    (define previous-vector-usage (profile-query vector-src))
    (define list>=vector (>= previous-list-usage previous-vector-usage))
-   ...
+   ....
    (syntax-case syn ()
      [(_ init* ...)
       #`(let ()
