@@ -6,35 +6,38 @@
   scriblib/footnote
   scriblib/figure)
 
-@title[#:tag "design"]{Approach and API}
-This section presents our approach and presents an example of an API
-provided to meta-programmers by a meta-programming system using our
-approach.
-Our approach is not specific to a particular profiling technique, but for
+@title[#:tag "design"]{Design}
+Profile-guided meta-programming requires that the underlying language
+comes with a profiling system, and that the meta-programming system can
+access the profile information.
+This section presents the high-level requirements of our design, and
+sketches an API that suffices to provide profile-guided meta-programming.
+Our design is not specific to a particular profiling technique, but for
 simplicity our explanations refer to counter-based profile information.
 
 @section[#:tag "design-source-obj"]{Profile Points}
-To store and access profile information, we need to associate profile
-information with the source expressions on which meta-programs operate.
-@emph{Profile points} uniquely identify expressions that should be
-profiled by the underlying profiling system.
-For instance, if two expressions are associated with the same profile point, then they
-both increment the same profile counter when executed.
+As the profiling system may not understand source expressions,
+@emph{profile points} act as an abstraction of source expressions for
+the profiler.
+Each profile point uniquely identifies a counter.
+Associating a profile point with an expression indicates which counter
+to increment when profiling the expression.
+For instance, if two expressions are associated with the same profile
+point, then they both increment the same profile counter when executed.
 Conversely, if two expressions are associated with different profile
 points, then they increment different profile counters when executed.
-The profiling system uses profile points when a program is
-instrumented to collect profile information.
+The profiling system uses profile points when a program is instrumented
+to collect profile information.
 When the program is not instrumented to collect profile information,
 profile points do not introduce any runtime overhead.
 
-For fine-grained profiling, each input expression and subexpression can
+For fine-grained profiling, each input expression and sub-expression can
 have a unique profile point.
-In the case of our running example, separate profile points are
-associated with @racket[#'(if ...)], @racket[#'(subject-contains email
-"PLDI")], @racket[#'subject-contains], @racket[#'email],
-@racket[#'"PLDI"], @racket[#'(flag email 'spam)], and so on.
-Note that @racket[#'flag] and @racket[#'email] appear multiple
-times, but each occurrence can have a unique profile point.
+In the case of our running example, the ASTs for @racket[if],
+@racket[subject-contains], @racket[email], @racket["PLDI"], etc, are each
+associated with separate profile points.
+Note that @racket[flag] and @racket[email] appear multiple times, but
+each occurrence can have a unique profile point.
 
 In addition to profile points associated with input expressions,
 meta-programs can also manufacture new profile points.
@@ -46,18 +49,18 @@ point, or an object with an associated profile point, to an API call,
 such as the function @racket[profile-query] in our running example.
 
 @section[#:tag "design-profile-weights"]{Profile Information}
-Absolute profile information, such as the exact execution count of an
-expression, is incomparable across different data sets.
 Multiple data sets are important to ensure PGOs can optimize for
 multiple classes of inputs expected in production.
-Instead, our approach considers @emph{profile weights}.
-The profile weight of a profile point in a given data set is the ratio of
-the absolute profile information for that profile point to the maximum of
-all other profile points.
+However, absolute profile information is incomparable across different
+data sets.
+Instead, our design considers @emph{profile weights}.
 The profile weight is represented as a number in the range [0,1].
-In the case of counter-based profiling, the profile weight for a given profile
-point is execution count for that point divided by the the execution
-count for the most frequently executed point in the data set.
+The profile weight of a profile point is the ratio of the absolute
+profile count for that profile point to the maximum count of all other
+profile points in the same data set.
+That is, the profile weight for a given profile point is the execution
+count for that point divided by the the execution count of the most
+frequently executed profile point in the data set.
 This provides a single value identifying the relative importance of an
 expression and simplifies the combination of multiple profile data sets.
 @todo{Still want to say something about percent-of-max vs
@@ -98,44 +101,54 @@ after each data set.
 (flag email 'spam)     → (1 + 10/100)/2   ;; 0.55
 }|]
 
-@section[#:tag "design-api-sketch"]{Complete API Sketch}
-In this section, we sketch an example of an API provided by a
-meta-programming system using our approach.
-The API assumes the underlying language implementation has some way to
+@section[#:tag "design-api-sketch"]{API}
+This section presents an example of an API provided by a
+meta-programming system that implements our design.
+We assume a single object, @racket[(current-profile-information)],
+exists in the meta-programming system.
+@Figure-ref{api-sketch} documents the methods of this object.
+The type @racket[SyntaxObject] is provided by the meta-programming
+system.
+This API assumes that the underlying implementation has some way to
 profile expressions that are associated with profile points.
 The API is only concerned with providing meta-programs with access
 to that profile information and the ability to manipulate profile points.
-
-To create profile points,
+@todo{I would rather the documentation not be centered.}
+@figure-here["api-sketch" "API Sketch"
+@#reader scribble/comment-reader
 @(racketblock0
-(make-profile-point))
-generates profile points. This function must generate profile points
-deterministically so meta-programs can access the profile information
-of a generated profile point across multiple runs.
+type ProfilePoint
+type ProfileWeight
+type ProfileInformation)
 
-To attach profile points to expressions,
-@(racketblock0
-(annotate-expr expr profile-point))
-takes an expression, such as a syntax object, and a profile
-point, and associates the expression with the profile point.
-The underlying profiling system should then profile that expression
-separately from any other expression with a different associated profile
-point.
+@defproc[(make-profile-point) ProfilePoint]{
+Generates a profile point deterministically so meta-programs can access
+the profile information of the generated profile point across multiple
+runs.
+}
 
-To access profile information,
-@(racketblock0
-(profile-query expr))
-takes an expression associated with a profile point, and returns the
-profile information associated with that profile point.
+@defproc[(annotate-expr [e SyntaxObject] [pp ProfilePoint])
+         SyntaxObject]{
+Associates the expression @racket[e] with the profile point @racket[pp].
+The underlying profiling system will increment the counter for
+@racket[pp] anytime @racket[e] is executed.
+}
 
-To store profile information from a sample run,
-@(racketblock0
-(store-profile-info filename))
-takes a filename and stores the current profile information from the
-underlying profiling system to the file.
+@defproc[(profile-query [e SyntaxObject])
+         ProfileWeight]{
+Retrieves the profile weight associated with the profile point for the
+expression @racket[e].
+}
 
-To load profile information from a previous run,
-@(racketblock0
-(load-profile-info filename))
-takes a filename and loads the profile information from the file, making
-the profile information available via @racket[profile-query].
+@defproc[(store-profile [f Filename])
+         Null]{
+Stores the current profile information from the underlying profile
+system in the file with the filename @racket[f].
+}
+
+@defproc[(load-profile [f Filename])
+         ProfileInformation]{
+Loads the profile information stored in the file with the filename
+@racket[f].
+}
+]
