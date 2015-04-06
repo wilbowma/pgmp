@@ -5,9 +5,16 @@ RM=rm
 
 all: paper.pdf
 
-paper.pdf: smaller.tex abstract.scrbl implementation.scrbl design.scrbl conclusion.scrbl example.scrbl case-studies.scrbl study-case.scrbl study-datatype.scrbl study-virtual-call.scrbl intro.scrbl main.scrbl related.scrbl defs.rkt bib.rkt results.scrbl bib.bib 
-
+paper.pdf: smaller.tex main.scrbl defs.rkt bib.rkt abstract.scrbl intro.scrbl example.scrbl design.scrbl implementation.scrbl beyondscheme.scrbl case-studies.scrbl related.scrbl conclusion.scrbl bib.bib study-case.scrbl study-datatype.scrbl study-virtual-call.scrbl
 	$(SCRIBBLE) ++style smaller.tex --dest-name paper.pdf --pdf main.scrbl
+
+# TODO: Relearn how to makefile. Or maybe make switch to raco or some
+# TODO: such thing?
+# main.scrbl: defs.rkt bib.rkt abstract.scrbl intro.scrbl example.scrbl design.scrbl implementation.scrbl beyondscheme.scrbl case-studies.scrbl related.scrbl conclusion.scrbl
+#
+# bib.rkt: bib.bib
+#
+# case-studies.scrbl: study-case.scrbl study-datatype.scrbl study-virtual-call.scrbl
 
 clean:
 	$(RM) paper.pdf
