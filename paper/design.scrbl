@@ -79,7 +79,7 @@ percent-of-total and percent-of-average}
 @;points with similar importance.
 
 To demonstrate profile weights, consider the running example from
-@Figure-ref{if-r-eg}.
+@Figure-ref{sample-macro}.
 Suppose in the first data set, @racket[(flag email 'important)] runs 5
 times and @racket[(flag email 'spam)] runs 10 times.
 In the second data set, @racket[(flag email 'important)] runs 100 times

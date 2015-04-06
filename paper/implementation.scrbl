@@ -86,7 +86,7 @@ However, since meta-programs may generate different source code after
 optimization, the low-level representation will change when
 meta-programs perform optimizations.
 We describe a workflow for using both source-level and basic block-level
-PGOs via the running example from @Figure-ref{if-r-eg}.
+PGOs via the running example from @Figure-ref{sample-macro}.
 
 This workflow requires compiling the code three times in a specific
 order, to ensure profile information remains consistent at both the
@@ -97,7 +97,7 @@ as in @Figure-ref{profile-weight-comps}.
 Second, we recompile, using those profile weights to perform
 profile-guided meta-program optimizations, while instrumenting
 the code to profile basic blocks.
-The generated source code, @Figure-ref{if-r-eg}, will remain stable as
+The generated source code, @Figure-ref{sample-macro}, will remain stable as
 long as we continue to optimize using the source profile weights.
 Because the generated source code remains stable, so do the generated basic
 blocks.
