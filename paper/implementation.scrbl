@@ -7,13 +7,12 @@
   scriblib/figure)
 
 @title[#:tag "implementation" "Implementations"]
-In this section we describe the implementations of our approach in Chez
-Scheme and in Racket, and discuss compile-time and profiling overhead.
+To validate the design principles from @Secref{design}, we need at
+least two implementations.
+This section describes implementations in Chez Scheme and Racket.
+While both languages belong to the Lisp family, they differ in their
+meta-programming and profiling facilities.
 
-@todo{Integrate this:
-Our Chez Scheme implementation uses standard and efficient
-block-level profiling techniques@~citea["ball1994optimally"
-"burger1998infrastructure"].}
 @section[#:tag "impl-chez"]{Chez Scheme Implementation}
 Chez Scheme implements profile points using @emph{source
 objects}@~cite[dybvig93].
@@ -22,34 +21,37 @@ character positions.
 Source objects uniquely identify source expressions, providing
 fine-grained profile information.
 The Chez Scheme reader automatically creates and attaches them to each
-syntax object it reads from a file. The Chez system uses them to
-report errors at their precise source location.
+syntax object it reads from a file.
+Chez Scheme uses source objects to report errors at their precise source
+location.
 
 Chez Scheme provides an API to programmatically manipulate source
 objects and attach them to syntax objects@~cite[csug-ch11].
 This API is used to implement @racket[make-profile-point] and
 @racket[annotate-expr].
-We implement @racket[make-profile-point] to deterministically generating
-fresh source objects by adding a suffix to the filename of a base source
-object.
-This has the added benefit of preserving source locations for error
-messages when errors occur in the output of a profile-guided
+The former deterministically generates fresh source objects by adding a
+suffix to the filename of a base source object.
+This scheme has the added benefit of preserving source locations for
+error messages when errors occur in the output of a profile-guided
 optimization.
-The runtime system maintains an associative map of source
-objects to profile weights, which is used to implement
-@racket[profile-query].
-This associative map is updated via @racket[load-profile-info] and saved
-to disk via @racket[store-profile-info].
+The meta-programming system maintains an associative map of source
+objects to profile weights, which implements
+@racket[(current-profile-information)].
+The function @racket[profile-query] simply queries this map.
+This associative map is updated via @racket[load-profile] and saved
+to disk via @racket[store-profile].
 
-Chez Scheme implements precise counter-based profiling.
+Chez Scheme implements precise counter-based profiling, using standard
+and efficient block-level profiling
+techniques@~citea["ball1994optimally" "burger1998infrastructure"].
 Adding a profile point for every single source expression requires care
 to instrument correctly and efficiently.
 As optimizations duplicate or throw out expressions, profile points
-must not be duplicated or lost.
+must not be duplicated or dropped.
 
-To ensure profile points are not duplicated, lost, or otherwise
-misplaced, Chez Scheme makes profile points explicit in the intermediate
-languages by generating an expression @racket[(profile e)], where
+To ensure profile points are not duplicated or dropped, Chez Scheme
+makes profile points explicit in the intermediate languages by
+generating an expression @racket[(profile e)], where
 @racket[e] is a source object.
 Chez Scheme considers these @racket[profile] expressions to be effectful, like
 an assignment to an external variable, and never duplicates or removes
@@ -57,15 +59,14 @@ them.
 Even if the original expression associated with the @racket[profile]
 form is duplicated or removed, the @racket[profile] form itself is
 preserved separately.
-This ensures profile points are not conflated or lost during
+This ensures profile points are not conflated or dropped during
 compilation.
 
 Chez Scheme preserves @racket[profile] expressions until it generates
 basic blocks.
 While generating basic blocks, all the profile points from
 @racket[profile] expressions are attached to the basic block in which
-they appear.
-@note{Chez Scheme reuses this infrastructure to profile basic blocks by
+they appear.@note{Chez Scheme reuses this infrastructure to profile basic blocks by
 generating a new profile point for each basic block.}
 Chez Scheme generates at most one counter per block, and fewer in
 practice, providing efficient, precise counter-based
@@ -83,13 +84,11 @@ One goal of our approach is to avoid interfering with
 traditional, e.g., basic block-level PGO, which Chez Scheme also
 supports.
 However, since meta-programs may generate different source code after
-optimization, the low-level representation will change when
+optimization, the low-level representation would have to change when
 meta-programs perform optimizations.
-We describe a workflow for using both source-level and basic block-level
-PGOs via the running example from @Figure-ref{sample-macro}.
-
-This workflow requires compiling the code three times in a specific
-order, to ensure profile information remains consistent at both the
+To solve this problem, the source code is compiled three times in a
+specific order.
+Doing so ensure profile information remains consistent at both the
 source-level and the block-level.
 First, we compile while instrumenting the code to profile source expressions.
 After running the instrumented program on representative inputs, we get the profile weights
@@ -154,4 +153,4 @@ Scheme profiler@~citea{burger1998infrastructure}.
 According to the @racketmodname[errortrace] documentation, profiling
 introduces a factor of 4 to 12 slowdown.
 Typically, profiling is disabled for production runs of a program, so
-this overhead affects only for profiled runs during development.
+this overhead affects only for profiled runs.
