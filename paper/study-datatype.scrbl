@@ -6,27 +6,24 @@
    scriblib/figure)
 
 @title[#:tag "study-datatype"]{Data Structure Specialization}
-In this case study we show that our approach is general enough to implement
+In this final case study, we show that our approach is expressive enough
+to implement and improve upon state-of-the-art profile-guided
 tools such as Perflint@~citea{liu09}, which provides high-level
 recommendations for changes in data structures and algorithms that may
 result in asymptotic improvements.
-We then go beyond recommendation and provide the programmer with a
-library that automatically specializes each instance of a data structure
-according to profile information.
-
-We provide implementations of lists and vectors that warn the programmer
-when a different representation may lead to asymptotic performance
-gains.
-The implementations provide wrappers around the standard list and vector
-functions. These wrapper use generated profile point to separately
-profile each instance of the data structures.
-Finally, we provide an implementation of a sequence datatype that will
-automatically specialize to a list or vector based on profiling
-information.
+We describe implementations of list and vector libraries that warn the
+programmer when a different representation may lead to asymptotic
+performance gains.
+The new libraries wrap the standard list and vector functions.
+These wrapper use generated profile point to separately profile each
+instance of the data structures.
+Finally, we develop a sequence datatype that will automatically
+specialize to a list or vector based on profiling information.
 As this is done via a library, programmers can easily opt-in to such
 automated high-level changes without many changes to their code.
-The full implementation of the list library is 80-line,
-the vector library is 88-line, and the sequence library is 111-line.
+The full implementation of the list library is 80 lines long,
+the vector library is 88 lines long, and the sequence library is 111
+lines long.
 @figure**["profile-list" (elem "Implementation of profiled " @racket[list])
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
@@ -84,11 +81,11 @@ Perflint.
 
 Our approach enables us to go beyond just providing recommendations.
 Because our meta-programs are integrated into the language, rather than
-existing as a separate tool outside the language, we can easily provide
-libraries that automatically follows these recommendations rather than
-asking programmers to change their code.
-To demonstrate this, we implement a profiled sequence datatype that will
-automatically specialize each instance to a list or vector, at
+separate tools outside the language, we can easily provide libraries
+that automatically follow these recommendations rather than asking
+programmers to change their code.
+To demonstrate this point, we implement a profiled sequence datatype
+that will automatically specialize each instance to a list or vector, at
 compile-time, based on profile information.
 
 @Figure-ref{profile-seq} shows the implementation of the profiled
@@ -118,8 +115,3 @@ using a list @emph{or} vector, depending on the profile information.
                 ...
                 ht)
             (#,(if list>=vector #'list #'vector) init* ...)))])))]
-
-This case study demonstrates that our approach is general enough to
-implement tools and optimizations that lead to asymptotic
-improvements to source code, and powerful enough to improve upon
-state-of-the-art profile-guided tools.

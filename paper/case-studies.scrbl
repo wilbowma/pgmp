@@ -5,19 +5,18 @@
    scribble/manual)
 
 @title[#:tag "case-studies"]{Case Studies}
-In this section we evaluate the generality of our approach by
-implementing existing PGOs and profile-guided meta-programs in the
-Racket implementation of our approach.
-First we demonstrate optimizing Scheme's @racket[case], a
-multi-way branching construct similar to C's @code{switch}, as a
-meta-program.
-Then we implement profile-guided receiver class
-prediction@~citea["holzle1994optimizing" "grove95"] for an
-object system implemented as a syntax extension.
-Finally we implement a sequence datatype that specializes each
-instance to a @racket[list] or @racket[vector], based on
-profiling information, automating the recommendations performed by tools
-like Perflint@~citea{liu09}.
+@todo{Is "expressive" the right word? I think so. I'm talking about what
+kinds of of PGOs our design can express.}
+To evaluate the expressive power and usability of our design, we carry
+out three case studies.
+In the first study, we demonstrate an implementation of @racket[case]
+expressions, which are analogous to C's @code{switch} statements, that
+performs a well-known PGO.
+In the second study, we equip an embedded object system with profile-guided receiver
+class prediction@~citea["holzle1994optimizing" "grove95"].
+In the the third and final study, we present libraries that recommend
+and automate high-level changes to data structures, similar to the
+recommendations given by tools like Perflint@~citea{liu09}.
 
 @include-section{study-case.scrbl}
 @include-section{study-virtual-call.scrbl}
