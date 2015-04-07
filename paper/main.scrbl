@@ -16,6 +16,11 @@
   "swaham@vmware.com")
 @(authorinfo "Vincent St-Amour"  "Northeastern University" "stamourv@ccs.neu.edu")
 @(authorinfo "R. Kent Dybvig"  "Cisco Systems, Inc" "dyb@cisco.com")
+
+@(conferenceinfo "PLDI '15" "June 13--17, 2015, Portland, OR, USA")
+@(copyrightyear "2015")
+@(copyrightdata "978-1-4503-3468-6/15/06")
+@;@(doi )
 @include-abstract{abstract.scrbl}
 @include-section{intro.scrbl}
 @include-section{example.scrbl}
