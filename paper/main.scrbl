@@ -1,4 +1,4 @@
-#lang scribble/sigplan @preprint
+#lang scribble/sigplan
 @(require scriblib/footnote)
 @(require "defs.rkt" "bib.rkt")
 
@@ -20,7 +20,7 @@
 @(conferenceinfo "PLDI '15" "June 13--17, 2015, Portland, OR, USA")
 @(copyrightyear "2015")
 @(copyrightdata "978-1-4503-3468-6/15/06")
-@;@(doi )
+@(doi "10.1145/2737924.2737990")
 @include-abstract{abstract.scrbl}
 @include-section{intro.scrbl}
 @include-section{example.scrbl}
