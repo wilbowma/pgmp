@@ -11,7 +11,8 @@ languages.
 Each of these can take advantage of PGO to optimize before information
 is lost or constraints are imposed.
 Until now, such optimizations have been implemented via tools designed
-for a specific meta-program or optimization.
-We have described a general mechanism for implementing arbitrary
-profile-guided meta-programs, and evaluated its use by implementing
-several profile-guided meta-programs in a single @nonbreaking{general-purpose system.}
+for a specific meta-program or a specific optimization.
+We described how to build a general mechanism for implementing arbitrary
+profile-guided meta-programs.
+We also demonstrated the expressivity of this design by by using it to
+implement several examples of profile-guided meta-programs.
