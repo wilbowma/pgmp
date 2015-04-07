@@ -33,7 +33,7 @@ meta-programs.
 Meta-programs are programs that operate on programs.
 Languages with general-purpose meta-programming systems include C, C++,
 Java@~citea{erdweg11}, ML@~citea{taha00}, OCaml@~citea{bermetaocaml},
-Racket@~cite[plt-tr1], Scheme@~cite[dybvig93],
+Racket@~cite[plt-tr1], Scheme@~citea{dybvig93},
 Scala@~citea{burmako2013scala}, and Template
 Haskell@~citea{sheard2002template}.
 Meta-programming is used to implement high-level yet efficient abstractions.

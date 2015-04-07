@@ -22,32 +22,6 @@
                  #:degree "Master")
     #:date 2002))
 
-(define dybvig93
-  (make-bib
-    #:title "Syntactic Abstraction in Scheme"
-    #:author (authors "R. Kent Dybvig"
-                       "Robert Hieb"
-                       "Carl Bruggeman")
-    #:location (journal-location
-                 "Lisp and Symbolic Computation"
-                 #:pages '(295 326)
-                 #:number 4
-                 #:volume 5)
-    #:date 1993
-    #:url "http://pdf.aminer.org/001/006/789/syntactic_abstraction_in_scheme.pdf"))
-
-(define felleisen04
-  (make-bib
-    #:title "Building Little Languages with Macros."
-    #:author (authors "Matthias Felleisen" "R. Findler" "Matthew Flatt"
-                      "Shriram Krishnamurthi")
-    #:location (journal-location
-                 "Dr. Dobb's Journal"
-                 #:pages '(45 49)
-                 #:number 4)
-    #:date 2004
-    #:url "http://fortissimo.unice.fr/twiki/pub/Minfo03/DrK/Building.pdf"))
-
 (define boost
   (make-bib
     #:title "Boost C++ Libraries"
@@ -85,4 +59,4 @@
             #:date 2004
             #:location (techrpt-location #:institution "EPFL Lausanne"
                                          #:number "IC/2004/64")
-            #:url "http://lampwww.epfl.ch/~odersky/papers/ScalaOverview.html"))
+            #:url "http://infoscience.epfl.ch/record/52656?ln=en"))

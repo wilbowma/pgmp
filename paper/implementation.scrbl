@@ -15,7 +15,7 @@ meta-programming and profiling facilities.
 
 @section[#:tag "impl-chez"]{Chez Scheme Implementation}
 Chez Scheme implements profile points using @emph{source
-objects}@~cite[dybvig93].
+objects}@~citea{dybvig93}.
 Chez Scheme source objects contain a filename and starting and ending
 character positions.
 Source objects uniquely identify source expressions, providing
