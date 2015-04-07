@@ -40,70 +40,12 @@ The function @racket[profile-query] simply queries this map.
 The function @racket[load-profile] updates this map and the function
 @racket[store-profile] stores it to a file.
 
+Despite seperately profiling every source expression, the Chez Scheme
+profiler generates at most one counter per block, and fewer in
+practice.
 Chez Scheme implements precise counter-based profiling, using standard
 and efficient block-level profiling
 techniques@~citea["ball1994optimally" "burger1998infrastructure"].
-Adding a profile point for every single source expression requires care
-to instrument correctly and efficiently.
-As optimizations duplicate or throw out expressions, profile points
-must not be duplicated or dropped.
-
-To ensure profile points are not duplicated or dropped, Chez Scheme
-makes profile points explicit in the intermediate languages by
-generating an expression @racket[(profile e)], where
-@racket[e] is a source object.
-Chez Scheme considers these @racket[profile] expressions to be effectful, like
-an assignment to an external variable, and never duplicates or removes
-them.
-Even if the original expression associated with the @racket[profile]
-form is duplicated or removed, the @racket[profile] form itself is
-preserved separately.
-This ensures profile points are not conflated or dropped during
-compilation.
-
-Chez Scheme preserves @racket[profile] expressions until it generates
-basic blocks.
-While generating basic blocks, all the profile points from
-@racket[profile] expressions are attached to the basic block in which
-they appear.@note{Chez Scheme reuses this infrastructure to profile basic blocks by
-generating a new profile point for each basic block.}
-Chez Scheme generates at most one counter per block, and fewer in
-practice, providing efficient, precise counter-based
-profiling@~citea{burger1998infrastructure}.
-
-@;We reuse the source profiling infrastructure to instrumenting
-@;block-level profiling.
-@;Recall that we can generate new source objects.  When generating basic
-@;blocks, we attach a newly generated source objects for that block.
-@;The source objects need to be generated deterministically to remain
-@;stable across different runs.
-
-@subsection{Source and Block-level PGO}
-One goal of our approach is to avoid interfering with
-traditional, e.g., basic block-level PGO, which Chez Scheme also
-supports.
-However, since meta-programs may generate different source code after
-optimization, the low-level representation would have to change when
-meta-programs perform optimizations.
-To solve this problem, the source code is compiled three times in a
-specific order.
-Doing so ensure profile information remains consistent at both the
-source-level and the block-level.
-First, we compile while instrumenting the code to profile source expressions.
-After running the instrumented program on representative inputs, we get the profile weights
-as in @Figure-ref{profile-weight-comps}.
-Second, we recompile, using those profile weights to perform
-profile-guided meta-program optimizations, while instrumenting
-the code to profile basic blocks.
-The generated source code, @Figure-ref{sample-macro}, will remain stable as
-long as we continue to optimize using the source profile weights.
-Because the generated source code remains stable, so do the generated basic
-blocks.
-After running the instrumented program, we get the profile weights for
-the basic blocks generated from the optimized source program.
-Third, we recompile using both the profile weights for the source
-expressions and for the basic blocks to do both profile-guided
-meta-programming and low-level PGOs.
 
 @section[#:tag "impl-racket"]{Racket implementation}
 In Racket, we implement profile points in essentially the same way as in
@@ -144,6 +86,32 @@ The @racketmodname[errortrace] profiler only profiles function calls.
 To correctly implement the @racket[annotate-expr] function, our Racket
 implementation wraps any annotated expression in a dummy function call
 when profiling.
+
+@section{Source and Block-level PGO}
+One goal of our approach is to avoid interfering with traditional, e.g.,
+basic block-level PGO, which Chez Scheme also supports.
+However, since meta-programs may generate different source code after
+optimization, the low-level representation would have to change when
+meta-programs perform optimizations.
+To solve this problem, the source code is compiled three times in a
+specific order.
+Doing so ensure profile information remains consistent at both the
+source-level and the block-level.
+First, we compile while instrumenting the code to profile source expressions.
+After running the instrumented program on representative inputs, we get the profile weights
+as in @Figure-ref{profile-weight-comps}.
+Second, we recompile, using those profile weights to perform
+profile-guided meta-program optimizations, while instrumenting
+the code to profile basic blocks.
+The generated source code, @Figure-ref{sample-macro}, will remain stable as
+long as we continue to optimize using the source profile weights.
+Because the generated source code remains stable, so do the generated basic
+blocks.
+After running the instrumented program, we get the profile weights for
+the basic blocks generated from the optimized source program.
+Third, we recompile using both the profile weights for the source
+expressions and for the basic blocks to do both profile-guided
+meta-programming and low-level PGOs.
 
 @section[#:tag "impl-overhead"]{Compile-time and Profiling Overhead}
 As with any technique for performing profile-guided optimizations, our
