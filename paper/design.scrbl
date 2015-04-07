@@ -17,13 +17,13 @@ simplicity our explanations refer to counter-based profile information.
 
 @section[#:tag "design-source-obj"]{Profile Points}
 As the profiling system may not understand source expressions,
-@emph{profile points} act as an abstraction of source expressions for
-the profiler.
+our design introduces @emph{profile points} as an abstraction of source
+expressions for the profiler.
 Each profile point uniquely identifies a counter.
 Associating a profile point with an expression indicates which counter
 to increment when profiling the expression.
 For instance, if two expressions are associated with the same profile
-point, then they both increment the same profile counter when executed.
+point, then they both increment the same counter when executed.
 Conversely, if two expressions are associated with different profile
 points, then they increment different profile counters when executed.
 The profiling system uses profile points when a program is instrumented
@@ -32,15 +32,16 @@ When the program is not instrumented to collect profile information,
 profile points do not introduce any runtime overhead.
 
 For fine-grained profiling, each input expression and sub-expression can
-have a unique profile point.
+be associated with a unique profile point.
 In the case of our running example, the ASTs for @racket[if],
 @racket[subject-contains], @racket[email], @racket["PLDI"], etc, are each
 associated with separate profile points.
 Note that @racket[flag] and @racket[email] appear multiple times, but
-each occurrence can have a unique profile point.
+each occurrence is associated with separate profile point.
 
-In addition to profile points associated with input expressions,
-meta-programs can also manufacture new profile points.
+A profiler may implicitly insert profile points on certain nodes in the
+AST, but it is also important that meta-programs can manufacture new
+profile points.
 Meta-programmers may want to generate expressions that are profiled
 separately from any other expression in the source program.
 

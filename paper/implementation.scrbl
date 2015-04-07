@@ -14,32 +14,31 @@ While both languages belong to the Lisp family, they differ in their
 meta-programming and profiling facilities.
 
 @section[#:tag "impl-chez"]{Chez Scheme Implementation}
-Chez Scheme implements profile points using @emph{source
-objects}@~citea{dybvig93}.
+In Chez Scheme, we implement profile points using @emph{source
+objects}@~citea{dybvig93} which can be attached to syntax objects.
 Chez Scheme source objects contain a filename and starting and ending
 character positions.
-Source objects uniquely identify source expressions, providing
-fine-grained profile information.
-The Chez Scheme reader automatically creates and attaches them to each
-syntax object it reads from a file.
+The Chez Scheme reader automatically creates and attaches source objects
+to each syntax object it reads from a file.
 Chez Scheme uses source objects to report errors at their precise source
 location.
 
 Chez Scheme provides an API to programmatically manipulate source
 objects and attach them to syntax objects@~cite[csug-ch11].
-This API is used to implement @racket[make-profile-point] and
+We use this API to implement @racket[make-profile-point] and
 @racket[annotate-expr].
 The former deterministically generates fresh source objects by adding a
 suffix to the filename of a base source object.
 This scheme has the added benefit of preserving source locations for
 error messages when errors occur in the output of a profile-guided
 optimization.
-The meta-programming system maintains an associative map of source
-objects to profile weights, which implements
+
+We modify the meta-programming system to maintain an associative map of
+source objects to profile weight, which implements
 @racket[(current-profile-information)].
 The function @racket[profile-query] simply queries this map.
-This associative map is updated via @racket[load-profile] and saved
-to disk via @racket[store-profile].
+The function @racket[load-profile] updates this map and the function
+@racket[store-profile] stores it to a file.
 
 Chez Scheme implements precise counter-based profiling, using standard
 and efficient block-level profiling
@@ -107,29 +106,44 @@ expressions and for the basic blocks to do both profile-guided
 meta-programming and low-level PGOs.
 
 @section[#:tag "impl-racket"]{Racket implementation}
-In Racket, we implement profile points using source information attached
-to each syntax object.
-Racket attaches the filename, line number, etc to every syntax object,
-and provides functions for attaching source information when building
-a new syntax object.
-This source information is similar to source objects in Chez Scheme.
-We implement @racket[make-profile-point] and @racket[annotate-expr] in
-essentially the same way as in Chez Scheme.
+In Racket, we implement profile points in essentially the same way as in
+Chez Scheme---by using source information attached to each syntax
+object.
+The Racket reader automatically attaches the filename, line number, etc
+to every syntax object it reads from a file.
+These source locations are used to report errors at their precise
+location.
+
+Racket provides an API for attaching source information when building a
+new syntax object.
+A separate library exists which provides a more extensive API for
+manipulating source information.
+We use this library to implement @racket[make-profile-point] and
+@racket[annotate-expr] in essentially the same way as in Chez Scheme.
 The only differences result from the different representations of source
 information.
 
-The Racket implementation uses a pre-existing @racketmodname[errortrace]
-Racket profiling library.
-The @racketmodname[errortrace] library provides counter-based profiling, like
-the Chez Scheme profiler.
-As @racketmodname[errortrace] is a library and provides programmatic
-access to the profiler, we do not need to modify the runtime system of
-Racket or the @racketmodname[errortrace] library in order to implement
-the rest of the API.
 We implement a library which maintains the associate map from source
-location to profile weight, and provide @racket[profile-query],
-@racket[store-profile-info], and @racket[load-profile-info] as
-simple Racket functions that can be called by meta-programs.
+locations to profile weight, and provide @racket[profile-query],
+@racket[store-profile], and @racket[load-profile] as simple Racket
+functions that can be called by meta-programs.
+We are able to implement all this as user-level a library due to
+Racket's advanced meta-programming facilities and the extensive API
+provided by an existing Racket profiler.
+
+Racket includes a pre-existing @racketmodname[errortrace] profiling
+library.
+The @racketmodname[errortrace] library provides counter-based profiling,
+similar to the Chez Scheme profiler.
+As @racketmodname[errortrace] is a library and provides programmatic
+access to the profiler, we do not need to modify the meta-programming
+system of Racket or the @racketmodname[errortrace] library in order to
+implement our design.
+
+The @racketmodname[errortrace] profiler only profiles function calls.
+To correctly implement the @racket[annotate-expr] function, our Racket
+implementation wraps any annotated expression in a dummy function call
+when profiling.
 
 @section[#:tag "impl-overhead"]{Compile-time and Profiling Overhead}
 As with any technique for performing profile-guided optimizations, our
