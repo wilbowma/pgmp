@@ -5,10 +5,11 @@
   scribble/manual)
 
 @title[#:tag "impl-other"]{Beyond Scheme and Racket}
-Our design should work in most meta-programming system.
+Our design should work in most meta-programming systems.
 Languages such as Template Haskell@~citea{sheard2002template},
-MetaML@~citea{taha00}, and Scala@~cite[scala-overview-tech-report]
-feature powerful meta-programming facilities.
+MetaOCaml@~citea{bermetaocaml}, and
+Scala@~cite[scala-overview-tech-report] feature powerful
+meta-programming facilities.
 They allow executing expressive programs at compile-time, support direct
 access to input expressions, and provide templating systems for
 manipulating expressions.
