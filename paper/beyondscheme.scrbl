@@ -60,7 +60,7 @@ outside of the language.
 @section{Scala}
 Scala features powerful general-purpose
 meta-programming@~citea{burmako2013scala}, multi-stage
-programming@~citea{rompf:2012:LMS}, and various reflection libraries.
+programming@~citea{rompf10}, and various reflection libraries.
 
 Existing profilers for Scala work at the level of the JVM.
 JVM bytecode retains much source information.
