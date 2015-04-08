@@ -1,12 +1,15 @@
 SCRIBBLE=scribble
 RM=rm
 
-.PHONY: all clean
+.PHONY: all clean spell
 
 all: paper.pdf
 
 paper.pdf: smaller.tex main.scrbl defs.rkt bib.rkt abstract.scrbl intro.scrbl example.scrbl design.scrbl implementation.scrbl beyondscheme.scrbl case-studies.scrbl related.scrbl conclusion.scrbl bib.bib study-case.scrbl study-datatype.scrbl study-virtual-call.scrbl
 	$(SCRIBBLE) ++style smaller.tex --dest-name paper.pdf --pdf main.scrbl
+
+spell:
+	for i in *.scrbl; do aspell -c $i; done
 
 # TODO: Relearn how to makefile. Or maybe make switch to raco or some
 # TODO: such thing?
