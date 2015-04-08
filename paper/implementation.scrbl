@@ -7,8 +7,8 @@
   scriblib/figure)
 
 @title[#:tag "implementation" "Implementations"]
-To validate the design principles from @Secref{design}, we need at
-least two implementations.
+To validate the design principles from @Secref{design}, we provide two
+implementations.
 This section describes implementations in Chez Scheme and Racket.
 While both languages belong to the Lisp family, they differ in their
 meta-programming and profiling facilities.
@@ -17,10 +17,10 @@ meta-programming and profiling facilities.
 Chez Scheme implements precise counter-based profiling, using standard
 and efficient block-level profiling
 techniques@~citea["ball1994optimally" "burger1998infrastructure"].
-The Chez Scheme profiler seperately profiling every source expression,
+The Chez Scheme profiler separately profiles every source expression,
 and provides profiles in terms of source code locations.
 
-In Chez Scheme, We implement profile points using @emph{source
+In Chez Scheme, we implement profile points using @emph{source
 objects}@~citea{dybvig93} which can be attached to syntax objects.
 Chez Scheme source objects contain a filename and starting and ending
 character positions.
@@ -51,8 +51,8 @@ Racket includes an @racketmodname[errortrace] profiling library.
 The @racketmodname[errortrace] library provides counter-based profiling
 and returns profiles in terms of source code locations, similar to the
 Chez Scheme profiler.
-However, the @racketmodname[errortrace] library only profiles function
-calls.
+Note that in contrast to the Chez Scheme profiler, the
+@racketmodname[errortrace] library only profiles function calls.
 
 In Racket, we implement profile points in essentially the same way as in
 Chez Scheme---by using source information attached to each syntax
@@ -75,6 +75,9 @@ we generate a new function @racket[f] whose body is @racket[e].
 The result of @racket[annotate-expr] is a call to the generated function
 @racket[f].
 This call to @racket[f] is annotated with the profile point @racket[p].
+While this results in difference performance characteristics while
+profiling, it does not change the counters used to calculate profile
+weights.
 
 We implement a library which maintains the associative map from source
 locations to profile weight.
@@ -91,19 +94,19 @@ However, since meta-programs may generate different source code after
 optimization, the low-level representation would have to change when
 meta-programs perform optimizations.
 To solve this problem, the source code is compiled three times in a
-specific order.
+specific order, instead of the usual two times.
 Doing so ensure profile information remains consistent at both the
 source-level and the block-level.
 First, we compile while instrumenting the code to profile source expressions.
-After running the instrumented program on representative inputs, we get the profile weights
-as in @Figure-ref{profile-weight-comps}.
+After running the instrumented program on representative inputs, we get
+the profile weights as in @Figure-ref{profile-weight-comps}.
 Second, we recompile, using those profile weights to perform
 profile-guided meta-program optimizations, while instrumenting
 the code to profile basic blocks.
-The generated source code, @Figure-ref{sample-macro}, will remain stable as
-long as we continue to optimize using the source profile weights.
-Because the generated source code remains stable, so do the generated basic
-blocks.
+The generated source code, @Figure-ref{sample-macro}, will remain stable
+as long as we continue to optimize using the source profile weights.
+Because the generated source code remains stable, so do the generated
+basic blocks.
 After running the instrumented program, we get the profile weights for
 the basic blocks generated from the optimized source program.
 Third, we recompile using both the profile weights for the source
@@ -125,8 +128,8 @@ Profile-guided meta-programs may also slow down (or speed up)
 compilation, as they run at compile-time.
 The slowdown will depend on the complexity of the meta-program.
 
-Profiling overhead is inherited by the profiler used by the
-implementation of our technique.
+A meta-programming system using our technique inherits overhead from the
+profiler used in the implementation.
 Previous work measured about 9% runtime overhead introduced by the Chez
 Scheme profiler@~citea{burger1998infrastructure}.
 According to the @racketmodname[errortrace] documentation, profiling

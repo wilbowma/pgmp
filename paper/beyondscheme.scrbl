@@ -63,8 +63,7 @@ meta-programming@~citea{burmako2013scala}, multi-stage
 programming@~citea{rompf10}, and various reflection libraries.
 
 Existing profilers for Scala work at the level of the JVM.
-JVM bytecode retains much source information.
-Therefore, it should be possible to map the profiling information at the
+However, it should be possible to map the profiling information at the
 JVM level back to Scala source code.
 With such a mapping, a Scala implementation of our API should be similar
 to the implementation sketches for Haskell and MetaOCaml.

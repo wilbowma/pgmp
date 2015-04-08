@@ -74,7 +74,8 @@ additional 87 lines long.
            ;; Fall back to dynamic dispatch
            [else (dynamic-dispatch x m val* ...)]))])))]
 
-@Figure-ref{method-call-example} shows an example method call, the
+@Figure-ref{method-call-example} shows an example code snippet using
+this object system. @Figure-ref{method-call-output} demonstrates the
 resulting code after instrumentation, and the resulting code after
 optimization.
 Note that each occurrence of @racket[(instrumented-dispatch x area)]
@@ -97,9 +98,13 @@ has a different profile point, so each occurrence is @nonbreaking{profiled separ
 ....
 (for/list ([s (list cir1 cir2 cir3 sqr1)])
   (method s area))
+)]
 
+@figure["method-call-output" "Generated code from @figure-ref{method-call-example}"
+@#reader scribble/comment-reader #:escape-id UNSYNTAX
+(RACKETBLOCK0
 ;; ---------------------------
-;; After instrumentation
+;; Generated code after instrumentation
 ....
 (for/list ([s (list cir1 cir2 cir3 sqr1)])
   (let* ([x s])
@@ -113,7 +118,7 @@ has a different profile point, so each occurrence is @nonbreaking{profiled separ
       [else (dynamic-dispatch x area)])))
 
 ;; ---------------------------
-;; After optimization
+;; Generated code after optimization
 ....
 (for/list ([s (list cir1 cir2 cir3 sqr1)])
   (let* ([x s])

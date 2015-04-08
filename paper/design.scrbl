@@ -20,6 +20,7 @@ As the profiling system may not understand source expressions,
 our design introduces @emph{profile points} as an abstraction of source
 expressions for the profiler.
 Each profile point uniquely identifies a counter.
+Any expression can be associated with at most one profile point.
 Associating a profile point with an expression indicates which counter
 to increment when profiling the expression.
 For instance, if two expressions are associated with the same profile
@@ -29,7 +30,7 @@ points, then they increment different profile counters when executed.
 The profiling system uses profile points when a program is instrumented
 to collect profile information.
 When the program is not instrumented to collect profile information,
-profile points do not introduce any runtime overhead.
+profile points need not introduce any runtime overhead.
 
 For fine-grained profiling, each input expression and sub-expression can
 be associated with a unique profile point.
@@ -56,40 +57,12 @@ However, absolute profile information is incomparable across different
 data sets.
 Instead, our design considers @emph{profile weights}.
 The profile weight is represented as a number in the range [0,1].
-The profile weight of a profile point is the ratio of the absolute
-profile count for that profile point to the maximum count of all other
-profile points in the same data set.
-That is, the profile weight for a given profile point is the execution
-count for that point divided by the the execution count of the most
-frequently executed profile point in the data set.
+The profile weight of a profile point is the ratio of the counter for
+that profile point to the counter of the most executed profile point in
+the same data set.
 This provides a single value identifying the relative importance of an
-expression and simplifies the combination of multiple profile data sets.
-@todo{Still want to say something about percent-of-max vs
-percent-of-total and percent-of-average}
-@;This percent-of-max value has advantages over percent-of-total and
-@;percent-of-average. For example, the ratio of individual counts
-@;to the total number of counts is distorted when there are a few heavily
-@;executed expressions
-
-@;We also considered using ratios of individual counts to total or
-@;average counts.
-@;In both cases, the results are distorted when there are a few heavily
-@;executed expressions, potentially leading to difficulty distinguishing
-@;profile weights for two less frequently executed expressions.
-@;We also considered using fixed-precision rather than floating point,
-@;but the floating-point representation makes it easy to determine
-@;the importance of a particular expression overall while still
-@;providing substantial precision when comparing the counts for source
-@;points with similar importance.
-
-To demonstrate profile weights, consider the running example from
-@Figure-ref{sample-macro}.
-Suppose in the first data set, @racket[(flag email 'important)] runs 5
-times and @racket[(flag email 'spam)] runs 10 times.
-In the second data set, @racket[(flag email 'important)] runs 100 times
-and @racket[(flag email 'spam)] run 10 times.
-@Figure-ref{profile-weight-comps} shows the profile weights computed
-after each data set.
+expression and simplifies the combination of multiple profile
+@nonbreaking{data sets}.
 @figure-here["profile-weight-comps" "Sample profile weight computations"
 @#reader scribble/comment-reader
 @codeblock0|{
@@ -101,6 +74,16 @@ after each data set.
 (flag email 'important)→ (.5 + 100/100)/2 ;; 0.75
 (flag email 'spam)     → (1 + 10/100)/2   ;; 0.55
 }|]
+
+
+To demonstrate profile weights, consider the running example from
+@Figure-ref{sample-macro}.
+Suppose in the first data set, @racket[(flag email 'important)] runs 5
+times and @racket[(flag email 'spam)] runs 10 times.
+In the second data set, @racket[(flag email 'important)] runs 100 times
+and @racket[(flag email 'spam)] run 10 times.
+@Figure-ref{profile-weight-comps} shows the profile weights computed
+after each data set.
 
 @section[#:tag "design-api-sketch"]{API}
 This section presents an example of an API provided by a
@@ -115,7 +98,7 @@ profile expressions that are associated with profile points.
 The API is only concerned with providing meta-programs with access
 to that profile information and the ability to manipulate profile points.
 @todo{I would rather the documentation not be centered.}
-@figure-here["api-sketch" "API Sketch"
+@figure["api-sketch" "API Sketch"
 @#reader scribble/comment-reader
 @(racketblock0
 type ProfilePoint

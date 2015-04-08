@@ -1,8 +1,8 @@
 #lang scribble/base
 @(require "defs.rkt")
-Modern compilers such as GCC, .NET, and LLVM incorporate profile-guided
-optimizations (PGOs) on low-level intermediate code and basic blocks,
-with impressive results over purely static heuristics.
+Modern compilers systems such as GCC, .NET, and LLVM incorporate
+profile-guided optimizations (PGOs) on low-level intermediate code and
+basic blocks, with impressive results over purely static heuristics.
 Recent work shows that profile information is also useful for performing
 source-to-source optimizations via meta-programming.
 For example, using profiling information to inform decisions about data

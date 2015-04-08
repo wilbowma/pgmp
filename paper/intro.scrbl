@@ -6,24 +6,24 @@
 
 @title[#:tag "intro" "Introduction"]
 @; What is profile-guided optimization?
-Profile-guided optimization (PGO) is an optimization technique in which a
-compiler uses profile information gathered at runtime to improve the
+Profile-guided optimization (PGO) is an optimization technique in which
+a compiler uses profile information gathered at runtime to improve the
 performance of the generated code.
 The profile information acts as an oracle for runtime behavior.
 For example, a profiler might gather information about how many times
 each function in a program is called to inform decisions about function
 inlining.
-Profile information is used to guide decisions about reordering
+Compilers use profile information to guide decisions about reordering
 basic blocks, function inlining, reordering conditional branches, and
 function layout in memory@~citea{gupta02}.
+Modern compilers systems that support PGO include .NET, GCC, and
+LLVM@~cite[lattner02].
 Code generated using PGOs usually exhibits improved performance, at least on
 the represented class of inputs, compared to code generated with static
 optimization heuristics.
 For example, @citeta{Arnold:2000} show that using profiling information
 to guide inlining decisions in Java resulted in up to 59% improvement
 over static heuristics.
-Modern compilers that support PGO include .NET, GCC, and
-LLVM@~cite[lattner02].
 @todo{Not sure if I should cite .net and gcc documentation or not.}
 
 @; Introduce profile-guided meta-programming.

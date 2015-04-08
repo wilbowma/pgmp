@@ -28,7 +28,7 @@ profiler features special support for @code{switch} statements called
 The .NET compilers use value probes optimize @code{switch} statement
 common values, similar to our optimization of @racket[case] expressions
 in @Secref{study-case}.
-Our design can express this optimization via the same profiler machinary
+Our design can express this optimization via the same profiler machinery
 used in our other case studies.
 
 LLVM takes a different approach to PGO.

@@ -9,6 +9,8 @@
 @title[#:tag "example"]{A Running Example}
 We first introduce a syntax extension to familiarize readers with Scheme
 and Racket style meta-programming and to provide a running example.
+This transformation presented is not a meaningful optimization and is
+only used for illustrative purposes.
 @figure-here["sample-macro" "Example syntax extension"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
@@ -78,5 +80,5 @@ When the false branch is executed more frequently than the true branch,
 and swapping the branches.
 Otherwise, @racket[if-r] expands into an @racket[if] expression by
 keeping the original test and branches.
-This transformation is not a meaningful optimization and is only used for
-illustrative purposes.
+While this transformation is not meaningful, it strongly resembles the
+optimization we present in @Secref{study-case}.
