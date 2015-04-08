@@ -113,7 +113,7 @@ Third, we recompile using both the profile weights for the source
 expressions and for the basic blocks to do both profile-guided
 meta-programming and low-level PGOs.
 
-@section[#:tag "impl-overhead"]{Compile-time and Profiling Overhead}
+@section[#:tag "impl-overhead"]{Compile-Time and Profiling Overhead}
 As with any technique for performing profile-guided optimizations, our
 approach introduces compile-time overhead for optimizations and runtime
 overhead when profiling.

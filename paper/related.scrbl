@@ -7,7 +7,7 @@
    scriblib/figure)
 
 @title[#:tag "related" "Related Work"]
-@section{Profile-guided optimizations}
+@section{Profile-Guided Optimizations}
 Modern compiler systems such as GCC, .NET, and LLVM@~cite[lattner02] use
 profile-guided optimizations.
 These systems use profile information to guide decisions about code
@@ -48,7 +48,7 @@ collection.
 @citeta{debray02} compress infrequently executed code based on profile
 information.
 
-@section{Meta-program optimizations}
+@section{Meta-Program Optimizations}
 Meta-programming combines the ability to provide high-levels of
 abstraction while producing efficient code.
 Meta-programming has been widely used to implement high performance
