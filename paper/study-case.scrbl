@@ -106,7 +106,7 @@ The @racket[exclusive-cond] expression also demonstrates an important
 feature of profile-guided meta-programming---meta-programming allows the
 programmer to encode their domain-specific knowledge, e.g., that the
 branches of this conditional are mutually exclusive, in order to take
-advantage of optimizations that would have otherwise been impossible.
+advantage of optimizations that would have otherwise @nonbreaking{been impossible.}
 @figure-here["exclusive-cond" (elem "Implementation of " @racket[exclusive-cond])
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0

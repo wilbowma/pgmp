@@ -62,7 +62,7 @@ that profile point to the counter of the most executed profile point in
 the same data set.
 This provides a single value identifying the relative importance of an
 expression and simplifies the combination of multiple profile
-@nonbreaking{data sets}.
+data sets.
 @figure-here["profile-weight-comps" "Sample profile weight computations"
 @#reader scribble/comment-reader
 @codeblock0|{
@@ -98,7 +98,7 @@ profile expressions that are associated with profile points.
 The API is only concerned with providing meta-programs with access
 to that profile information and the ability to manipulate profile points.
 @todo{I would rather the documentation not be centered.}
-@figure["api-sketch" "API Sketch"
+@figure-here["api-sketch" "API Sketch"
 @#reader scribble/comment-reader
 @(racketblock0
 type ProfilePoint

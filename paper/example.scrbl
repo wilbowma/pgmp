@@ -52,7 +52,7 @@ In @Figure-ref{sample-macro},
 @racket[define-syntax] introduces a new syntax extension @racket[if-r].
 Any uses of @racket[if-r] in the source will be rewritten using the code
 in the body of the extension. The syntax extension can be thought of as
-a function from source expressions to @nonbreaking{source expression}.
+a function from source expressions to @nonbreaking{source expression.}
 
 When used in @Figure-ref{sample-macro}, the syntax extension
 @racket[if-r] receives @nonbreaking{the argument:}
@@ -66,7 +66,7 @@ forms @racketmetafont{#'}, @racketmetafont{#`}, and @racketmetafont{#,}
 provide a templating system for syntax objects,@note{Specifically, these
 forms implement Lisp's quote, quasiquote, and unquote on syntax objects
 instead of lists.} and @racket[syntax-case] performs pattern matching
-on @nonbreaking{syntax objects}.
+on @nonbreaking{syntax objects.}
 
 The syntax extension @racket[if-r] is expanded at compile-time, while
 the resulting @racket[if] expression is run at runtime.

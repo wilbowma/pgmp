@@ -59,8 +59,8 @@ Chez Scheme---by using source information attached to each syntax
 object.
 The Racket reader automatically attaches the filename, line number, etc
 to every syntax object it reads from a file.
-These source locations are used to report errors at their precise
-location.
+These source locations are used to report errors at their 
+@nonbreaking{precise location.}
 
 Racket provides an API for attaching source information when building a
 new syntax object.

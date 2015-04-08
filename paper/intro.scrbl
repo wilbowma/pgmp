@@ -79,4 +79,4 @@ In @Secref{case-studies}, we demonstrate that our design is general
 enough to implement and extend existing PGOs and profile-guided
 meta-programs.
 In @Secref{related}, we relate to existing work on PGOs and
-@nonbreaking{profile-guided meta-programming}.
+profile-guided meta-programming.

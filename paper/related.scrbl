@@ -29,7 +29,7 @@ The .NET compilers use value probes optimize @code{switch} statement
 common values, similar to our optimization of @racket[case] expressions
 in @Secref{study-case}.
 Our design can express this optimization via the same profiler machinery
-used in our other case studies.
+used in our other @nonbreaking{case studies.}
 
 LLVM takes a different approach to PGO.
 LLVM uses a runtime reoptimizer that monitors the running program.
@@ -64,7 +64,7 @@ transformations on Haskell intermediate code before compiling, even
 allowing interactive experimentation@~citea["farmer2012hermit"].
 @citeta["hawkins11" "hawkins12"] implement a compiler for a language
 that generates C++ implementations of data structures based on
-high-level specifications.
+@nonbreaking{high-level specifications.}
 
 Previous work also integrates profiling to guide meta-program
 optimizations.
@@ -73,7 +73,7 @@ profile-guided meta-programming.
 @citeta{vsimunic2000source} optimize source code using energy profiles,
 although the bulk of the optimization requires programmer intervention.
 @citeta{karuri2005fine} optimize ASIP designs with fine-grained source
-profile information.
+@nonbreaking{profile information.}
 
 In contrast, our own work introduces a single general-purpose approach
 in which we can implement new general-purpose languages, domain-specific

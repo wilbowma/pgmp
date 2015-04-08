@@ -75,11 +75,11 @@ additional 87 lines long.
            [else (dynamic-dispatch x m val* ...)]))])))]
 
 @Figure-ref{method-call-example} shows an example code snippet using
-this object system. @Figure-ref{method-call-output} demonstrates the
-resulting code after instrumentation, and the resulting code after
-optimization.
+this object system.
+@Figure-ref{method-call-output} demonstrates the resulting code after
+instrumentation, and the resulting code after optimization.
 Note that each occurrence of @racket[(instrumented-dispatch x area)]
-has a different profile point, so each occurrence is @nonbreaking{profiled separately.}
+has a different profile point, so each occurrence is profiled separately.
 @figure["method-call-example" "Example of profile-guided receiver class prediction"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
@@ -99,8 +99,8 @@ has a different profile point, so each occurrence is @nonbreaking{profiled separ
 (for/list ([s (list cir1 cir2 cir3 sqr1)])
   (method s area))
 )]
-
-@figure["method-call-output" "Generated code from @figure-ref{method-call-example}"
+@figure["method-call-output" (elem "Generated code from "
+@Figure-ref{method-call-example})
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
 ;; ---------------------------
