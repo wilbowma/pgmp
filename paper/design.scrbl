@@ -8,12 +8,13 @@
 
 @title[#:tag "design"]{Design}
 Profile-guided meta-programming requires that the underlying language
-comes with a profiling system, and that the meta-programming system can
+comes with a profiling system and that the meta-programming system can
 access the profile information.
-This section presents the high-level requirements of our design, and
-sketches an API that suffices to provide profile-guided meta-programming.
+This section presents the abstractions introduced by our design, and
+sketches an API that suffices to provide profile-guided
+meta-programming.
 Our design is not specific to a particular profiling technique, but for
-simplicity our explanations refer to counter-based profile information.
+simplicity our explanations refer to counter-based profiling.
 
 @section[#:tag "design-source-obj"]{Profile Points}
 As the profiling system may not understand source expressions,
@@ -30,7 +31,7 @@ points, then they increment different profile counters when executed.
 The profiling system uses profile points when a program is instrumented
 to collect profile information.
 When the program is not instrumented to collect profile information,
-profile points need not introduce any runtime overhead.
+profile points need not introduce any overhead.
 
 For fine-grained profiling, each input expression and sub-expression can
 be associated with a unique profile point.
@@ -38,7 +39,7 @@ In the case of our running example, the ASTs for @racket[if],
 @racket[subject-contains], @racket[email], @racket["PLDI"], etc, are each
 associated with separate profile points.
 Note that @racket[flag] and @racket[email] appear multiple times, but
-each occurrence is associated with separate profile point.
+each occurrence is associated with different profile point.
 
 A profiler may implicitly insert profile points on certain nodes in the
 AST, but it is also important that meta-programs can manufacture new
@@ -50,19 +51,23 @@ Meta-programmers can access profile information by passing a profile
 point, or an object with an associated profile point, to an API call,
 such as the function @racket[profile-query] in our running example.
 
-@section[#:tag "design-profile-weights"]{Profile Information}
-Multiple data sets are important to ensure PGOs can optimize for
-multiple classes of inputs expected in production.
-However, absolute profile information is incomparable across different
-data sets.
-Instead, our design considers @emph{profile weights}.
+@section[#:tag "design-profile-weights"]{Profile Weights}
+Our design introduces @emph{profile weights} as an abstraction of
+the profile information provided by the underlying profiling system.
+Profile weights serve two purposes.
+First, a profile weight provides a single value identifying the relative
+importance a profile point.
 The profile weight is represented as a number in the range [0,1].
 The profile weight of a profile point is the ratio of the counter for
 that profile point to the counter of the most executed profile point in
 the same data set.
-This provides a single value identifying the relative importance of an
-expression and simplifies the combination of multiple profile
+Second, profile weights simplify merging multiple profile data sets.
+Multiple data sets are important to ensure PGOs can optimize for
+multiple classes of inputs expected in production.
+However, absolute profile information is incomparable across different
 data sets.
+On the other hand, merging the profile weights computed from a data set
+is simple.
 @figure-here["profile-weight-comps" "Sample profile weight computations"
 @#reader scribble/comment-reader
 @codeblock0|{
@@ -75,28 +80,25 @@ data sets.
 (flag email 'spam)     → (1 + 10/100)/2   ;; 0.55
 }|]
 
-
-To demonstrate profile weights, consider the running example from
-@Figure-ref{sample-macro}.
+Consider the running example from @Figure-ref{sample-macro}.
 Suppose in the first data set, @racket[(flag email 'important)] runs 5
 times and @racket[(flag email 'spam)] runs 10 times.
 In the second data set, @racket[(flag email 'important)] runs 100 times
 and @racket[(flag email 'spam)] run 10 times.
-@Figure-ref{profile-weight-comps} shows the profile weights computed
-after each data set.
+@Figure-ref{profile-weight-comps} shows the resulting profile weights and
+how to merge the profile weights of these two data sets.
 
 @section[#:tag "design-api-sketch"]{API}
-This section presents an example of an API provided by a
-meta-programming system that implements our design.
-We assume a single object, @racket[(current-profile-information)],
+This section presents an example of an API that implements our design.
+We assume an object, @racket[(current-profile-information)],
 exists in the meta-programming system.
 @Figure-ref{api-sketch} documents the methods of this object.
-The type @racket[SyntaxObject] is provided by the meta-programming
-system.
-This API assumes that the underlying implementation has some way to
+The API assumes that the underlying profiler has some way to
 profile expressions that are associated with profile points.
-The API is only concerned with providing meta-programs with access
-to that profile information and the ability to manipulate profile points.
+The API is only concerned with interfacing meta-programs with the
+profiler.
+The type @racket[SyntaxObject] stands for the type of source expressions
+on which meta-programs operate.
 @todo{I would rather the documentation not be centered.}
 @figure-here["api-sketch" "API Sketch"
 @#reader scribble/comment-reader
