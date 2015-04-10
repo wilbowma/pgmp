@@ -67,9 +67,9 @@ multiple classes of inputs expected in production.
 However, absolute profile information is generally incomparable across different
 data sets.
 On the other hand, merging the profile weights computed from multiple
-data sets is straightforward and essentially results in the computation
-of a weighted average across the data sets.
-@figure-here["profile-weight-comps" "Sample profile weight computations"
+data sets is straightforward---the computation is essentially
+a weighted average across the data sets.
+@figure-here["profile-weight-comps" "Example profile weight computations"
 @#reader scribble/comment-reader
 @codeblock0|{
 ;; After loading data from data set 1
