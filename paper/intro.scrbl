@@ -61,8 +61,6 @@ To demonstrate the generality of our design, we implement it for
 both Racket and Scheme.
 Both implementations reuse existing meta-programming and
 profiling infrastructure.
-@;We also implement this approach in Racket@~cite[plt-tr1] purely as a
-@;library, using pre-existing profiling and meta-programming tools.
 
 The rest of the paper is organized as follows.
 In @Secref{example}, we introduce a running example and
@@ -79,3 +77,8 @@ enough to implement and extend existing PGOs and profile-guided
 meta-programs.
 In @Secref{related}, we relate to existing work on PGOs and
 profile-guided meta-programming.
+
+Our Racket implementation and the implementations of all of the case
+studies in this paper are available at our online
+repository@~citea{bowman:2015online}.
+
