@@ -6,16 +6,16 @@
 @(authorinfo
   (elem
    "William J. Bowman"
-   (titlenote "Author's current affiliation: Northeastern University"))
-  (elem "Northeastern University and " (linebreak) "Cisco Systems, Inc")
+   (titlenote "Author's current affiliation: Northeastern University, USA"))
+  (elem "Northeastern University, USA and " (linebreak) "Cisco Systems, Inc, USA")
   "wjb@williamjbowman.com")
 @(authorinfo
   (elem "Swaha Miller"
-   (titlenote "Author's current affiliation: VMware, Inc"))
-  "Cisco Systems, Inc"
+   (titlenote "Author's current affiliation: VMware, Inc, USA"))
+  "Cisco Systems, Inc, USA"
   "swaham@vmware.com")
-@(authorinfo "Vincent St-Amour"  "Northeastern University" "stamourv@ccs.neu.edu")
-@(authorinfo "R. Kent Dybvig"  "Cisco Systems, Inc" "dyb@cisco.com")
+@(authorinfo "Vincent St-Amour"  "Northeastern University, USA" "stamourv@ccs.neu.edu")
+@(authorinfo "R. Kent Dybvig"  "Cisco Systems, Inc, USA" "dyb@cisco.com")
 
 @(conferenceinfo "PLDI '15" "June 13--17, 2015, Portland, OR, USA")
 @(copyrightyear "2015")
