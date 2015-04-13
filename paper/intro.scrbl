@@ -57,8 +57,8 @@ and profiling tools to implement profile-guided meta-programs.
 
 This paper presents a design for supporting profile-guided meta-programming in
 general-purpose meta-programming systems.
-To demonstrate the generality of our design, we implement it in two
-languages.
+To demonstrate the generality of our design, we implement it for
+both Racket and Scheme.
 Both implementations reuse existing meta-programming and
 profiling infrastructure.
 @;We also implement this approach in Racket@~cite[plt-tr1] purely as a
