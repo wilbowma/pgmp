@@ -21,7 +21,14 @@
 @(copyrightyear "2015")
 @(copyrightdata "978-1-4503-3468-6/15/06")
 @(doi "10.1145/2737924.2737990")
+
 @include-abstract{abstract.scrbl}
+
+@(category "D.3.3" "Programming Languages" "Language Constructs and Features")
+@(category "D.3.4" "Programming Languages" "Processors")
+@(terms "Design, Performance, Languages")
+@(keywords "Optimization, profiling, profile-guided optimization, PGO, meta-programming")
+
 @include-section{intro.scrbl}
 @include-section{example.scrbl}
 @include-section{design.scrbl}
