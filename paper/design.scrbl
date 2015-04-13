@@ -96,7 +96,7 @@ exists in the meta-programming system.
 @Figure-ref{api-sketch} documents the methods of this object.
 The API assumes that the underlying profiler has some way to
 profile expressions that are associated with profile points.
-The API is concerned only with interfacing meta-programs with the
+The API is concerned only with interfacing meta-programs and the
 profiler.
 The type @racket[SyntaxObject] stands for the type of source expressions
 on which meta-programs operate.
@@ -117,8 +117,8 @@ runs.
 @defproc[(annotate-expr [e SyntaxObject] [pp ProfilePoint])
          SyntaxObject]{
 Associates the expression @racket[e] with the profile point @racket[pp].
-The underlying profiling system will increment the counter for
-@racket[pp] anytime @racket[e] is executed.
+The underlying profiling system increments the counter for
+@racket[pp] any time @racket[e] is executed.
 }
 
 @defproc[(profile-query [e SyntaxObject])
