@@ -37,4 +37,4 @@
 @include-section{case-studies.scrbl}
 @include-section{related.scrbl}
 @include-section{conclusion.scrbl}
-@(generate-bibliography)
+@(generate-bibliography #:sec-title "References")
