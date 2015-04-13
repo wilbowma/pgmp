@@ -5,8 +5,8 @@ RM=rm
 
 all: paper.pdf
 
-paper.pdf: smaller.tex main.scrbl defs.rkt bib.rkt abstract.scrbl intro.scrbl example.scrbl design.scrbl implementation.scrbl beyondscheme.scrbl case-studies.scrbl related.scrbl conclusion.scrbl bib.bib study-case.scrbl study-datatype.scrbl study-virtual-call.scrbl
-	$(SCRIBBLE) ++style orphan-widow.tex ++style smaller.tex --dest-name paper.pdf --pdf main.scrbl
+paper.pdf: balancecols.tex orphan-widow.tex smaller.tex main.scrbl defs.rkt bib.rkt abstract.scrbl intro.scrbl example.scrbl design.scrbl implementation.scrbl beyondscheme.scrbl case-studies.scrbl related.scrbl conclusion.scrbl bib.bib study-case.scrbl study-datatype.scrbl study-virtual-call.scrbl
+	$(SCRIBBLE) ++style balancecols.tex ++style orphan-widow.tex ++style smaller.tex --dest-name paper.pdf --pdf main.scrbl
 
 spell:
 	for i in *.scrbl; do aspell -c $i; done
