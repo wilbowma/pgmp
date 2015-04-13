@@ -114,7 +114,7 @@ After running the instrumented program, we get the profile weights for
 the basic blocks generated from the optimized source program.
 Third, we recompile using both the profile weights for the source
 expressions and for the basic blocks to do both profile-guided
-meta-programming and low-level PGOs.
+meta-programming and @nonbreaking{low-level PGOs.}
 
 @section[#:tag "impl-overhead"]{Compile-Time and Profiling Overhead}
 As with any technique for performing profile-guided optimizations, our
@@ -128,7 +128,7 @@ profile point is amortized constant-time.
 Since they run at compile time, a profile-guided meta-program might
 slow down or speed up compilation, depending on the complexity
 of the meta-program and whether it produces more or less code as
-a result of the optimization.
+a result of @nonbreaking{the optimization.}
 
 The API does not directly introduce run-time overhead; however,
 a meta-programming system using our technique inherits overhead from the
