@@ -45,7 +45,7 @@
   (make-bib #:title    "Reference: Racket"
             #:author   (authors "Matthew Flatt" "PLT")
             #:date     "2010"
-            #:location (techrpt-location #:institution "PLT Design Inc."
+            #:location (techrpt-location #:institution "PLT Inc."
                                          #:number "PLT-TR-2010-1")
             #:url      "http://racket-lang.org/tr1/"))
 
