@@ -9,7 +9,8 @@
 @title[#:tag "implementation" "Implementations"]
 To validate the design principles from @Secref{design}, we provide two
 implementations.
-This section describes implementations in Chez Scheme and Racket.
+This section describes implementations in Chez Scheme and Racket and
+discusses some implementation concerns.
 While both languages belong to the Lisp family, they differ in their
 meta-programming and profiling facilities.
 
@@ -75,17 +76,17 @@ we generate a new function @racket[f] whose body is @racket[e].
 The result of @racket[annotate-expr] is a call to the generated function
 @racket[f].
 This call to @racket[f] is annotated with the profile point @racket[p].
-While this results in difference performance characteristics while
+While this results in different performance characteristics while
 profiling, it does not change the counters used to calculate profile
 weights.
 
 We implement a library that maintains the associative map from source
-locations to profile weight.
+locations to profile weights.
 The library provides our API as simple Racket functions that can be
 called by meta-programs.
-We are able to implement the entire API as user-level a library due to
+We are able to implement the entire API as a user-level library due to
 Racket's advanced meta-programming facilities and the extensive API
-provided by the existing Racket profiler.
+provided by the @racketmodname[errortrace] profiler.
 
 @section{Source and Block-level PGO}
 One goal of our approach is to avoid interfering with traditional, e.g.,
@@ -93,6 +94,8 @@ basic-block-level PGO, which Chez Scheme also supports.
 However, since meta-programs may generate different source code after
 optimization, the low-level representation would have to change when
 meta-programs perform optimizations.
+The different low-level code would invalidate the low-level profile
+information.
 To solve this problem, the source code is compiled three times in a
 specific order, instead of the usual two times.
 Doing so ensures profile information remains consistent at both the
