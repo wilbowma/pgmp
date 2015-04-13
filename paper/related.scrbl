@@ -38,10 +38,10 @@ This run-time system can perform simple optimizations on the machine code
 during program execution.
 More complex optimization require running an offline optimizer on the
 LLVM bytecode@~citea{lattner2004llvm}.
-Burger and Dybvig's run-time recompilation mechanism also allows
-simple optimizations to be performed at run time (during garbage
-collection) but does not support source-level profile-guided
-optimizations@~cite[burger98].
+@citeta{burger1998infrastructure} develop a similar run-time recompilation mechanism
+that allows simple optimizations to be performed at run time (during
+garbage collection) but does not support source-level profile-guided
+optimizations.
 
 Recent work is still discovering novel applications for profile information.
 @citeta{furr09} use profile information to infer types in dynamic
@@ -86,30 +86,3 @@ all of which can take advantage of profile-guided optimizations.
 Further, our approach reuses existing meta-programming and profiling
 facilities rather than implementing new tools that interface with the
 compiler in ad-hoc ways.
-
-@;@section{Dynamic Recompilation}
-@;The standard model for PGO requires the instrument-profile-optimize
-@;workflow.
-@;While not currently enabled, our mechanism supports this kind of
-@;reoptimization. We build on the work of Burger and Dybvig, who present
-@;an infrastructure for profile-directed dynamic
-@;reoptimization@~cite[burger98]. Their work shows just 14% run-time
-@;overhead for instrumented code, but they express concerns that dynamic
-@;recompilation will not overcome this cost. Our internal microbenchmarks show
-@;similar overhead. To enable dynamic PGO, we would need to modify our
-@;mechanism to automatically reload profile information, such as whenever
-@;@racket[profile-query-weight] is called, instead of manually loading
-@;information from a file. This is a trivial change to our system, but we
-@;have no optimizations in mind that make use of profile-guided at
-@;run time. It may also increase overhead, since we compute profile
-@;weights and many counters when loading new profile data.
-
-@; PDO has some limitations. If profile data is inaccurate it can slow down
-@; a program by optimizing for the wrong cases. This can happen when
-@; programs are profiled on a set of benchmarks that don't represent the
-@; real-world parameters of a program. The need to compile twice and run
-@; the program leads to a longer development process. These limitations
-@; make developers unlikely to even use PDOs @todo{cite 2, 7}. we
-@; find
-
-@;http://dl.acm.org/citation.cfm?id=582432
