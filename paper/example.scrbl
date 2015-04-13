@@ -52,7 +52,6 @@ extension @racket[if-r] receives the argument:
 #'(if-r (subject-contains-ci email "PLDI")
         (flag email 'important)
         (flag email 'spam))]
-
 This is a data representation of a term called a syntax object. The
 forms @racketmetafont{#'}, @racketmetafont{#`}, and @racketmetafont{#,}
 provide a templating system for syntax objects,@note{Specifically, these

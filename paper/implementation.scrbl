@@ -135,7 +135,10 @@ a meta-programming system using our technique inherits overhead from the
 profiler used in the implementation.
 Previous work measured about 9% run-time overhead introduced by the Chez
 Scheme profiler@~citea{burger1998infrastructure}.
-According to the @racketmodname[errortrace] documentation, profiling
+According to the @racketmodname[errortrace] documentation, the profiler
 introduces a factor of 4 to 12 slowdown.
+This does not include the additional instrumentation our implementation
+of @racket[annotate-expr] performs, i.e., wrapping each annotated
+expression in a function call.
 Typically, profiling is disabled for production runs of a program, so
 this overhead affects only profiled runs.

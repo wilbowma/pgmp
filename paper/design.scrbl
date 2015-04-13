@@ -9,16 +9,17 @@
 @title[#:tag "design"]{Design}
 Profile-guided meta-programming requires that the underlying language
 comes with a profiling system and that the meta-programming system can
-access the profile information.
+correlate profile information with source expressions.
 This section presents the abstractions introduced by our design and
 sketches an API that suffices to support profile-guided
 meta-programming.
-Our design is not specific to a particular profiling technique, but for
-simplicity our explanations refer to counter-based profiling.
+For simplicity, our explanations refer to counter-based profiling.
+Our design should work for other point profiling systems, but does not
+extend to path profiling.
 
 @section[#:tag "design-source-obj"]{Profile Points}
-As the profiling system may not understand source expressions,
-our design introduces @emph{profile points} as an abstraction of source
+As the profiling system may not understand source expressions, our
+design introduces @emph{profile points} as an abstraction of source
 expressions for the profiler.
 Each profile point uniquely identifies a counter.
 Any expression can be associated with at most one profile point.
@@ -117,6 +118,8 @@ runs.
 @defproc[(annotate-expr [e SyntaxObject] [pp ProfilePoint])
          SyntaxObject]{
 Associates the expression @racket[e] with the profile point @racket[pp].
+The profile point @racket[pp] replaces any other profile point with
+which @racket[e] is associated.
 The underlying profiling system increments the counter for
 @racket[pp] any time @racket[e] is executed.
 }
