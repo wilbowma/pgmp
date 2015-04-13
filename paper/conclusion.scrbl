@@ -14,5 +14,5 @@ Until now, such optimizations have been implemented via tools designed
 for a specific meta-program or a specific optimization.
 We described how to build a general mechanism for implementing arbitrary
 profile-guided meta-programs.
-We also demonstrated the expressivity of this design by by using it to
-implement several examples of profile-guided meta-programs.
+We also demonstrated the expressivity of this design by using it to
+implement several representative profile-guided meta-programs.

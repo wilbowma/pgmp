@@ -10,7 +10,7 @@
 We first introduce a syntax extension to familiarize readers with Scheme
 and Racket style meta-programming and to provide a running example.
 The transformation presented is not a meaningful optimization and is
-only used for illustrative purposes.
+used only for illustrative purposes.
 @figure-here["sample-macro" "Example syntax extension"
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
@@ -22,12 +22,12 @@ only used for illustrative purposes.
            [f-prof (profile-query #'f-branch)])
        ; This @racket[cond] expression runs at
        ; compile-time, and conditionally
-       ; generates runtime code based on profile
+       ; generates run-time code based on profile
        ; information.
        (cond
           [(< t-prof f-prof)
           ; This @racket[if] expression would run at
-          ; runtime when generated.
+          ; run time when generated.
            #'(if (not test) f-branch t-branch)]
           [(>= t-prof f-prof)
           ; So would this @racket[if] expression.
@@ -44,7 +44,7 @@ In @Figure-ref{sample-macro},
 @racket[define-syntax] introduces a new syntax extension @racket[if-r].
 Any uses of @racket[if-r] in the source will be rewritten using the code
 in the body of the extension. The syntax extension can be thought of as
-a function from source expressions to @nonbreaking{source expression.}
+a function from source expressions to @nonbreaking{source expressions.}
 
 When used at the bottom of @Figure-ref{sample-macro}, the syntax
 extension @racket[if-r] receives the argument:
@@ -61,7 +61,7 @@ instead of lists.} and @racket[syntax-case] performs pattern matching
 on @nonbreaking{syntax objects.}
 
 The syntax extension @racket[if-r] expands at compile-time, while
-the resulting @racket[if] expression runs at runtime.
+the resulting @racket[if] expression runs at run time.
 At compile time, the @racket[if-r] expression uses
 @racket[profile-query] to look up the profile information attached to
 each branch.

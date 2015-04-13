@@ -15,7 +15,7 @@ We describe implementations of list and vector libraries that warn the
 programmer when a different representation may lead to asymptotic
 performance gains.
 The new libraries wrap the standard list and vector functions.
-These wrapper use generated profile point to separately profile each
+These wrappers use generated profile point to separately profile each
 instance of the data structures.
 Finally, we develop a sequence datatype that will automatically
 specialize to a list or vector based on profiling information.

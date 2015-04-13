@@ -12,7 +12,13 @@ allow fall through---each case must end in a jump such as @code{break}.
 The .NET compiler features a profile-guided optimization of @code{switch}
 statements that uses profile information to reorder the branches
 according to which branch is most likely to succeed.
-The entire implementation is 81 lines long.
+
+In this section, we describe a similar optimizaton for Scheme and
+Racket @racket[case] expressions.
+The implementation is straightforward and just 81 lines long.
+More importantly, it is not baked into the compiler and can be
+adapted to other forms of conditional expressions without changes to
+the underlying compiler.
 
 The @racket[case] expression takes an expression @racket[key-expr] and an
 arbitrary number of clauses, followed by an optional @racket[else]

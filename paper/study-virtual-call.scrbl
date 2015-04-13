@@ -29,15 +29,15 @@ A method call such as @racket[(method s area)] is actually a
 meta-program that generates code as follows.
 First, it generates a new profile point for each class in the system.
 When profile information is not available, the method call generates a
-@racket[cond] expression with a clause for each class in the system.
-Each clause tests if @racket[s] is an instance of a specific
-class, ignores the result, and uses normal dynamic dispatch to call the
-@racket[area] method of @racket[s].
-However, @emph{a different profile point is associated with each branch}.@note{A
+@racket[cond] expression with a clause for each class in the system.@note{A
 production implementation would create a table of instrumented dynamic
 dispatch calls and dynamically dispatch through this table, instead of
 instrumenting code with @racket[cond].  However, using @racket[cond]
 simplifies visualizing the instrumentation.}
+Each clause tests if @racket[s] is an instance of a specific
+class, ignores the result, and uses normal dynamic dispatch to call the
+@racket[area] method of @racket[s].
+However, @emph{a different profile point is associated with each branch}.
 That is, each method call site is instrumented by generating a multi-way
 branch to the standard dynamic dispatch routine, but with a separate
 profile point in each branch.

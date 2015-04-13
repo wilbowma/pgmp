@@ -10,8 +10,8 @@
 Profile-guided meta-programming requires that the underlying language
 comes with a profiling system and that the meta-programming system can
 access the profile information.
-This section presents the abstractions introduced by our design, and
-sketches an API that suffices to provide profile-guided
+This section presents the abstractions introduced by our design and
+sketches an API that suffices to support profile-guided
 meta-programming.
 Our design is not specific to a particular profiling technique, but for
 simplicity our explanations refer to counter-based profiling.
@@ -47,7 +47,7 @@ profile points.
 Meta-programmers may want to generate expressions that are profiled
 separately from any other expression in the source program.
 
-Meta-programmers can access profile information by passing a profile
+Meta-programs can access profile information by passing a profile
 point, or an object with an associated profile point, to an API call,
 such as the function @racket[profile-query] in our running example.
 
@@ -64,10 +64,11 @@ the same data set.
 Second, profile weights simplify merging multiple profile data sets.
 Multiple data sets are important to ensure PGOs can optimize for
 multiple classes of inputs expected in production.
-However, absolute profile information is incomparable across different
+However, absolute profile information is generally incomparable across different
 data sets.
-On the other hand, merging the profile weights computed from a data set
-is simple.
+On the other hand, merging the profile weights computed from multiple
+data sets is straightforward and essentially results in the computation
+of a weighted average across the data sets.
 @figure-here["profile-weight-comps" "Sample profile weight computations"
 @#reader scribble/comment-reader
 @codeblock0|{
@@ -95,7 +96,7 @@ exists in the meta-programming system.
 @Figure-ref{api-sketch} documents the methods of this object.
 The API assumes that the underlying profiler has some way to
 profile expressions that are associated with profile points.
-The API is only concerned with interfacing meta-programs with the
+The API is concerned only with interfacing meta-programs with the
 profiler.
 The type @racket[SyntaxObject] stands for the type of source expressions
 on which meta-programs operate.

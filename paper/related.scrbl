@@ -8,7 +8,7 @@
 
 @title[#:tag "related" "Related Work"]
 @section{Profile-Guided Optimizations}
-Modern compiler systems such as GCC, .NET, and LLVM@~cite[lattner02] use
+Contemporary compiler systems such as GCC, .NET, and LLVM@~cite[lattner02] use
 profile-guided optimizations.
 These systems use profile information to guide decisions about code
 positioning, register allocation, inlining, and conditional branch
@@ -25,19 +25,23 @@ source and block-level PGOs in Chez Scheme.
 In addition to the common optimizations noted previously, the .NET
 profiler features special support for @code{switch} statements called
 @emph{value probes}.
-The .NET compilers use value probes optimize @code{switch} statement
+The .NET compilers use value probes to optimize @code{switch} statement
 common values, similar to our optimization of @racket[case] expressions
 in @Secref{study-case}.
-Our design can express this optimization via the same profiler machinery
-used in our other @nonbreaking{case studies.}
+Our design can express this optimization at the user level via the same profiler machinery
+used in our other case studies.
 
 LLVM takes a different approach to PGO.
-LLVM uses a runtime reoptimizer that monitors the running program.
-The runtime system can profile the program ``in the field''.
-This runtime system can perform simple optimizations on the machine code
+LLVM uses a run-time reoptimizer that monitors the running program.
+The run-time system can profile the program ``in the field''.
+This run-time system can perform simple optimizations on the machine code
 during program execution.
 More complex optimization require running an offline optimizer on the
 LLVM bytecode@~citea{lattner2004llvm}.
+Burger and Dybvig's run-time recompilation mechanism also allows
+simple optimizations to be performed at run time (during garbage
+collection) but does not support source-level profile-guided
+optimizations@~cite[burger98].
 
 Recent work is still discovering novel applications for profile information.
 @citeta{furr09} use profile information to infer types in dynamic
@@ -80,7 +84,7 @@ in which we can implement new general-purpose languages, domain-specific
 languages, efficient abstract libraries, and arbitrary meta-programs,
 all of which can take advantage of profile-guided optimizations.
 Further, our approach reuses existing meta-programming and profiling
-facilities, rather than implementing new tools that interface the
+facilities rather than implementing new tools that interface with the
 compiler in ad-hoc ways.
 
 @;@section{Dynamic Recompilation}
@@ -97,7 +101,7 @@ compiler in ad-hoc ways.
 @;@racket[profile-query-weight] is called, instead of manually loading
 @;information from a file. This is a trivial change to our system, but we
 @;have no optimizations in mind that make use of profile-guided at
-@;runtime. It may also increase overhead, since we compute profile
+@;run time. It may also increase overhead, since we compute profile
 @;weights and many counters when loading new profile data.
 
 @; PDO has some limitations. If profile data is inaccurate it can slow down

@@ -7,15 +7,15 @@
 @title[#:tag "intro" "Introduction"]
 @; What is profile-guided optimization?
 Profile-guided optimization (PGO) is an optimization technique in which
-a compiler uses profile information gathered at runtime to improve the
+a compiler uses profile information gathered at run time to improve the
 performance of the generated code.
-The profile information acts as an oracle for runtime behavior.
+The profile information acts as an oracle for run-time behavior.
 For example, a profiler might count how many times each function in a
 program is called to inform decisions about function inlining.
 Compilers use profile information to guide decisions about reordering
 basic blocks, function inlining, reordering conditional branches, and
 function layout in memory@~citea{gupta02}.
-Modern compilers systems that support PGO include .NET, GCC, and
+Contemporary compiler systems that support PGO include .NET, GCC, and
 LLVM@~cite[lattner02].
 Code generated using PGOs usually exhibits improved performance, at least on
 the represented class of inputs, compared to code generated with static
@@ -47,14 +47,15 @@ suboptimal usage of the STL in C++ @nonbreaking{source code}.
 @; Claim the state of the art is insufficient.
 Current meta-programming systems do not provide profile information
 about the input programs on which meta-programs operate.
-Therefore, profile-guided meta-programs introduce new special-purpose
+Therefore, profile-guided meta-programs must introduce new special-purpose
 toolkits for profiling and meta-programming.
 @; And propose a solution
 Instead, meta-programming systems should provide access to profile
 information from existing profilers.
 Meta-programmers could then reuse existing and familiar meta-programming
 and profiling tools to implement profile-guided meta-programs.
-We present a design for supporting profile-guided meta-programming in
+
+This paper presents a design for supporting profile-guided meta-programming in
 general-purpose meta-programming systems.
 To demonstrate the generality of our design, we implement it in two
 languages.

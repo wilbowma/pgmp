@@ -19,7 +19,7 @@ meta-programming systems to validate the generality of our design.
 @section{Template Haskell}
 Template Haskell@~citea{sheard2002template} adds general-purpose
 meta-programming to Haskell, and comes with the current version of
-the Glasgow Haskell Compilers (GHC).
+the Glasgow Haskell Compiler (GHC).
 
 GHC's profiler attributes costs to @emph{cost-centers}.
 By default, each function defines a cost-center, but users can define
@@ -54,7 +54,7 @@ MetaOCaml would require the ability to manipulate source locations and
 attach them to source expressions.
 Then implementing @racket[profile-query] should be straightforward.
 Like in Haskell, implementing @racket[load-profile] simply requires
-parsing profile files, and profile information disk is stored to a file
+parsing profile files, and profile information is stored to a file
 outside of the language.
 
 @section{Scala}
