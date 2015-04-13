@@ -7,6 +7,11 @@
    scriblib/figure)
 
 @title[#:tag "related" "Related Work"]
+In @Secref{intro}, we briefly discussed some related work in the areas
+of profile-guided optimization and profile-guided meta-programming.
+In this section, we relate in more detail to work on PGO @nonbreaking{and
+meta-programming.}
+
 @section{Profile-Guided Optimizations}
 Contemporary compiler systems such as GCC, .NET, and LLVM@~cite[lattner02] use
 profile-guided optimizations.
