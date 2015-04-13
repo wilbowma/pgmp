@@ -13,7 +13,7 @@ The .NET compiler features a profile-guided optimization of @code{switch}
 statements that uses profile information to reorder the branches
 according to which branch is most likely to succeed.
 
-In this section, we describe a similar optimizaton for Scheme and
+In this section, we describe a similar optimization for Scheme and
 Racket @racket[case] expressions.
 The implementation is straightforward and just 81 lines long.
 More importantly, it is not baked into the compiler and can be
