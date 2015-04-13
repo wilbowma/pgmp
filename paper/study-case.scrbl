@@ -33,6 +33,9 @@ a constant does not appear in the left-hand side of more than one
 clause and does not support an @racket[else] clause@note{The full
 implementation handles the full generality of Scheme's @racket[case]}.
 @Figure-ref{case-example} shows an example @racket[case] expression.
+Since @racket[...] is a literal expression used
+by @racket[syntax-case] and syntax templates to indicate a sequence of
+elements, we use @racket[....] to indicate elided code.
 
 @; How are clauses parsed
 @Figure-ref{case-impl} shows the profile-guided implementation of
@@ -99,7 +102,7 @@ by profile weight and generates a regular @racket[cond].
 Since each @racket[exclusive-cond] clause is also a @racket[cond]
 clause, the clauses do not need to be transformed.
 @Figure-ref{case-expansion} shows the code generated after expanding
-@racket[case] and then after expanding @racket[exclusive-cond] 
+@racket[case] and then after expanding @racket[exclusive-cond]
 in the example @racket[case] expression in @Figure-ref{case-example}.
 The full implementation of @racket[exclusive-cond] in Racket,
 which also handles additional @racket[cond] syntaxes and an optional
