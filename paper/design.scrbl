@@ -34,11 +34,11 @@ to collect profile information.
 When the program is not instrumented to collect profile information,
 profile points need not introduce any overhead.
 
-For fine-grained profiling, each input expression and sub-expression can
-be associated with a unique profile point.
-In the case of our running example, the ASTs for @racket[if],
-@racket[subject-contains], @racket[email], @racket["PLDI"], etc, are each
-associated with separate profile points.
+For fine-grained profiling, each node in the AST of a program can be
+associated with a unique profile point.
+In the case of our running example, the AST nodes for @racket[if],
+@racket[subject-contains], @racket[email], @racket["PLDI"], etc, are
+each associated with separate profile points.
 Note that @racket[flag] and @racket[email] appear multiple times, but
 each occurrence is associated with different profile point.
 
@@ -84,9 +84,9 @@ a weighted average across the data sets.
 
 Consider the running example from @Figure-ref{sample-macro}.
 Suppose in the first data set, @racket[(flag email 'important)] runs 5
-times and @racket[(flag email 'spam)] runs 10 times.
-In the second data set, @racket[(flag email 'important)] runs 100 times
-and @racket[(flag email 'spam)] run 10 times.
+times and @racket[(flag email 'spam)] runs 10 times, while in the second
+data set, @racket[(flag email 'important)] runs 100 times and
+@racket[(flag email 'spam)] run 10 times.
 @Figure-ref{profile-weight-comps} shows the resulting profile weights and
 how to merge the profile weights of these two data sets.
 
