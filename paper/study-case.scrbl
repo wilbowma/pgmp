@@ -28,14 +28,14 @@ body expression on the right-hand side.
 A @racket[case] expression executes the body of the first clause in which
 @racket[key-expr] is @racket[equal?] to some element of the left-hand
 side.
-For simplicity, we present a version of @racket[case] that assumes that
-a constant does not appear in the left-hand side of more than one
-clause and does not support an @racket[else] clause@note{The full
-implementation handles the full generality of Scheme's @racket[case]}.
+For simplicity, we present a version of @racket[case] that does not
+support an @racket[else] clause and assumes no constant appears in the
+left-hand side of more than one clause@note{The implementation available
+online handles the full generality of Scheme's @racket[case]}.
 @Figure-ref{case-example} shows an example @racket[case] expression.
-Since @racket[...] is a literal expression used
-by @racket[syntax-case] and syntax templates to indicate a sequence of
-elements, we use @racket[....] to indicate elided code.
+Since @racket[...] is a literal expression used by @racket[syntax-case]
+and syntax templates to indicate a sequence of elements, we use
+@racket[....] to indicate elided code.
 
 @; How are clauses parsed
 @Figure-ref{case-impl} shows the profile-guided implementation of
@@ -53,10 +53,9 @@ the left-hand side and a body expression on the right-hand side.
 Each @racket[case] clause is transformed by converting the left-hand
 side into an explicit membership test for @racket[key-expr], while
 leaving the body unchanged.
-The full implementation of @racket[case] in Racket, which also removes
-duplicate constants from successive clauses and supports an optional
-@racket[else] clause that is never reordered, is 50 lines long.
-@figure-here["case-example" (elem "An example using " @racket[case])
+The implementation of @racket[case] in Racket is 50 lines long, not
+including the implementation of @racket[exclusive-cond].
+@figure["case-example" (elem "An example using " @racket[case])
 @(racketblock0
 (define (parse stream)
  (case (peek-char stream)
@@ -66,7 +65,7 @@ duplicate constants from successive clauses and supports an optional
   [(#\)) (end-paren stream)]
   ....)))]
 
-@figure-here["case-impl" (elem "Implementation of " @racket[case])
+@figure["case-impl" (elem "Implementation of " @racket[case])
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
 (define-syntax (case syn)
@@ -116,7 +115,7 @@ feature of profile-guided meta-programming---meta-programming allows the
 programmer to encode their domain-specific knowledge, e.g., that the
 branches of this conditional are mutually exclusive, in order to take
 advantage of optimizations that would have otherwise @nonbreaking{been impossible.}
-@figure-here["exclusive-cond" (elem "Implementation of " @racket[exclusive-cond])
+@figure["exclusive-cond" (elem "Implementation of " @racket[exclusive-cond])
 @#reader scribble/comment-reader #:escape-id UNSYNTAX
 (RACKETBLOCK0
 (define-syntax (exclusive-cond syn)
@@ -134,7 +133,7 @@ advantage of optimizations that would have otherwise @nonbreaking{been impossibl
      ; expression
      #`(cond #,@(sort-clause #'(clause ...)))])))]
 
-@figure-here["case-expansion"
+@figure["case-expansion"
         (elem "Generated code from " @Figure-ref{case-example})
 @#reader scribble/comment-reader
 @(racketblock0
