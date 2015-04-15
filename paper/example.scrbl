@@ -7,8 +7,9 @@
    scriblib/footnote)
 
 @title[#:tag "example"]{A Running Example}
-We first introduce a syntax extension to familiarize readers with Scheme
-and Racket style meta-programming and to provide a running example.
+We first introduce a simple syntax extension to familiarize readers with
+Scheme and Racket style meta-programming and to provide a running
+example.
 The transformation we present is not a meaningful optimization and is
 used only for illustrative purposes.
 The structure of this transformation strongly resembles the optimization
@@ -41,8 +42,8 @@ we present in @Secref{study-case}.
         (flag email 'important)
         (flag email 'spam))))]
 
-In @Figure-ref{sample-macro},
-@racket[define-syntax] introduces a new syntax extension @racket[if-r].
+In @Figure-ref{sample-macro}, @racket[define-syntax] introduces a new
+syntax extension @racket[if-r] (for reordering if).
 A syntax extension can be thought of as a function from source
 expressions to source expressions.
 The compiler rewrites any uses of @racket[if-r] using the code in the
