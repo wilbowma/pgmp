@@ -21,6 +21,7 @@
 @(copyrightyear "2015")
 @(copyrightdata "978-1-4503-3468-6/15/06")
 @(doi "10.1145/2737924.2737990")
+@(exclusive-license)
 
 @include-abstract{abstract.scrbl}
 
