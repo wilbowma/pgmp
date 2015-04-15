@@ -62,7 +62,7 @@ In Racket, we implement profile points in essentially the same way as in
 Chez Scheme---by using source information attached to each syntax
 object.
 The Racket reader automatically attaches the filename, line number, etc
-to every syntax object it reads from a file.
+to every syntax object it reads from @nonbreaking{a file.}
 
 Racket provides an API for attaching source information when building a
 new syntax object.

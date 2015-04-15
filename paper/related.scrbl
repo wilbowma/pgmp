@@ -51,8 +51,8 @@ languages to assist in debugging.
 @citeta{chen06:garbage} apply use PGO to optimize garbage
 collection.
 @citeta{luk02} perform data prefetching guided by profile information.
-@citeta{debray02} compress infrequently executed code based on profile
-information.
+@citeta{debray02} compress infrequently executed code based on
+@nonbreaking{profile information.}
 
 @section{Meta-Program Optimizations}
 Meta-programming combines the ability to provide high-levels of
