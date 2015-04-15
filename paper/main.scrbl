@@ -1,5 +1,4 @@
-#lang scribble/sigplan @preprint
-@(require scriblib/footnote)
+#lang scribble/sigplan
 @(require "defs.rkt" "bib.rkt")
 
 @title{Profile-Guided Meta-Programming}
@@ -38,4 +37,5 @@
 @include-section{case-studies.scrbl}
 @include-section{related.scrbl}
 @include-section{conclusion.scrbl}
+@include-section{acknowledgments.scrbl}
 @(generate-bibliography #:sec-title "References")

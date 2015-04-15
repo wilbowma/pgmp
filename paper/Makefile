@@ -5,7 +5,7 @@ RM=rm
 
 all: paper.pdf
 
-paper.pdf: acmformat.tex smaller.tex main.scrbl defs.rkt bib.rkt abstract.scrbl intro.scrbl example.scrbl design.scrbl implementation.scrbl beyondscheme.scrbl case-studies.scrbl related.scrbl conclusion.scrbl bib.bib study-case.scrbl study-datatype.scrbl study-virtual-call.scrbl
+paper.pdf: acmformat.tex smaller.tex main.scrbl defs.rkt bib.rkt abstract.scrbl intro.scrbl example.scrbl design.scrbl implementation.scrbl beyondscheme.scrbl case-studies.scrbl related.scrbl conclusion.scrbl bib.bib study-case.scrbl study-datatype.scrbl study-virtual-call.scrbl acknowledgments.scrbl
 	$(SCRIBBLE) ++style acmformat.tex ++style smaller.tex --dest-name paper.pdf --pdf main.scrbl
 
 spell:
