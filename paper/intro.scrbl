@@ -1,6 +1,7 @@
 #lang scribble/base
 @(require
   scribble/manual
+  scriblib/footnote
   "defs.rkt"
   "bib.rkt")
 
@@ -45,15 +46,16 @@ profile-guided meta-programming.
 suboptimal usage of the STL in C++ @nonbreaking{source code}.
 
 @; Claim the state of the art is insufficient.
-Current meta-programming systems do not provide profile information
-about the input programs on which meta-programs operate.
-Therefore, profile-guided meta-programs must introduce new special-purpose
-toolkits for profiling and meta-programming.
+Current meta-programming systems do provide profile information to
+meta-programs.
+Therefore, to implement a profile-guided meta-program, programmers
+must introduce new special-purpose toolkits for profiling and
+meta-programming.
 @; And propose a solution
 Instead, meta-programming systems should provide access to profile
 information from existing profilers.
-Meta-programmers could then reuse existing and familiar meta-programming
-and profiling tools to implement profile-guided meta-programs.
+Then programmers could reuse existing and familiar meta-programming
+and profiling tools.
 
 This paper presents a design for supporting profile-guided meta-programming in
 general-purpose meta-programming systems.
@@ -79,5 +81,4 @@ In @Secref{related}, we relate to existing work on PGOs and
 profile-guided meta-programming.
 
 The source code for our case studies and Racket implementation is
-available in our online repository@~citea{bowman:2015online}.
-
+available online@note{http://dx.doi.org/10.5281/zenodo.16784}.
