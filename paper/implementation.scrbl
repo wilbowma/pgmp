@@ -23,12 +23,12 @@ and provides profiles in terms of source-code locations.
 
 In Chez Scheme, we implement profile points using @emph{source
 objects}@~citea{dybvig93} which can be attached to syntax objects.
+Chez Scheme uses source objects to report errors at their precise source
+location.
 Chez Scheme source objects contain a filename and starting and ending
 character positions.
 The Chez Scheme reader automatically creates and attaches source objects
 to each syntax object it reads from a file.
-Chez Scheme uses source objects to report errors at their precise source
-location.
 
 Chez Scheme provides an API to programmatically manipulate source
 objects and attach them to syntax objects@~cite[csug-ch11].
@@ -63,8 +63,6 @@ Chez Scheme---by using source information attached to each syntax
 object.
 The Racket reader automatically attaches the filename, line number, etc
 to every syntax object it reads from a file.
-These source locations are used to report errors at their
-@nonbreaking{precise location.}
 
 Racket provides an API for attaching source information when building a
 new syntax object.
