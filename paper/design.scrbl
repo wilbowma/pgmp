@@ -9,7 +9,7 @@
 @title[#:tag "design"]{Design}
 Profile-guided meta-programming requires that the underlying language
 comes with a profiling system and that the meta-programming system can
-correlate profile information with source expressions.
+associate profile information with source expressions.
 This section presents the abstractions introduced by our design and
 sketches an API that suffices to support profile-guided
 meta-programming.
@@ -56,12 +56,14 @@ such as the function @racket[profile-query] in our running example.
 Our design introduces @emph{profile weights} as an abstraction of
 the profile information provided by the underlying profiling system.
 Profile weights serve two purposes.
+
 First, a profile weight provides a single value identifying the relative
 importance a profile point.
 The profile weight is represented as a number in the range [0,1].
 The profile weight of a profile point is the ratio of the counter for
 that profile point to the counter of the most executed profile point in
 the same data set.
+
 Second, profile weights simplify merging multiple profile data sets.
 Multiple data sets are important to ensure PGOs can optimize for
 multiple classes of inputs expected in production.
@@ -72,23 +74,24 @@ data sets is straightforward---the computation is essentially
 a weighted average across the data sets.
 @figure-here["profile-weight-comps" "Example profile weight computations"
 @#reader scribble/comment-reader
-@codeblock0|{
+@(racketblock0
 ;; After loading data from data set 1
-(flag email 'important)→ 5/10             ;; 0.5
-(flag email 'spam)     → 10/10            ;; 1
+(flag email 'important)→ (unsyntax (racketvalfont "5/10"))              ;; @racket[0.5]
+(flag email 'spam)     → (unsyntax (racketvalfont "10/10"))             ;; @racket[1]
 
 ;; After loading data from data sets 1 and 2
-(flag email 'important)→ (.5 + 100/100)/2 ;; 0.75
-(flag email 'spam)     → (1 + 10/100)/2   ;; 0.55
-}|]
+(flag email 'important)→ (.5 + (unsyntax (racketvalfont "100/100")))/2 ;; @racket[0.75]
+(flag email 'spam)     → (1 + (unsyntax (racketvalfont "10/100")))/2    ;; @racket[0.55]
+)]
 
 Consider the running example from @Figure-ref{sample-macro}.
 Suppose in the first data set, @racket[(flag email 'important)] runs 5
 times and @racket[(flag email 'spam)] runs 10 times, while in the second
 data set, @racket[(flag email 'important)] runs 100 times and
-@racket[(flag email 'spam)] run 10 times.
-@Figure-ref{profile-weight-comps} shows the resulting profile weights and
-how to merge the profile weights of these two data sets.
+@nonbreaking{@racket[(flag email 'spam)]} run 10 times.
+@Figure-ref{profile-weight-comps} shows the resulting profile weights
+and how to merge the profile weights of these two @nonbreaking{data
+sets.}
 
 @section[#:tag "design-api-sketch"]{API}
 This section presents an example of an API that implements our design.
