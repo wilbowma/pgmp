@@ -1,4 +1,4 @@
-#lang scribble/sigplan
+#lang scribble/sigplan @preprint
 @(require "defs.rkt" "bib.rkt")
 
 @title{Profile-Guided Meta-Programming}
