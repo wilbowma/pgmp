@@ -22,7 +22,7 @@ To maintain consistent CFGs across instrumented and optimized
 builds, GCC requires similar optimization decisions across
 builds@~citea{chen10}.
 This requirement is similar to how we ensure consistency when using both
-source and block-level PGOs in Chez Scheme.
+source and block-level PGOs in @nonbreaking{Chez Scheme.}
 
 In addition to the common optimizations noted previously, the .NET
 profiler features special support for @code{switch} statements called
@@ -42,8 +42,7 @@ More complex optimization require running an offline optimizer on the
 LLVM bytecode@~citea{lattner2004llvm}.
 @citeta{burger1998infrastructure} develop a similar run-time recompilation mechanism
 that allows simple optimizations to be performed at run time (during
-garbage collection) but does not support source-level profile-guided
-optimizations.
+garbage collection) but does not support source-level PGO.
 
 Recent work is still discovering novel applications for profile information.
 @citeta{furr09} use profile information to infer types in dynamic

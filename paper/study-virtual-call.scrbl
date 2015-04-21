@@ -6,7 +6,7 @@
    scriblib/footnote
    scriblib/figure)
 
-@title[#:tag "study-virtual-call"]{Profile-guided receiver class prediction}
+@title[#:tag "study-virtual-call"]{Profile-Guided Receiver Class Prediction}
 Profile-guided receiver class prediction@~citea["holzle1994optimizing"
 "grove95"] is a well-known PGO for object-oriented languages.
 However, when an object-oriented language is implemented via

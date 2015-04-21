@@ -6,7 +6,7 @@
    scriblib/footnote
    scriblib/figure)
 
-@title[#:tag "study-case"]{Profile-guided conditional branch optimization}
+@title[#:tag "study-case"]{Profile-Guided Conditional Branch Optimization}
 In C#, @code{switch} statements must be mutually exclusive and do not
 allow fall through---each case must end in a jump such as @code{break}.
 The .NET compiler features a profile-guided optimization of @code{switch}

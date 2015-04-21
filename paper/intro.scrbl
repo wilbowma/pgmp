@@ -28,7 +28,7 @@ over static heuristics.
 
 @; Introduce profile-guided meta-programming.
 Profile information has also proven useful to implement profile-guided
-meta-programs.
+meta-programs, i.e., PGOs on source programs.
 @; Introduce meta-programming
 Meta-programs are programs that operate on programs.
 Languages with general-purpose meta-programming systems include C, C++,

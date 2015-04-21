@@ -5,7 +5,7 @@
          racket/date)
 (provide (all-defined-out))
 
-(define-cite ~cite citet generate-bibliography #:style author+date-style)
+(define-cite ~cite citet generate-bibliography #:style number-style)
 (define-bibtex-cite* "bib.bib" ~cite citet ~citea citeta)
 
 (define code-repo
