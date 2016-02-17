@@ -1,3 +1,4 @@
+Examples may require `ln -s utils.ss perflinty/util.ss`.
 All examples, except let-loop.ss, run under Petite Chez Scheme 8.4.
 However, they will be unable to take advantage of profile driven
 optimizations without a more up-to-date version of full Chez Scheme.
